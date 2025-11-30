@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:1010/cinema
+    username: auth_user
+    password: 123 # It will eventually be moved to .env
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: auth
+
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.xml
+    default-schema: auth
