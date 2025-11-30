@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:1010/cinema
+    username: cinema_user
+    password: 123 # It will eventually be moved to .env
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true

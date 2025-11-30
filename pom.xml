@@ -24,6 +24,7 @@
 
     <modules>
         <module>auth-service</module>
+        <module>cinema-service</module>
     </modules>
 
     <dependencies>
@@ -88,11 +89,6 @@
             <artifactId>postgresql</artifactId>
             <version>1.19.8</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>5.0.1</version>
         </dependency>
     </dependencies>
 
