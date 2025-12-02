@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:1010/cinema
+    url: jdbc:postgresql://localhost:1010/cinema_db
     username: cinema_user
     password: 123 # It will eventually be moved to .env
 

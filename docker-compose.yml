@@ -1,13 +1,22 @@
 version: '3.8'
+
 services:
-  db:
-    container_name: cinema
+  cinema-db:
+    container_name: cinema-db
     image: postgres:16
     environment:
-      POSTGRES_USER: root
-      POSTGRES_DB: cinema
+      POSTGRES_USER: cinema_user
       POSTGRES_PASSWORD: 123 # It will eventually be moved to .env
+      POSTGRES_DB: cinema_db
     ports:
       - "1010:5432"
-    volumes:
-      - ./db/init:/docker-entrypoint-initdb.d
+
+  auth-db:
+    container_name: auth-db
+    image: postgres:16
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: 123 # It will eventually be moved to .env
+      POSTGRES_DB: auth_db
+    ports:
+      - "1011:5432"
