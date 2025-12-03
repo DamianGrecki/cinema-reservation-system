@@ -3,13 +3,13 @@ package org.example.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
-
-    public User(){}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

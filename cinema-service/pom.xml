@@ -18,5 +18,10 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>5.0.1</version>
+        </dependency>
     </dependencies>
 </project>
