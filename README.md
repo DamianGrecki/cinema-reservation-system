@@ -17,10 +17,11 @@ W katalogu projektu uruchom:
 ```bash
 docker-compose up -d
 ```
-## 2. Uruchomienie aplikacji
+## 2. Uruchomienie serwisów
 
-W katalogu serwisu uruchom:
+W katalogu projektu uruchom:
 
 ```bash
-./mvnw spring-boot:run
+./mvnw -pl auth-service spring-boot:run
+./mvnw -pl cinema-service spring-boot:run
 ```
