@@ -2,7 +2,7 @@ package org.example.integration;
 
 import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.models.User;
-import org.example.models.requests.UserRegisterRequestBody;
+import org.example.models.requests.UserRegisterRequest;
 import org.example.models.responses.UserRegisterResponse;
 import org.example.repositories.UserRepository;
 import org.example.services.UserService;
@@ -24,7 +24,7 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
         String email = "test@example.com";
         String password = "Password123!";
 
-        UserRegisterRequestBody request = new UserRegisterRequestBody(
+        UserRegisterRequest request = new UserRegisterRequest(
                 email,
                 password,
                 password
@@ -46,7 +46,7 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
         String email = "test@example.com";
         String password = "Password123!";
 
-        UserRegisterRequestBody request = new UserRegisterRequestBody(
+        UserRegisterRequest request = new UserRegisterRequest(
                 email,
                 password,
                 password

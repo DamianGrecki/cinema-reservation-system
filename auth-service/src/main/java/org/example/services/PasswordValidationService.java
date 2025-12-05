@@ -4,6 +4,7 @@ import org.example.exceptions.ValidationException;
 import org.example.exceptions.ValidationsException;
 import org.example.validators.*;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,10 +40,6 @@ public class PasswordValidationService {
         if (!password.equals(confirmedPassword)) {
             throw new ValidationException(PASSWORDS_DO_NOT_MATCH_MSG);
         }
-    }
-
-    public String encodePassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     private void validatePasswordPresence(String password) {

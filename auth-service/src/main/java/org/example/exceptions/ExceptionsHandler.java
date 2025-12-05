@@ -4,8 +4,11 @@ import org.example.models.responses.ErrorResponse;
 import org.example.models.responses.ValidationErrorsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import static org.example.constants.Messages.INCORRECT_CREDENTIALS_MSG;
 
 @RestControllerAdvice
 public class ExceptionsHandler {
@@ -29,5 +32,12 @@ public class ExceptionsHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials() {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse(INCORRECT_CREDENTIALS_MSG));
     }
 }
