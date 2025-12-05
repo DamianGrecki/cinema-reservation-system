@@ -1,5 +1,10 @@
 package org.example.unit;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.ArrayList;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.exceptions.ValidationException;
@@ -13,17 +18,10 @@ import org.example.services.JwtService;
 import org.example.services.PasswordValidationService;
 import org.example.services.UserService;
 import org.junit.jupiter.api.Test;
-import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.ArrayList;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @RequiredArgsConstructor
 class UserServiceUnitTests {
@@ -34,18 +32,20 @@ class UserServiceUnitTests {
     private final AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
     private final JwtService jwtService = mock(JwtService.class);
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    private final UserService userService = new UserService(userRepository, passwordValidationService, emailValidationService, passwordEncoder, authenticationManager, jwtService);
+    private final UserService userService = new UserService(
+            userRepository,
+            passwordValidationService,
+            emailValidationService,
+            passwordEncoder,
+            authenticationManager,
+            jwtService);
 
     @Test
     void registerUserSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
 
-        UserRegisterRequest request = new UserRegisterRequest(
-                email,
-                password,
-                password
-        );
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -68,11 +68,7 @@ class UserServiceUnitTests {
         String email = "test@example.com";
         String password = "Password123!";
 
-        UserRegisterRequest request = new UserRegisterRequest(
-                email,
-                password,
-                password
-        );
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(new User()));
         assertThrows(ResourceAlreadyExistsException.class, () -> userService.register(request));
@@ -85,11 +81,7 @@ class UserServiceUnitTests {
         String password = "Password123!";
         String confirmedPassword = "Password123!4";
 
-        UserRegisterRequest request = new UserRegisterRequest(
-                email,
-                password,
-                confirmedPassword
-        );
+        UserRegisterRequest request = new UserRegisterRequest(email, password, confirmedPassword);
         doThrow(new ValidationException("Passwords do not match."))
                 .when(passwordValidationService)
                 .comparePasswords(password, confirmedPassword);
@@ -105,11 +97,7 @@ class UserServiceUnitTests {
         String email = "test@example.com";
         String password = "Password";
 
-        UserRegisterRequest request = new UserRegisterRequest(
-                email,
-                password,
-                password
-        );
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
         doThrow(new ValidationsException(new ArrayList<>()))
                 .when(passwordValidationService)
                 .validatePassword(password);
@@ -125,11 +113,7 @@ class UserServiceUnitTests {
         String email = "testexample.com";
         String password = "Password";
 
-        UserRegisterRequest request = new UserRegisterRequest(
-                email,
-                password,
-                password
-        );
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
         doThrow(new ValidationsException(new ArrayList<>()))
                 .when(emailValidationService)
                 .validateEmail(email);
@@ -139,5 +123,4 @@ class UserServiceUnitTests {
         verify(emailValidationService, times(1)).validateEmail(email);
         verify(userRepository, never()).save(any());
     }
-
 }

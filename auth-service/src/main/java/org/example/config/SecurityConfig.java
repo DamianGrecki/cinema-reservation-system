@@ -23,14 +23,11 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/login", "/api/user/register")
+        return http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/user/login", "/api/user/register")
                         .permitAll()
                         .anyRequest()
-                        .authenticated()
-                )
+                        .authenticated())
                 .build();
     }
 
@@ -41,8 +38,7 @@ public class SecurityConfig {
 
     @SneakyThrows
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)  {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 }
-

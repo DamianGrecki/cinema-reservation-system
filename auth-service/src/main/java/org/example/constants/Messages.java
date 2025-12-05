@@ -8,8 +8,10 @@ public class Messages {
     public static final String PASSWORD_IS_REQUIRED_MSG = "Password is required.";
     public static final String MIN_PASSWORD_LENGTH_MSG = "Password length should be more than %d chars.";
     public static final String MAX_PASSWORD_LENGTH_MSG = "Password length should be less than %d chars.";
-    public static final String PASSWORD_UPPERCASE_LETTER_IS_REQUIRED_MSG = "Password should contain an uppercase letter.";
-    public static final String PASSWORD_LOWERCASE_LETTER_IS_REQUIRED_MSG = "Password should contain an lowercase letter.";
+    public static final String PASSWORD_UPPERCASE_LETTER_IS_REQUIRED_MSG =
+            "Password should contain an uppercase letter.";
+    public static final String PASSWORD_LOWERCASE_LETTER_IS_REQUIRED_MSG =
+            "Password should contain an lowercase letter.";
     public static final String PASSWORD_DIGIT_IS_REQUIRED_MSG = "Password should contain a digit";
     public static final String PASSWORD_SPECIAL_CHAR_IS_REQUIRED_MSG = "Password should contain an special character.";
 

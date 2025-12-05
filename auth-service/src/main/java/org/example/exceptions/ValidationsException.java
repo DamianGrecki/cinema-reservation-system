@@ -9,7 +9,7 @@ public class ValidationsException extends RuntimeException {
         this.messages = messages;
     }
 
-    public List<String> getMessages(){
+    public List<String> getMessages() {
         return messages;
     }
 }

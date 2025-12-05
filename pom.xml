@@ -133,6 +133,29 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <java>
+                        <palantirJavaFormat/>
+                        <includes>
+                        <include>src/main/java/**/*.java</include>
+                        <include>src/test/java/**/*.java</include>
+                        </includes>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>format-java</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

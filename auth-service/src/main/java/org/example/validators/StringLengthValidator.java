@@ -1,8 +1,7 @@
 package org.example.validators;
 
-import lombok.AllArgsConstructor;
-
 import java.util.List;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class StringLengthValidator extends Validator {
@@ -10,7 +9,6 @@ public class StringLengthValidator extends Validator {
     private final int maxLength;
     private final String toShortStringMessage;
     private final String toLongStringMessage;
-
 
     @Override
     protected void check(String text, List<String> errors) {

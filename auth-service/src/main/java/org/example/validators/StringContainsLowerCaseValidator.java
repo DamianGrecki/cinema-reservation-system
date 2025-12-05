@@ -1,9 +1,8 @@
 package org.example.validators;
 
-import lombok.AllArgsConstructor;
-
 import java.util.List;
 import java.util.regex.Pattern;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class StringContainsLowerCaseValidator extends Validator {
