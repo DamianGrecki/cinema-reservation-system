@@ -14,7 +14,6 @@ class BaseIntegrationTest {
 
     private static final PostgreSQLContainer<?> postgres = PostgresContainer.getInstance();
 
-
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);

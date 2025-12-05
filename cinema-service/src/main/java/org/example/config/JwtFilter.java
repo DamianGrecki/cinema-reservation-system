@@ -7,6 +7,9 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Optional;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,10 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Optional;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -34,8 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) {
+            @NonNull FilterChain filterChain) {
 
         extractToken(request).ifPresent(token -> {
             try {
@@ -68,11 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private Authentication buildAuthentication(Claims claims) {
         String email = claims.getSubject();
-        return new UsernamePasswordAuthenticationToken(
-                email,
-                null,
-                Collections.emptyList()
-        );
+        return new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
     }
 
     private void setAuthentication(Authentication auth) {

@@ -22,16 +22,11 @@ class UserController {
 
     @PostMapping("/register")
     ResponseEntity<UserRegisterResponse> register(@RequestBody UserRegisterRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(userService.register(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(request));
     }
 
     @PostMapping("/login")
     public ResponseEntity<JwtTokenResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.login(request));
+        return ResponseEntity.status(HttpStatus.OK).body(userService.login(request));
     }
-
 }

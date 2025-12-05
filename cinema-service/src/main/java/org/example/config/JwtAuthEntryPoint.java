@@ -1,5 +1,7 @@
 package org.example.config;
 
+import static org.example.constants.Messages.INVALID_OR_EXPIRED_TOKEN_MSG;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,8 +10,6 @@ import org.example.models.responses.ErrorResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-
-import static org.example.constants.Messages.INVALID_OR_EXPIRED_TOKEN_MSG;
 
 @Component
 public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
@@ -20,10 +20,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
     @SneakyThrows
     @Override
     public void commence(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            AuthenticationException authException
-    ) {
+            HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(CONTENT_TYPE_APPLICATION_JSON);

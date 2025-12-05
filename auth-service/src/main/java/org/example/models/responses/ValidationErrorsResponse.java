@@ -1,8 +1,7 @@
 package org.example.models.responses;
 
-import lombok.Getter;
-
 import java.util.List;
+import lombok.Getter;
 
 @Getter
 public class ValidationErrorsResponse {

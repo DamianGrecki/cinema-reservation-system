@@ -1,5 +1,7 @@
 package org.example.services;
 
+import static org.example.constants.Messages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
+
 import lombok.RequiredArgsConstructor;
 import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.models.User;
@@ -14,8 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.example.constants.Messages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
 
 @Service
 @RequiredArgsConstructor
@@ -42,27 +42,20 @@ public class UserService {
 
     public JwtTokenResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         String token = jwtService.generateToken(authentication.getName());
         return new JwtTokenResponse(token);
     }
 
     private void addUser(String email, String password) {
         validateEmailUniqueness(email);
-        User user = new User(
-                email,
-                passwordEncoder.encode(password)
-        );
+        User user = new User(email, passwordEncoder.encode(password));
         userRepository.save(user);
     }
 
     private void validateEmailUniqueness(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new ResourceAlreadyExistsException(
-                    String.format(EMAIL_ADDRESS_ALREADY_EXISTS_MSG, email)
-            );
+            throw new ResourceAlreadyExistsException(String.format(EMAIL_ADDRESS_ALREADY_EXISTS_MSG, email));
         }
     }
-
 }
