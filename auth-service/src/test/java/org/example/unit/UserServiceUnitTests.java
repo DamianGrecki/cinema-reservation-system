@@ -10,35 +10,83 @@ import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.exceptions.ValidationException;
 import org.example.exceptions.ValidationsException;
 import org.example.models.User;
+import org.example.models.requests.LoginRequest;
 import org.example.models.requests.UserRegisterRequest;
+import org.example.models.responses.JwtTokenResponse;
 import org.example.models.responses.UserRegisterResponse;
 import org.example.repositories.UserRepository;
 import org.example.services.EmailAddressValidationService;
 import org.example.services.JwtService;
 import org.example.services.PasswordValidationService;
 import org.example.services.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RequiredArgsConstructor
 class UserServiceUnitTests {
 
-    private final UserRepository userRepository = mock(UserRepository.class);
-    private final PasswordValidationService passwordValidationService = mock(PasswordValidationService.class);
-    private final EmailAddressValidationService emailValidationService = mock(EmailAddressValidationService.class);
-    private final AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
-    private final JwtService jwtService = mock(JwtService.class);
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    private final UserService userService = new UserService(
-            userRepository,
-            passwordValidationService,
-            emailValidationService,
-            passwordEncoder,
-            authenticationManager,
-            jwtService);
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PasswordValidationService passwordValidationService;
+
+    @Mock
+    private EmailAddressValidationService emailValidationService;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private Authentication auth;
+
+    private PasswordEncoder passwordEncoder;
+    private UserService userService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        passwordEncoder = new BCryptPasswordEncoder();
+        userService = new UserService(
+                userRepository,
+                passwordValidationService,
+                emailValidationService,
+                passwordEncoder,
+                authenticationManager,
+                jwtService);
+    }
+
+    @Test
+    void loginUserSuccessfullyTest() {
+        String email = "test@example.com";
+        String password = "password123!";
+
+        String token = "mocked-jwt-token";
+
+        LoginRequest request = new LoginRequest(email, password);
+        when(auth.getName()).thenReturn(email);
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(auth);
+        when(jwtService.generateToken(email)).thenReturn(token);
+
+        JwtTokenResponse response = userService.login(request);
+
+        assertEquals(token, response.getJwtToken());
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(jwtService).generateToken(email);
+    }
 
     @Test
     void registerUserSuccessfullyTest() {
