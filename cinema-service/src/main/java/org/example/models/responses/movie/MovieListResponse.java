@@ -8,6 +8,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class MovieListResponse {
-    private static final boolean IS_SUCCESS = true;
+    private final boolean isSuccess = true;
     private final List<MovieResponse> movies;
 }

@@ -18,4 +18,6 @@ public class Messages {
     public static final String EMAIL_ADDRESS_FORMAT_IS_INVALID_MSG = "Email format is invalid.";
     public static final String EMAIL_ADDRESS_ALREADY_EXISTS_MSG = "User with email '%s' already exists.";
     public static final String EMAIL_ADDRESS_IS_REQUIRED_MSG = "Email is required.";
+
+    public static final String INCORRECT_CREDENTIALS_MSG = "Incorrect credentials";
 }

@@ -5,15 +5,19 @@ import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.exceptions.ValidationException;
 import org.example.exceptions.ValidationsException;
 import org.example.models.User;
-import org.example.models.requests.UserRegisterRequestBody;
+import org.example.models.requests.UserRegisterRequest;
 import org.example.models.responses.UserRegisterResponse;
 import org.example.repositories.UserRepository;
 import org.example.services.EmailAddressValidationService;
+import org.example.services.JwtService;
 import org.example.services.PasswordValidationService;
 import org.example.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.ArgumentCaptor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -27,21 +31,23 @@ class UserServiceUnitTests {
     private final UserRepository userRepository = mock(UserRepository.class);
     private final PasswordValidationService passwordValidationService = mock(PasswordValidationService.class);
     private final EmailAddressValidationService emailValidationService = mock(EmailAddressValidationService.class);
-    private final UserService userService = new UserService(userRepository, passwordValidationService, emailValidationService);
+    private final AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+    private final JwtService jwtService = mock(JwtService.class);
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final UserService userService = new UserService(userRepository, passwordValidationService, emailValidationService, passwordEncoder, authenticationManager, jwtService);
 
     @Test
     void registerUserSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
 
-        UserRegisterRequestBody request = new UserRegisterRequestBody(
+        UserRegisterRequest request = new UserRegisterRequest(
                 email,
                 password,
                 password
         );
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
-        when(passwordValidationService.encodePassword(password)).thenReturn(BCrypt.hashpw(password, BCrypt.gensalt()));
 
         UserRegisterResponse response = userService.register(request);
 
@@ -54,7 +60,7 @@ class UserServiceUnitTests {
         User savedUser = userCaptor.getValue();
         assertEquals(email, savedUser.getEmail());
         assertNotEquals(password, savedUser.getPassword());
-        assertTrue(BCrypt.checkpw(password, savedUser.getPassword()));
+        assertTrue(passwordEncoder.matches(password, savedUser.getPassword()));
     }
 
     @Test
@@ -62,7 +68,7 @@ class UserServiceUnitTests {
         String email = "test@example.com";
         String password = "Password123!";
 
-        UserRegisterRequestBody request = new UserRegisterRequestBody(
+        UserRegisterRequest request = new UserRegisterRequest(
                 email,
                 password,
                 password
@@ -79,7 +85,7 @@ class UserServiceUnitTests {
         String password = "Password123!";
         String confirmedPassword = "Password123!4";
 
-        UserRegisterRequestBody request = new UserRegisterRequestBody(
+        UserRegisterRequest request = new UserRegisterRequest(
                 email,
                 password,
                 confirmedPassword
@@ -99,7 +105,7 @@ class UserServiceUnitTests {
         String email = "test@example.com";
         String password = "Password";
 
-        UserRegisterRequestBody request = new UserRegisterRequestBody(
+        UserRegisterRequest request = new UserRegisterRequest(
                 email,
                 password,
                 password
@@ -119,7 +125,7 @@ class UserServiceUnitTests {
         String email = "testexample.com";
         String password = "Password";
 
-        UserRegisterRequestBody request = new UserRegisterRequestBody(
+        UserRegisterRequest request = new UserRegisterRequest(
                 email,
                 password,
                 password

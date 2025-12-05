@@ -9,6 +9,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -17,9 +19,11 @@ import static org.example.constants.Messages.*;
 import static org.example.constants.PasswordConstraints.MAX_PASSWORD_LENGTH;
 import static org.example.constants.PasswordConstraints.MIN_PASSWORD_LENGTH;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @RequiredArgsConstructor
 class PasswordValidationServiceUnitTests {
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private final PasswordValidationService passwordValidationService = new PasswordValidationService();
 
     @ParameterizedTest
@@ -104,7 +108,7 @@ class PasswordValidationServiceUnitTests {
     @Test
     void encodePasswordTest() {
         String password = "Password123!";
-        String encodedPassword = passwordValidationService.encodePassword(password);
-        assertTrue(BCrypt.checkpw(password, encodedPassword));
+        String encodedPassword = passwordEncoder.encode(password);
+        assertTrue(passwordEncoder.matches(password, encodedPassword));
     }
 }
