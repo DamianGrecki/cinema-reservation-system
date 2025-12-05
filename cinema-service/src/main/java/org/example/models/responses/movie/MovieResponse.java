@@ -2,11 +2,13 @@ package org.example.models.responses.movie;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class MovieResponse {
-    private final Long id;
-    private final String title;
-    private final String description;
+    private Long id;
+    private String title;
+    private String description;
 }
