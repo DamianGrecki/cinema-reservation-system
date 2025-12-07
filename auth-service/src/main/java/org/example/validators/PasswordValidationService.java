@@ -1,4 +1,4 @@
-package org.example.services;
+package org.example.validators;
 
 import static org.example.constants.Messages.*;
 import static org.example.constants.PasswordConstraints.MAX_PASSWORD_LENGTH;
@@ -7,7 +7,6 @@ import static org.example.constants.PasswordConstraints.MIN_PASSWORD_LENGTH;
 import java.util.List;
 import org.example.exceptions.ValidationException;
 import org.example.exceptions.ValidationsException;
-import org.example.validators.*;
 import org.springframework.stereotype.Service;
 
 @Service
