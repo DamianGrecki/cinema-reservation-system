@@ -1,15 +1,11 @@
-package org.example.services;
+package org.example.validators;
 
 import static org.example.constants.EmailAddressConstraints.MAX_EMAIL_ADDRESS_LENGTH;
 import static org.example.constants.EmailAddressConstraints.MIN_EMAIL_ADDRESS_LENGTH;
 import static org.example.constants.Messages.*;
 
 import java.util.List;
-import org.example.exceptions.ValidationException;
 import org.example.exceptions.ValidationsException;
-import org.example.validators.EmailAddressFormatValidator;
-import org.example.validators.StringLengthValidator;
-import org.example.validators.Validator;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,7 +28,7 @@ public class EmailAddressValidationService {
 
     private void validateEmailPresence(String email) {
         if (email == null || email.isEmpty()) {
-            throw new ValidationException(EMAIL_ADDRESS_IS_REQUIRED_MSG);
+            throw new ValidationsException(List.of(EMAIL_ADDRESS_IS_REQUIRED_MSG));
         }
     }
 }

@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.example.exceptions.ValidationException;
 import org.example.exceptions.ValidationsException;
-import org.example.services.PasswordValidationService;
+import org.example.validators.PasswordValidationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

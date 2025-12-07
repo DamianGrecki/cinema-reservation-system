@@ -15,7 +15,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 
-class CustomUserDetailsServiceTests {
+class CustomUserDetailsServiceUnitTests {
 
     @Mock
     private UserRepository userRepository;

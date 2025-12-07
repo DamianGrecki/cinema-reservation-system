@@ -3,22 +3,19 @@ package org.example.unit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.exceptions.ValidationException;
-import org.example.exceptions.ValidationsException;
 import org.example.models.User;
 import org.example.models.requests.LoginRequest;
 import org.example.models.requests.UserRegisterRequest;
 import org.example.models.responses.JwtTokenResponse;
 import org.example.models.responses.UserRegisterResponse;
 import org.example.repositories.UserRepository;
-import org.example.services.EmailAddressValidationService;
 import org.example.services.JwtService;
-import org.example.services.PasswordValidationService;
 import org.example.services.UserService;
+import org.example.validators.RequestDataValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -37,10 +34,7 @@ class UserServiceUnitTests {
     private UserRepository userRepository;
 
     @Mock
-    private PasswordValidationService passwordValidationService;
-
-    @Mock
-    private EmailAddressValidationService emailValidationService;
+    private RequestDataValidator<UserRegisterRequest> userRegisterDataValidator;
 
     @Mock
     private AuthenticationManager authenticationManager;
@@ -59,12 +53,7 @@ class UserServiceUnitTests {
         MockitoAnnotations.openMocks(this);
         passwordEncoder = new BCryptPasswordEncoder();
         userService = new UserService(
-                userRepository,
-                passwordValidationService,
-                emailValidationService,
-                passwordEncoder,
-                authenticationManager,
-                jwtService);
+                userRepository, passwordEncoder, authenticationManager, jwtService, userRegisterDataValidator);
     }
 
     @Test
@@ -124,51 +113,16 @@ class UserServiceUnitTests {
     }
 
     @Test
-    void registerUserFailsWhenPasswordsDoNotMatchTest() {
+    void registerUserFailsWhenValidatorThrowExceptionTest() {
         String email = "test@example.com";
         String password = "Password123!";
-        String confirmedPassword = "Password123!4";
 
-        UserRegisterRequest request = new UserRegisterRequest(email, password, confirmedPassword);
-        doThrow(new ValidationException("Passwords do not match."))
-                .when(passwordValidationService)
-                .comparePasswords(password, confirmedPassword);
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
+        doThrow(new ValidationException("Validation failed."))
+                .when(userRegisterDataValidator)
+                .validate(request);
 
         assertThrows(ValidationException.class, () -> userService.register(request));
-
-        verify(passwordValidationService, times(1)).comparePasswords(password, confirmedPassword);
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void registerUserFailsWhenPasswordIsInValidTest() {
-        String email = "test@example.com";
-        String password = "Password";
-
-        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
-        doThrow(new ValidationsException(new ArrayList<>()))
-                .when(passwordValidationService)
-                .validatePassword(password);
-
-        assertThrows(ValidationsException.class, () -> userService.register(request));
-
-        verify(passwordValidationService, times(1)).validatePassword(password);
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void registerUserFailsWhenEmailAddressIsInValidTest() {
-        String email = "testexample.com";
-        String password = "Password";
-
-        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
-        doThrow(new ValidationsException(new ArrayList<>()))
-                .when(emailValidationService)
-                .validateEmail(email);
-
-        assertThrows(ValidationsException.class, () -> userService.register(request));
-
-        verify(emailValidationService, times(1)).validateEmail(email);
         verify(userRepository, never()).save(any());
     }
 }

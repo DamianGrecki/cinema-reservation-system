@@ -10,6 +10,7 @@ import org.example.models.requests.UserRegisterRequest;
 import org.example.models.responses.JwtTokenResponse;
 import org.example.models.responses.UserRegisterResponse;
 import org.example.repositories.UserRepository;
+import org.example.validators.RequestDataValidator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,20 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordValidationService passwordValidationService;
-    private final EmailAddressValidationService emailValidationService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RequestDataValidator<UserRegisterRequest> userRegisterValidator;
 
     @Transactional
     public UserRegisterResponse register(UserRegisterRequest request) {
         String email = request.getEmail();
         String password = request.getPassword();
-        String confirmedPassword = request.getConfirmPassword();
-        emailValidationService.validateEmail(email);
-        passwordValidationService.validatePassword(password);
-        passwordValidationService.comparePasswords(password, confirmedPassword);
+        userRegisterValidator.validate(request);
         addUser(email, password);
         return new UserRegisterResponse(true, email);
     }

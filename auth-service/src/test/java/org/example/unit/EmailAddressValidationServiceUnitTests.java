@@ -8,9 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
-import org.example.exceptions.ValidationException;
 import org.example.exceptions.ValidationsException;
-import org.example.services.EmailAddressValidationService;
+import org.example.validators.EmailAddressValidationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -60,9 +59,11 @@ class EmailAddressValidationServiceUnitTests {
 
     @Test
     void validateEmailShouldThrowForEmptyEmailTest() {
-        ValidationException exception =
-                assertThrows(ValidationException.class, () -> emailValidationService.validateEmail(""));
-        assertEquals(EMAIL_ADDRESS_IS_REQUIRED_MSG, exception.getMessage());
+        ValidationsException exception =
+                assertThrows(ValidationsException.class, () -> emailValidationService.validateEmail(""));
+        List<String> exceptions = exception.getMessages();
+        assertEquals(1, exceptions.size());
+        assertEquals(EMAIL_ADDRESS_IS_REQUIRED_MSG, exceptions.getFirst());
     }
 
     @Test
