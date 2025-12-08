@@ -2,7 +2,7 @@ package org.example.validators;
 
 import static org.example.constants.EmailAddressConstraints.MAX_EMAIL_ADDRESS_LENGTH;
 import static org.example.constants.EmailAddressConstraints.MIN_EMAIL_ADDRESS_LENGTH;
-import static org.example.constants.Messages.*;
+import static org.example.constants.ValidationErrorMessages.*;
 
 import java.util.List;
 import org.example.exceptions.ValidationsException;

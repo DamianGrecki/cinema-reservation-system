@@ -1,8 +1,8 @@
 package org.example.validators;
 
-import static org.example.constants.Messages.*;
 import static org.example.constants.PasswordConstraints.MAX_PASSWORD_LENGTH;
 import static org.example.constants.PasswordConstraints.MIN_PASSWORD_LENGTH;
+import static org.example.constants.ValidationErrorMessages.*;
 
 import java.util.List;
 import org.example.exceptions.ValidationException;
