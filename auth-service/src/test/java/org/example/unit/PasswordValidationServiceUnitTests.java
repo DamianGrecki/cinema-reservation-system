@@ -1,8 +1,8 @@
 package org.example.unit;
 
-import static org.example.constants.Messages.*;
 import static org.example.constants.PasswordConstraints.MAX_PASSWORD_LENGTH;
 import static org.example.constants.PasswordConstraints.MIN_PASSWORD_LENGTH;
+import static org.example.constants.ValidationErrorMessages.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package org.example.services;
 
-import static org.example.constants.Messages.INCORRECT_CREDENTIALS_MSG;
+import static org.example.constants.ExceptionMessages.INCORRECT_CREDENTIALS_MSG;
 
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;

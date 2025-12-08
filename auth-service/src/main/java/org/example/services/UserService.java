@@ -1,6 +1,6 @@
 package org.example.services;
 
-import static org.example.constants.Messages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
+import static org.example.constants.ValidationErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
 
 import lombok.RequiredArgsConstructor;
 import org.example.exceptions.ResourceAlreadyExistsException;

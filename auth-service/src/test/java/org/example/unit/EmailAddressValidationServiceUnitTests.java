@@ -2,7 +2,7 @@ package org.example.unit;
 
 import static org.example.constants.EmailAddressConstraints.MAX_EMAIL_ADDRESS_LENGTH;
 import static org.example.constants.EmailAddressConstraints.MIN_EMAIL_ADDRESS_LENGTH;
-import static org.example.constants.Messages.*;
+import static org.example.constants.ValidationErrorMessages.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;

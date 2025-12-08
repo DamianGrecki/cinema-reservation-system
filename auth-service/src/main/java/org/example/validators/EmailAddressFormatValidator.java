@@ -1,6 +1,6 @@
 package org.example.validators;
 
-import static org.example.constants.Messages.EMAIL_ADDRESS_FORMAT_IS_INVALID_MSG;
+import static org.example.constants.ValidationErrorMessages.EMAIL_ADDRESS_FORMAT_IS_INVALID_MSG;
 
 import java.util.List;
 import java.util.regex.Pattern;
