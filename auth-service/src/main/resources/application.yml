@@ -1,6 +1,13 @@
 server:
   port: 8081
 
+app:
+  log-path: ./auth-service/logs
+
+logging:
+  level:
+    org.example.config.RequestLoggingFilter: INFO
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:1011/auth_db
