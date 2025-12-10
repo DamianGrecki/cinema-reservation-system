@@ -20,9 +20,9 @@ class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/register")
-    ResponseEntity<UserRegisterResponse> register(@RequestBody UserRegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(request));
+    @PostMapping("/register/customer")
+    ResponseEntity<UserRegisterResponse> registerCustomer(@RequestBody UserRegisterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerCustomer(request));
     }
 
     @PostMapping("/login")

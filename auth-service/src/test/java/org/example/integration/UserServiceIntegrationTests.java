@@ -20,13 +20,13 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
     UserRepository userRepository;
 
     @Test
-    void shouldRegisterUserTest() {
+    void shouldRegisterCustomerUserTest() {
         String email = "test@example.com";
         String password = "Password123!";
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
-        UserRegisterResponse response = userService.register(request);
+        UserRegisterResponse response = userService.registerCustomer(request);
         assertTrue(response.isSuccess());
         assertEquals(email, response.getEmail());
 
@@ -43,10 +43,10 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
-        userService.register(request);
+        userService.registerCustomer(request);
         assertEquals(1, userRepository.count());
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> userService.register(request));
+        assertThrows(ResourceAlreadyExistsException.class, () -> userService.registerCustomer(request));
         assertEquals(1, userRepository.count());
     }
 }

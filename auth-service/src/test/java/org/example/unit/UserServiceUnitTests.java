@@ -7,11 +7,14 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.exceptions.ValidationException;
+import org.example.models.Role;
 import org.example.models.User;
+import org.example.models.enums.RoleType;
 import org.example.models.requests.LoginRequest;
 import org.example.models.requests.UserRegisterRequest;
 import org.example.models.responses.JwtTokenResponse;
 import org.example.models.responses.UserRegisterResponse;
+import org.example.repositories.RoleRepository;
 import org.example.repositories.UserRepository;
 import org.example.services.JwtService;
 import org.example.services.UserService;
@@ -34,6 +37,9 @@ class UserServiceUnitTests {
     private UserRepository userRepository;
 
     @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
     private RequestDataValidator<UserRegisterRequest> userRegisterDataValidator;
 
     @Mock
@@ -53,7 +59,12 @@ class UserServiceUnitTests {
         MockitoAnnotations.openMocks(this);
         passwordEncoder = new BCryptPasswordEncoder();
         userService = new UserService(
-                userRepository, passwordEncoder, authenticationManager, jwtService, userRegisterDataValidator);
+                userRepository,
+                roleRepository,
+                passwordEncoder,
+                authenticationManager,
+                jwtService,
+                userRegisterDataValidator);
     }
 
     @Test
@@ -68,25 +79,28 @@ class UserServiceUnitTests {
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(auth);
-        when(jwtService.generateToken(email)).thenReturn(token);
+        when(jwtService.generateToken(any(Authentication.class))).thenReturn(token);
 
         JwtTokenResponse response = userService.login(request);
 
         assertEquals(token, response.getJwtToken());
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtService).generateToken(email);
+        verify(jwtService).generateToken(any(Authentication.class));
     }
 
     @Test
-    void registerUserSuccessfullyTest() {
+    void registerCustomerUserSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
+        RoleType roleType = RoleType.ROLE_CUSTOMER;
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        UserRegisterResponse response = userService.register(request);
+        when(roleRepository.findByRoleType(roleType)).thenReturn(Optional.of(new Role(roleType)));
+
+        UserRegisterResponse response = userService.registerCustomer(request);
 
         assertTrue(response.isSuccess());
         assertEquals(email, response.getEmail());
@@ -98,22 +112,27 @@ class UserServiceUnitTests {
         assertEquals(email, savedUser.getEmail());
         assertNotEquals(password, savedUser.getPassword());
         assertTrue(passwordEncoder.matches(password, savedUser.getPassword()));
+        assertEquals(1, savedUser.getRoles().size());
+        assertTrue(savedUser.getRoles().stream().anyMatch(r -> r.getRoleType() == roleType));
     }
 
     @Test
-    void registerUserFailsWhenEmailExistsTest() {
+    void registerCustomerUserFailsWhenEmailExistsTest() {
         String email = "test@example.com";
         String password = "Password123!";
+        RoleType roleType = RoleType.ROLE_CUSTOMER;
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(new User()));
-        assertThrows(ResourceAlreadyExistsException.class, () -> userService.register(request));
+        when(roleRepository.findByRoleType(roleType)).thenReturn(Optional.of(new Role(roleType)));
+
+        assertThrows(ResourceAlreadyExistsException.class, () -> userService.registerCustomer(request));
         verify(userRepository, never()).save(any());
     }
 
     @Test
-    void registerUserFailsWhenValidatorThrowExceptionTest() {
+    void registerCustomerUserFailsWhenValidatorThrowExceptionTest() {
         String email = "test@example.com";
         String password = "Password123!";
 
@@ -122,7 +141,7 @@ class UserServiceUnitTests {
                 .when(userRegisterDataValidator)
                 .validate(request);
 
-        assertThrows(ValidationException.class, () -> userService.register(request));
+        assertThrows(ValidationException.class, () -> userService.registerCustomer(request));
         verify(userRepository, never()).save(any());
     }
 }
