@@ -1,14 +1,21 @@
 package org.example.services;
 
+import static org.example.constants.ExceptionMessages.ROLE_NOT_FOUND_MSG;
+import static org.example.constants.ExceptionMessages.USER_NOT_FOUND_MSG;
 import static org.example.constants.ValidationErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
 
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.example.exceptions.ResourceAlreadyExistsException;
+import org.example.exceptions.ResourceNotFoundException;
+import org.example.models.Role;
 import org.example.models.User;
+import org.example.models.enums.RoleType;
 import org.example.models.requests.LoginRequest;
 import org.example.models.requests.UserRegisterRequest;
 import org.example.models.responses.JwtTokenResponse;
 import org.example.models.responses.UserRegisterResponse;
+import org.example.repositories.RoleRepository;
 import org.example.repositories.UserRepository;
 import org.example.validators.RequestDataValidator;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,30 +30,32 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final RequestDataValidator<UserRegisterRequest> userRegisterValidator;
 
     @Transactional
-    public UserRegisterResponse register(UserRegisterRequest request) {
+    public UserRegisterResponse registerCustomer(UserRegisterRequest request) {
         String email = request.getEmail();
         String password = request.getPassword();
         userRegisterValidator.validate(request);
-        addUser(email, password);
+        Set<Role> customerRole = getCustomerRole();
+        addUser(email, password, customerRole);
         return new UserRegisterResponse(true, email);
     }
 
     public JwtTokenResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        String token = jwtService.generateToken(authentication.getName());
+        String token = jwtService.generateToken(authentication);
         return new JwtTokenResponse(token);
     }
 
-    private void addUser(String email, String password) {
+    private void addUser(String email, String password, Set<Role> roles) {
         validateEmailUniqueness(email);
-        User user = new User(email, passwordEncoder.encode(password));
+        User user = new User(email, passwordEncoder.encode(password), roles);
         userRepository.save(user);
     }
 
@@ -54,5 +63,16 @@ public class UserService {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new ResourceAlreadyExistsException(String.format(EMAIL_ADDRESS_ALREADY_EXISTS_MSG, email));
         }
+    }
+
+    private Set<Role> getCustomerRole() {
+        Role role = roleRepository
+                .findByRoleType(RoleType.ROLE_CUSTOMER)
+                .orElseThrow(() -> new ResourceNotFoundException(ROLE_NOT_FOUND_MSG));
+        return Set.of(role);
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MSG));
     }
 }

@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
+import java.util.Set;
+import org.example.models.Role;
 import org.example.models.User;
+import org.example.models.enums.RoleType;
 import org.example.repositories.UserRepository;
 import org.example.services.CustomUserDetailsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 class CustomUserDetailsServiceUnitTests {
@@ -32,7 +36,8 @@ class CustomUserDetailsServiceUnitTests {
     void loadUserByUsernameSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
-        User user = new User(email, password);
+        Set<Role> roles = Set.of(new Role(RoleType.ROLE_ADMIN), new Role(RoleType.ROLE_CUSTOMER));
+        User user = new User(email, password, roles);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
@@ -40,7 +45,9 @@ class CustomUserDetailsServiceUnitTests {
 
         assertEquals(email, userDetails.getUsername());
         assertEquals(password, userDetails.getPassword());
-        assertTrue(userDetails.getAuthorities().isEmpty());
+        assertEquals(2, userDetails.getAuthorities().size());
+        assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority(RoleType.ROLE_ADMIN.name())));
+        assertTrue(userDetails.getAuthorities().contains(new SimpleGrantedAuthority(RoleType.ROLE_CUSTOMER.name())));
         verify(userRepository).findByEmail(email);
     }
 
