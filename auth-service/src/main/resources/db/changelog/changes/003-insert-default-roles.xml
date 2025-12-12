@@ -7,10 +7,10 @@
 
     <changeSet id="003-insert-default-roles" author="Damian G">
         <insert tableName="roles">
-            <column name="role_type" value="ROLE_CUSTOMER"/>
+            <column name="role_type" value="ADMIN"/>
         </insert>
         <insert tableName="roles">
-            <column name="role_type" value="ROLE_ADMIN"/>
+            <column name="role_type" value="CUSTOMER"/>
         </insert>
     </changeSet>
 
