@@ -92,7 +92,7 @@ class UserServiceUnitTests {
     void registerCustomerUserSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
-        RoleType roleType = RoleType.ROLE_CUSTOMER;
+        RoleType roleType = RoleType.CUSTOMER;
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
@@ -120,7 +120,7 @@ class UserServiceUnitTests {
     void registerCustomerUserFailsWhenEmailExistsTest() {
         String email = "test@example.com";
         String password = "Password123!";
-        RoleType roleType = RoleType.ROLE_CUSTOMER;
+        RoleType roleType = RoleType.CUSTOMER;
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 

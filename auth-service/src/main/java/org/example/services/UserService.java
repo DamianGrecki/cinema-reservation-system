@@ -67,7 +67,7 @@ public class UserService {
 
     private Set<Role> getCustomerRole() {
         Role role = roleRepository
-                .findByRoleType(RoleType.ROLE_CUSTOMER)
+                .findByRoleType(RoleType.CUSTOMER)
                 .orElseThrow(() -> new ResourceNotFoundException(ROLE_NOT_FOUND_MSG));
         return Set.of(role);
     }

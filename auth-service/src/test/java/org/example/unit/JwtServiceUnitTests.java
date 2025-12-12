@@ -29,8 +29,8 @@ class JwtServiceUnitTests {
         String email = "test@example.com";
 
         List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority(RoleType.ROLE_CUSTOMER.name()),
-                new SimpleGrantedAuthority(RoleType.ROLE_ADMIN.name()));
+                new SimpleGrantedAuthority(RoleType.CUSTOMER.name()),
+                new SimpleGrantedAuthority(RoleType.ADMIN.name()));
         Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
 
         String token = jwtService.generateToken(authentication);
@@ -49,8 +49,8 @@ class JwtServiceUnitTests {
         List<String> roles = (List<String>) claims.get(ROLES);
         assertNotNull(roles);
         assertEquals(2, roles.size());
-        assertTrue(roles.contains(RoleType.ROLE_CUSTOMER.name()));
-        assertTrue(roles.contains(RoleType.ROLE_ADMIN.name()));
+        assertTrue(roles.contains(RoleType.CUSTOMER.name()));
+        assertTrue(roles.contains(RoleType.ADMIN.name()));
         assertTrue(claims.getExpiration().after(new Date()));
     }
 }

@@ -33,7 +33,7 @@ class MovieControllerIntegrationTests extends BaseIntegrationTest {
 
     @SneakyThrows
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "CUSTOMER")
     void getMoviesReturnsList() {
         MovieResponse movie1 = new MovieResponse(1L, "Movie 1", "Desc 1");
         MovieResponse movie2 = new MovieResponse(2L, "Movie 2", "Desc 2");
