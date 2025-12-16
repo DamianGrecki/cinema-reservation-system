@@ -18,7 +18,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.example.config.RequestLoggingFilter" additivity="false">
+    <logger name="org.example.logs.RequestLoggingFilter" additivity="false">
         <appender-ref ref="REQUEST_FILE"/>
     </logger>
 

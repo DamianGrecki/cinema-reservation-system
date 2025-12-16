@@ -1,6 +1,13 @@
 server:
   port: 8080
 
+app:
+  log-path: ./cinema-service/logs
+
+logging:
+  level:
+    org.example.config.RequestLoggingFilter: INFO
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:1010/cinema_db
