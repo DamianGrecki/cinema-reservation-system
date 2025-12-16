@@ -6,7 +6,7 @@ app:
 
 logging:
   level:
-    org.example.config.RequestLoggingFilter: INFO
+    org.example.logs.RequestLoggingFilter: INFO
 
 spring:
   datasource:
