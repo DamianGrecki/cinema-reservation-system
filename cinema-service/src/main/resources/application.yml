@@ -25,3 +25,13 @@ spring:
 
 jwt:
   secret: superDlugiKluczMinimum32ZnakiTutaj
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+  endpoint:
+    health:
+      show-details: always
