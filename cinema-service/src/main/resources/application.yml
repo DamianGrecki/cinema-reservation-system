@@ -2,7 +2,7 @@ server:
   port: 8080
 
 app:
-  log-path: ./cinema-service/logs
+  log-path: logs
 
 logging:
   level:

@@ -2,7 +2,7 @@ server:
   port: 8081
 
 app:
-  log-path: ./auth-service/logs
+  log-path: logs
 
 logging:
   level:

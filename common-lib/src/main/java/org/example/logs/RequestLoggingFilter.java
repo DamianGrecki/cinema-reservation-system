@@ -50,6 +50,11 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         wrappedResponse.copyBodyToResponse();
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/actuator");
+    }
+
     private void logRequestEndpoint(HttpServletRequest request) {
         log.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
     }
