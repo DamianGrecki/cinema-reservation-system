@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="LOG_PATH">${spring:app.log-path}</Property>
+
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss} %-5level [%t] %c{36} - %msg%n
+        </Property>
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="REQUEST_FILE"
+                     fileName="${LOG_PATH}/requests.log"
+                     filePattern="${LOG_PATH}/requests.%d{yyyy-MM-dd}.gz">
+
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+
+            <DefaultRolloverStrategy max="14"/>
+        </RollingFile>
+
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.example.logs.RequestLoggingFilter"
+                level="INFO"
+                additivity="false">
+            <AppenderRef ref="REQUEST_FILE"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="CONSOLE"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
