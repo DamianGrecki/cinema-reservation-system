@@ -1,7 +1,6 @@
 package org.example.services;
 
 import static org.example.constants.ExceptionMessages.ROLE_NOT_FOUND_MSG;
-import static org.example.constants.ExceptionMessages.USER_NOT_FOUND_MSG;
 import static org.example.constants.ValidationErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
 
 import java.util.Set;
@@ -70,9 +69,5 @@ public class UserService {
                 .findByRoleType(RoleType.CUSTOMER)
                 .orElseThrow(() -> new ResourceNotFoundException(ROLE_NOT_FOUND_MSG));
         return Set.of(role);
-    }
-
-    private User findUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MSG));
     }
 }
