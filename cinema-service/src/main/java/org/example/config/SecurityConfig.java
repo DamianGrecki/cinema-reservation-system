@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,14 +22,13 @@ public class SecurityConfig {
 
     @Bean
     @SneakyThrows
+    @Order(2)
     public SecurityFilterChain apiChain(HttpSecurity http) {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        return http.securityMatcher("/api/**")
+                .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(
                         ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint).accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/public/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated())
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

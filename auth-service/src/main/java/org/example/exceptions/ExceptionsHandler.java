@@ -1,7 +1,6 @@
 package org.example.exceptions;
 
 import static org.example.constants.ExceptionMessages.INCORRECT_CREDENTIALS_MSG;
-import static org.example.constants.ExceptionMessages.UNEXPECTED_ERROR_MSG;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.models.responses.ErrorResponse;
@@ -17,12 +16,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class ExceptionsHandler {
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handle(Exception ex) {
-        log.error("Unhandled exception occurred", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(UNEXPECTED_ERROR_MSG));
-    }
 
     @ExceptionHandler(ValidationsException.class)
     public ResponseEntity<ValidationErrorsResponse> handleValidationErrors(ValidationsException ex) {

@@ -10,7 +10,6 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,9 +19,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
-@Order(1)
 public class PrometheusSecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
@@ -31,6 +28,7 @@ public class PrometheusSecurityConfig {
 
     @Bean
     @SneakyThrows
+    @Order(1)
     public SecurityFilterChain prometheusChain(HttpSecurity http) {
         return http.securityMatcher("/actuator/prometheus")
                 .csrf(AbstractHttpConfigurer::disable)
