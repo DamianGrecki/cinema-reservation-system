@@ -1,10 +1,14 @@
 package org.example.config;
 
+import static org.example.constants.Endpoints.LOGIN_ENDPOINT;
+import static org.example.constants.Endpoints.REGISTER_CUSTOMER_ENDPOINT;
+
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.example.services.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -24,14 +28,16 @@ public class SecurityConfig {
 
     @Bean
     @SneakyThrows
+    @Order(2)
     public SecurityFilterChain apiChain(HttpSecurity http) {
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/user/**")
+        http.securityMatcher("/api/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.requestMatchers(LOGIN_ENDPOINT, REGISTER_CUSTOMER_ENDPOINT)
                         .permitAll()
                         .anyRequest()
                         .authenticated())
-                .authenticationProvider(daoAuthenticationProvider())
-                .build();
+                .authenticationProvider(daoAuthenticationProvider());
+        return http.build();
     }
 
     @Bean

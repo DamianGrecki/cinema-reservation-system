@@ -34,7 +34,7 @@ class MovieControllerIntegrationTests extends BaseIntegrationTest {
     @SneakyThrows
     @Test
     @WithMockUser(roles = "CUSTOMER")
-    void getMoviesReturnsList() {
+    void shouldReturnMoviesListTest() {
         MovieResponse movie1 = new MovieResponse(1L, "Movie 1", "Desc 1");
         MovieResponse movie2 = new MovieResponse(2L, "Movie 2", "Desc 2");
         MovieListResponse movieListResponse = new MovieListResponse(List.of(movie1, movie2));
@@ -57,5 +57,18 @@ class MovieControllerIntegrationTests extends BaseIntegrationTest {
         assertEquals(movie2.getId(), movies.getLast().getId());
         assertEquals(movie2.getTitle(), movies.getLast().getTitle());
         assertEquals(movie2.getDescription(), movies.getLast().getDescription());
+    }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser
+    void shouldReturnStatusForbiddenForUserWithoutCustomerRole() {
+        mockMvc.perform(get(MOVIES_ENDPOINT)).andExpect(status().isForbidden());
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldReturnStatusUnauthorizedWhenNoAuth() {
+        mockMvc.perform(get(MOVIES_ENDPOINT)).andExpect(status().isUnauthorized());
     }
 }
