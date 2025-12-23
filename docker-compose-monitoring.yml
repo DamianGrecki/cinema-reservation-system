@@ -6,6 +6,7 @@ services:
     container_name: prometheus
     ports:
       - "9090:9090"
+    restart: always
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
@@ -14,13 +15,13 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
-    restart: unless-stopped
+    restart: always
     environment:
       GF_SECURITY_ADMIN_USER: root
       GF_SECURITY_ADMIN_PASSWORD: 123
     volumes:
       - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./monitoring/grafana/provisioning/dashboards/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashbaords.yml
+      - ./monitoring/grafana/provisioning/dashboards/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yml
       - ./monitoring/grafana/provisioning/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus

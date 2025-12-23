@@ -10,6 +10,7 @@ services:
       POSTGRES_DB: cinema_db
     ports:
       - "1010:5432"
+    restart: always
 
   auth-db:
     container_name: auth-db
@@ -20,3 +21,4 @@ services:
       POSTGRES_DB: auth_db
     ports:
       - "1011:5432"
+    restart: always
