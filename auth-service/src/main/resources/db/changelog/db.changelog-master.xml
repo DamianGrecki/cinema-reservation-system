@@ -9,4 +9,5 @@
     <include file="db/changelog/changes/002-create-roles-table.xml"/>
     <include file="db/changelog/changes/003-insert-default-roles.xml"/>
     <include file="db/changelog/changes/004-create-user-roles-table.xml"/>
+    <include file="db/changelog/changes/005-create-outbox-events-table.xml"/>
 </databaseChangeLog>

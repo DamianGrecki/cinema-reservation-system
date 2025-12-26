@@ -35,3 +35,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+outbox:
+  kafka:
+    topic: mail.registration.user
+  poll-interval-ms: 5000
