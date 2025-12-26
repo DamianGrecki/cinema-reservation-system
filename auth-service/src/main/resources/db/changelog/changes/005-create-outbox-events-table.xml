@@ -42,11 +42,9 @@
             <column name="sent_at" type="TIMESTAMP"/>
         </createTable>
 
-        <createIndex indexName="idx_outbox_status" tableName="outbox_events">
+        <createIndex indexName="idx_outbox_status_event_type_created_at" tableName="outbox_events">
             <column name="status"/>
-        </createIndex>
-
-        <createIndex indexName="idx_outbox_created_at" tableName="outbox_events">
+            <column name="event_type"/>
             <column name="created_at"/>
         </createIndex>
 

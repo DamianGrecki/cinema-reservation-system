@@ -3,8 +3,11 @@ package org.example.unit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.exceptions.ValidationException;
 import org.example.models.Role;
@@ -17,6 +20,7 @@ import org.example.models.responses.UserRegisterResponse;
 import org.example.repositories.RoleRepository;
 import org.example.repositories.UserRepository;
 import org.example.services.JwtService;
+import org.example.services.OutboxService;
 import org.example.services.UserService;
 import org.example.validators.RequestDataValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +44,9 @@ class UserServiceUnitTests {
     private RoleRepository roleRepository;
 
     @Mock
+    private OutboxService outboxService;
+
+    @Mock
     private RequestDataValidator<UserRegisterRequest> userRegisterDataValidator;
 
     @Mock
@@ -53,6 +60,7 @@ class UserServiceUnitTests {
 
     private PasswordEncoder passwordEncoder;
     private UserService userService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
@@ -61,10 +69,12 @@ class UserServiceUnitTests {
         userService = new UserService(
                 userRepository,
                 roleRepository,
+                outboxService,
                 passwordEncoder,
                 authenticationManager,
                 jwtService,
-                userRegisterDataValidator);
+                userRegisterDataValidator,
+                objectMapper);
     }
 
     @Test
@@ -88,6 +98,7 @@ class UserServiceUnitTests {
         verify(jwtService).generateToken(any(Authentication.class));
     }
 
+    @SneakyThrows
     @Test
     void registerCustomerUserSuccessfullyTest() {
         String email = "test@example.com";
@@ -97,8 +108,11 @@ class UserServiceUnitTests {
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(new User(email, password, Set.of()));
 
         when(roleRepository.findByRoleType(roleType)).thenReturn(Optional.of(new Role(roleType)));
+
+        doNothing().when(outboxService).createOutboxEvent(any(), anyLong(), any(), anyString());
 
         UserRegisterResponse response = userService.registerCustomer(request);
 

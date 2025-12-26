@@ -41,7 +41,7 @@ public class OutboxEvent {
     }
 
     public enum EventType {
-        USER_REGISTERED_MAIL
+        USER_REGISTRATION_MAIL
     }
 
     public enum AggregateType {

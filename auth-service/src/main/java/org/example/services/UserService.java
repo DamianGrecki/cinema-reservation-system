@@ -4,7 +4,7 @@ import static org.example.constants.ExceptionMessages.EMAIL_PAYLOAD_SERIALIZE_FA
 import static org.example.constants.ExceptionMessages.ROLE_NOT_FOUND_MSG;
 import static org.example.constants.ValidationErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
 import static org.example.models.OutboxEvent.AggregateType.USER;
-import static org.example.models.OutboxEvent.EventType.USER_REGISTERED_MAIL;
+import static org.example.models.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,7 +52,7 @@ public class UserService {
         userRegisterValidator.validate(request);
         Set<Role> customerRole = getCustomerRole();
         User saved = addUser(email, password, customerRole);
-        createUserRegisteredMailEvent(saved);
+        createUserRegistrationMailEvent(saved);
         return new UserRegisterResponse(true, saved.getEmail());
     }
 
@@ -82,7 +82,7 @@ public class UserService {
         return Set.of(role);
     }
 
-    private void createUserRegisteredMailEvent(User user) {
+    private void createUserRegistrationMailEvent(User user) {
         // TODO Move subject and body strings
         EmailPayload payload = new EmailPayload(user.getEmail(), "Witaj w serwisie", "Dziękujemy za rejestrację, ...");
         String jsonPayload;
@@ -91,6 +91,6 @@ public class UserService {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(EMAIL_PAYLOAD_SERIALIZE_FAILED_MSG, e);
         }
-        outboxService.createOutboxEvent(USER, user.getId(), USER_REGISTERED_MAIL, jsonPayload);
+        outboxService.createOutboxEvent(USER, user.getId(), USER_REGISTRATION_MAIL, jsonPayload);
     }
 }

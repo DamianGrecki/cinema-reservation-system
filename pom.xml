@@ -25,6 +25,7 @@
         <module>common-lib</module>
         <module>auth-service</module>
         <module>cinema-service</module>
+        <module>mail-service</module>
     </modules>
 
     <dependencyManagement>
