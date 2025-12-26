@@ -1,5 +1,8 @@
 package org.example.schedulers;
 
+import static org.example.models.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
+import static org.example.models.OutboxEvent.Status.PENDING;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.example.models.OutboxEvent;
@@ -16,12 +19,12 @@ public class OutboxPublisherScheduler {
     private final OutboxService outboxService;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Value("${outbox.kafka.topic}")
+    @Value("${kafka.topics.mail-registration}")
     private String topic;
 
-    @Scheduled(fixedDelayString = "${outbox.poll-interval-ms}")
-    public void publishPendingEvents() {
-        List<OutboxEvent> events = outboxService.fetchPending();
+    @Scheduled(fixedDelayString = "${kafka.poll-interval-ms}")
+    public void publishUserRegistrationMailEvents() {
+        List<OutboxEvent> events = outboxService.fetchByStatusAndType(PENDING, USER_REGISTRATION_MAIL);
         for (OutboxEvent event : events) {
             try {
                 kafkaTemplate

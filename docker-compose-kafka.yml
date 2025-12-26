@@ -5,6 +5,7 @@ services:
     container_name: kafka
     ports:
       - "9092:9092"
+    restart: always
     environment:
       KAFKA_NODE_ID: 1
 

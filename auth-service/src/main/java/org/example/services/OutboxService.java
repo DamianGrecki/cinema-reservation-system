@@ -35,8 +35,8 @@ public class OutboxService {
         outboxRepository.save(event);
     }
 
-    public List<OutboxEvent> fetchPending() {
-        return outboxRepository.findByStatus(Status.PENDING);
+    public List<OutboxEvent> fetchByStatusAndType(OutboxEvent.Status status, OutboxEvent.EventType eventType) {
+        return outboxRepository.findEventsByStatusAndType(status, eventType);
     }
 
     @Transactional

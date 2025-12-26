@@ -36,7 +36,7 @@ management:
     health:
       show-details: always
 
-outbox:
-  kafka:
-    topic: mail.registration.user
+kafka:
+  topics:
+    mail-registration: mail.registration.user
   poll-interval-ms: 5000
