@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;">
+    <tr>
+        <td align="center">
+            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+
+                <tr>
+                    <td style="background-color: #2980b9; padding: 20px; text-align: center;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Witamy w naszym serwisie!</h1>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding: 30px;">
+                        <p style="font-size: 16px; color: #333333; margin: 0 0 15px 0;">
+                            Cześć <strong th:text="${userName}"></strong>!
+                        </p>
+                        <p style="font-size: 16px; color: #333333; margin: 0 0 15px 0;">
+                            Dziękujemy za rejestrację w naszym serwisie. Aby aktywować swoje konto, kliknij w poniższy przycisk:
+                        </p>
+
+                        <p style="text-align: center; margin: 30px 0;">
+                            <a th:href="${activationLink}"
+                               style="background-color: #2980b9; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 5px; display: inline-block;">
+                                Aktywuj konto
+                            </a>
+                        </p>
+
+                        <p style="font-size: 14px; color: #555555; margin: 0;">
+                            Jeśli nie zarejestrowałeś(-aś) się w naszym serwisie, zignoruj tego maila.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888888;">
+                        &copy; 2025 Cinema Reservation System. Wszystkie prawa zastrzeżone.
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -19,8 +19,8 @@ import org.example.models.responses.JwtTokenResponse;
 import org.example.models.responses.UserRegisterResponse;
 import org.example.repositories.RoleRepository;
 import org.example.repositories.UserRepository;
+import org.example.services.EventService;
 import org.example.services.JwtService;
-import org.example.services.OutboxService;
 import org.example.services.UserService;
 import org.example.validators.RequestDataValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +44,7 @@ class UserServiceUnitTests {
     private RoleRepository roleRepository;
 
     @Mock
-    private OutboxService outboxService;
+    private EventService eventService;
 
     @Mock
     private RequestDataValidator<UserRegisterRequest> userRegisterDataValidator;
@@ -69,12 +69,11 @@ class UserServiceUnitTests {
         userService = new UserService(
                 userRepository,
                 roleRepository,
-                outboxService,
+                eventService,
                 passwordEncoder,
                 authenticationManager,
                 jwtService,
-                userRegisterDataValidator,
-                objectMapper);
+                userRegisterDataValidator);
     }
 
     @Test
@@ -108,11 +107,11 @@ class UserServiceUnitTests {
         UserRegisterRequest request = new UserRegisterRequest(email, password, password);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenReturn(new User(email, password, Set.of()));
+        when(userRepository.save(any(User.class)))
+                .thenReturn(new User(email, password, Set.of()))
+                .getMock();
 
         when(roleRepository.findByRoleType(roleType)).thenReturn(Optional.of(new Role(roleType)));
-
-        doNothing().when(outboxService).createOutboxEvent(any(), anyLong(), any(), anyString());
 
         UserRegisterResponse response = userService.registerCustomer(request);
 
@@ -128,6 +127,8 @@ class UserServiceUnitTests {
         assertTrue(passwordEncoder.matches(password, savedUser.getPassword()));
         assertEquals(1, savedUser.getRoles().size());
         assertTrue(savedUser.getRoles().stream().anyMatch(r -> r.getRoleType() == roleType));
+
+        verify(eventService, times(1)).createUserRegistrationMailEvent(userCaptor.capture());
     }
 
     @Test

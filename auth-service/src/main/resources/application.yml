@@ -40,3 +40,8 @@ kafka:
   topics:
     mail-registration: mail.registration.user
   poll-interval-ms: 5000
+
+mail:
+  user-registration:
+    subject: Welcome in Cinema Service!
+    template: user_registration_v1

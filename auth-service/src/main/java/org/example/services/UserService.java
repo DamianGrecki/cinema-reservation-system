@@ -1,19 +1,13 @@
 package org.example.services;
 
-import static org.example.constants.ExceptionMessages.EMAIL_PAYLOAD_SERIALIZE_FAILED_MSG;
 import static org.example.constants.ExceptionMessages.ROLE_NOT_FOUND_MSG;
 import static org.example.constants.ValidationErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
-import static org.example.models.OutboxEvent.AggregateType.USER;
-import static org.example.models.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.example.exceptions.ResourceAlreadyExistsException;
 import org.example.exceptions.ResourceNotFoundException;
-import org.example.models.EmailPayload;
 import org.example.models.Role;
 import org.example.models.User;
 import org.example.models.enums.RoleType;
@@ -37,12 +31,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final OutboxService outboxService;
+    private final EventService eventService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final RequestDataValidator<UserRegisterRequest> userRegisterValidator;
-    private final ObjectMapper objectMapper;
 
     @SneakyThrows
     @Transactional
@@ -51,9 +44,9 @@ public class UserService {
         String password = request.getPassword();
         userRegisterValidator.validate(request);
         Set<Role> customerRole = getCustomerRole();
-        User saved = addUser(email, password, customerRole);
-        createUserRegistrationMailEvent(saved);
-        return new UserRegisterResponse(true, saved.getEmail());
+        User savedUser = addUser(email, password, customerRole);
+        eventService.createUserRegistrationMailEvent(savedUser);
+        return new UserRegisterResponse(true, savedUser.getEmail());
     }
 
     public JwtTokenResponse login(LoginRequest request) {
@@ -80,17 +73,5 @@ public class UserService {
                 .findByRoleType(RoleType.CUSTOMER)
                 .orElseThrow(() -> new ResourceNotFoundException(ROLE_NOT_FOUND_MSG));
         return Set.of(role);
-    }
-
-    private void createUserRegistrationMailEvent(User user) {
-        // TODO Move subject and body strings
-        EmailPayload payload = new EmailPayload(user.getEmail(), "Witaj w serwisie", "Dziękujemy za rejestrację, ...");
-        String jsonPayload;
-        try {
-            jsonPayload = objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException(EMAIL_PAYLOAD_SERIALIZE_FAILED_MSG, e);
-        }
-        outboxService.createOutboxEvent(USER, user.getId(), USER_REGISTRATION_MAIL, jsonPayload);
     }
 }

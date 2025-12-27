@@ -1,4 +1,4 @@
-package org.example.models;
+package org.example.models.events;
 
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -26,7 +26,7 @@ public class OutboxEvent {
     private EventType eventType;
 
     @Column(columnDefinition = "TEXT")
-    private String payload;
+    private String data;
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;
