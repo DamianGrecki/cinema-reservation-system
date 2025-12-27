@@ -29,7 +29,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="payload" type="TEXT"/>
+            <column name="data" type="TEXT"/>
 
             <column name="status" type="VARCHAR(50)">
                 <constraints nullable="false"/>

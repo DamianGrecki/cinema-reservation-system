@@ -1,4 +1,4 @@
-package org.example.models;
+package org.example.models.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class EmailPayload {
+public class EmailEvent<T> {
+    private OutboxEvent.EventType eventType;
+    private String template;
     private String to;
     private String subject;
-    private String body;
+    private T data;
 }

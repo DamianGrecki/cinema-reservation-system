@@ -1,15 +1,18 @@
 package org.example.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.example.models.EmailPayload;
+import org.example.models.EmailEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 @Slf4j
 @Component
@@ -18,6 +21,7 @@ public class UserRegistrationMailEventListener {
 
     private final ObjectMapper objectMapper;
     private final JavaMailSender mailSender;
+    private final SpringTemplateEngine templateEngine;
 
     @Value("${spring.mail.sender}")
     private String from;
@@ -25,17 +29,25 @@ public class UserRegistrationMailEventListener {
     @SneakyThrows
     @KafkaListener(topics = "${kafka.topics.mail-registration}")
     public void handleUserRegistrationMailEvent(String message) {
-        EmailPayload payload = objectMapper.readValue(message, EmailPayload.class);
-        sendEmail(payload);
+        EmailEvent event = objectMapper.readValue(message, EmailEvent.class);
+        sendEmail(event);
     }
 
-    private void sendEmail(EmailPayload payload) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(payload.getTo());
-        message.setSubject(payload.getSubject());
-        message.setText(payload.getBody());
+    @SneakyThrows
+    private void sendEmail(EmailEvent event) {
+        Context context = new Context();
+        context.setVariables(event.getData());
+
+        String htmlContent = templateEngine.process(event.getTemplate(), context);
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
+        messageHelper.setFrom(from);
+        messageHelper.setTo(event.getTo());
+        messageHelper.setSubject(event.getSubject());
+        messageHelper.setText(htmlContent, true);
+
         mailSender.send(message);
-        log.info("Sent email to '{}' with subject '{}'", payload.getTo(), payload.getSubject());
+        log.info("Sent email to '{}', EventType: '{}'", event.getTo(), event.getEventType());
     }
 }

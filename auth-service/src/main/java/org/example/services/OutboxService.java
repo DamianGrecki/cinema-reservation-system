@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.example.models.OutboxEvent;
-import org.example.models.OutboxEvent.Status;
+import org.example.models.events.OutboxEvent;
+import org.example.models.events.OutboxEvent.Status;
 import org.example.repositories.OutboxEventRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,13 +22,13 @@ public class OutboxService {
             OutboxEvent.AggregateType aggregateType,
             Long aggregateId,
             OutboxEvent.EventType eventType,
-            String payload) {
+            String data) {
 
         OutboxEvent event = OutboxEvent.builder()
                 .aggregateType(aggregateType)
                 .aggregateId(aggregateId)
                 .eventType(eventType)
-                .payload(payload)
+                .data(data)
                 .status(Status.PENDING)
                 .createdAt(Instant.now())
                 .build();

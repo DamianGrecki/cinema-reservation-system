@@ -1,11 +1,11 @@
 package org.example.schedulers;
 
-import static org.example.models.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
-import static org.example.models.OutboxEvent.Status.PENDING;
+import static org.example.models.events.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
+import static org.example.models.events.OutboxEvent.Status.PENDING;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.example.models.OutboxEvent;
+import org.example.models.events.OutboxEvent;
 import org.example.services.OutboxService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -28,7 +28,7 @@ public class OutboxPublisherScheduler {
         for (OutboxEvent event : events) {
             try {
                 kafkaTemplate
-                        .send(topic, String.valueOf(event.getAggregateId()), event.getPayload())
+                        .send(topic, String.valueOf(event.getAggregateId()), event.getData())
                         .get();
                 outboxService.markSent(event);
             } catch (Exception ex) {
