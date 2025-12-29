@@ -4,7 +4,6 @@ import static org.example.models.events.OutboxEvent.EventType.USER_REGISTRATION_
 import static org.example.models.events.OutboxEvent.Status.PENDING;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.example.models.events.OutboxEvent;
 import org.example.services.OutboxService;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,14 +12,20 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class OutboxPublisherScheduler {
 
     private final OutboxService outboxService;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final String topic;
 
-    @Value("${kafka.topics.mail-registration}")
-    private String topic;
+    public OutboxPublisherScheduler(
+            OutboxService outboxService,
+            KafkaTemplate<String, String> kafkaTemplate,
+            @Value("${kafka.topics.mail-registration}") String topic) {
+        this.outboxService = outboxService;
+        this.kafkaTemplate = kafkaTemplate;
+        this.topic = topic;
+    }
 
     @Scheduled(fixedDelayString = "${kafka.poll-interval-ms}")
     public void publishUserRegistrationMailEvents() {

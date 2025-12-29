@@ -19,10 +19,7 @@ public class OutboxService {
     @SneakyThrows
     @Transactional
     public void createOutboxEvent(
-            OutboxEvent.AggregateType aggregateType,
-            Long aggregateId,
-            OutboxEvent.EventType eventType,
-            String data) {
+            OutboxEvent.AggregateType aggregateType, Long aggregateId, OutboxEvent.EventType eventType, String data) {
 
         OutboxEvent event = OutboxEvent.builder()
                 .aggregateType(aggregateType)
