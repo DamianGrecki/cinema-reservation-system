@@ -16,7 +16,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
 @ExtendWith(MockitoExtension.class)
-class OutboxPublisherSchedulerTests {
+class OutboxPublisherUnitTests {
 
     @Mock
     private OutboxService outboxService;
