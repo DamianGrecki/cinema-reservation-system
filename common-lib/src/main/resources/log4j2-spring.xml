@@ -30,7 +30,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="org.example.logs.RequestLoggingFilter"
+        <Logger name="pl.dgrecki.logs.RequestLoggingFilter"
                 level="INFO"
                 additivity="false">
             <AppenderRef ref="REQUEST_FILE"/>
