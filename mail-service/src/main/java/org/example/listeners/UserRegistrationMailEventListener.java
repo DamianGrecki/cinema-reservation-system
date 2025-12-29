@@ -2,7 +2,6 @@ package org.example.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.example.models.EmailEvent;
@@ -16,15 +15,23 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class UserRegistrationMailEventListener {
 
     private final ObjectMapper objectMapper;
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
+    private final String emailFrom;
 
-    @Value("${spring.mail.sender}")
-    private String from;
+    public UserRegistrationMailEventListener(
+            JavaMailSender mailSender,
+            SpringTemplateEngine templateEngine,
+            ObjectMapper objectMapper,
+            @Value("${spring.mail.sender}") String emailFrom) {
+        this.mailSender = mailSender;
+        this.templateEngine = templateEngine;
+        this.objectMapper = objectMapper;
+        this.emailFrom = emailFrom;
+    }
 
     @SneakyThrows
     @KafkaListener(topics = "${kafka.topics.mail-registration}")
@@ -42,7 +49,7 @@ public class UserRegistrationMailEventListener {
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
-        messageHelper.setFrom(from);
+        messageHelper.setFrom(emailFrom);
         messageHelper.setTo(event.getTo());
         messageHelper.setSubject(event.getSubject());
         messageHelper.setText(htmlContent, true);
