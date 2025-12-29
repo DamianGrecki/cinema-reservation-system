@@ -6,7 +6,7 @@ app:
 
 logging:
   level:
-    org.example.logs.RequestLoggingFilter: INFO
+    pl.dgrecki.logs.RequestLoggingFilter: INFO
 
 spring:
   datasource:
