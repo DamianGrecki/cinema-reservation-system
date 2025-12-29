@@ -6,7 +6,6 @@ import static org.example.models.events.OutboxEvent.EventType.USER_REGISTRATION_
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.example.models.User;
 import org.example.models.events.EmailEvent;
 import org.example.models.events.UserRegistrationEventData;
@@ -15,17 +14,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class EventService {
 
     private final OutboxService outboxService;
     private final ObjectMapper objectMapper;
+    private final String template;
+    private final String subject;
 
-    @Value("${mail.user-registration.template}")
-    private String template;
-
-    @Value("${mail.user-registration.subject}")
-    private String subject;
+    public EventService(
+            OutboxService outboxService,
+            ObjectMapper objectMapper,
+            @Value("${mail.user-registration.template}") String template,
+            @Value("${mail.user-registration.subject}") String subject) {
+        this.outboxService = outboxService;
+        this.objectMapper = objectMapper;
+        this.template = template;
+        this.subject = subject;
+    }
 
     @Transactional
     public void createUserRegistrationMailEvent(User user) {
