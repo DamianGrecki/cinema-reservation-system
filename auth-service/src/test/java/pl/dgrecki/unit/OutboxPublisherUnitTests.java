@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import pl.dgrecki.models.events.OutboxEvent;
+import pl.dgrecki.models.entities.OutboxEvent;
 import pl.dgrecki.schedulers.OutboxPublisherScheduler;
 import pl.dgrecki.services.OutboxService;
 

@@ -11,7 +11,7 @@ import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.models.responses.UserRegisterResponse;
-import pl.dgrecki.services.UserService;
+import pl.dgrecki.services.user.UserService;
 
 @RestController
 @RequestMapping("/api/user")

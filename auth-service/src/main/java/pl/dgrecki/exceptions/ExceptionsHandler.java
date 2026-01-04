@@ -46,4 +46,16 @@ public class ExceptionsHandler {
         log.warn("Bad credentials exception occurred", ex);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(INCORRECT_CREDENTIALS_MSG));
     }
+
+    @ExceptionHandler(ActivationTokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleActivationTokenExpiredError(ActivationTokenExpiredException ex) {
+        log.warn("Activation account token has expired", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(ActivationTokenIsUsedException.class)
+    public ResponseEntity<ErrorResponse> handleActivationTokenExpiredError(ActivationTokenIsUsedException ex) {
+        log.warn("Activation account token has already been used", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
+    }
 }

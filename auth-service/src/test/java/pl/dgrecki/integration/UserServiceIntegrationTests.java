@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
-import pl.dgrecki.models.User;
+import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.models.responses.UserRegisterResponse;
 import pl.dgrecki.repositories.UserRepository;
-import pl.dgrecki.services.UserService;
+import pl.dgrecki.services.user.UserService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,8 +27,10 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
     void shouldRegisterCustomerUserTest() {
         String email = "test@example.com";
         String password = "Password123!";
+        String firstName = "John";
+        String lastName = "Doe";
 
-        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
 
         UserRegisterResponse response = userService.registerCustomer(request);
         assertTrue(response.isSuccess());
@@ -44,8 +46,10 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
     void shouldThrowExceptionWhenEmailExistsTest() {
         String email = "test@example.com";
         String password = "Password123!";
+        String firstName = "John";
+        String lastName = "Doe";
 
-        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
 
         userService.registerCustomer(request);
         assertEquals(1, userRepository.count());

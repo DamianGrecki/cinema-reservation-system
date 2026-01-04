@@ -8,6 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserRegistrationEventData {
-    private String userName;
+    private String userFirstName;
     private String activationLink;
 }

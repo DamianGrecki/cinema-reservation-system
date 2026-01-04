@@ -1,7 +1,6 @@
 package pl.dgrecki.config;
 
-import static pl.dgrecki.constants.Endpoints.LOGIN_ENDPOINT;
-import static pl.dgrecki.constants.Endpoints.REGISTER_CUSTOMER_ENDPOINT;
+import static pl.dgrecki.constants.Endpoints.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -16,7 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import pl.dgrecki.services.CustomUserDetailsService;
+import pl.dgrecki.services.user.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
@@ -32,7 +31,8 @@ public class SecurityConfig {
     public SecurityFilterChain apiChain(HttpSecurity http) {
         http.securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.requestMatchers(LOGIN_ENDPOINT, REGISTER_CUSTOMER_ENDPOINT)
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                                LOGIN_ENDPOINT, REGISTER_CUSTOMER_ENDPOINT, USER_ACTIVATE_ENDPOINT)
                         .permitAll()
                         .anyRequest()
                         .authenticated())

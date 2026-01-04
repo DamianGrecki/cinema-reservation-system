@@ -10,10 +10,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.dgrecki.models.events.OutboxEvent;
-import pl.dgrecki.models.events.OutboxEvent.AggregateType;
-import pl.dgrecki.models.events.OutboxEvent.EventType;
-import pl.dgrecki.models.events.OutboxEvent.Status;
+import pl.dgrecki.models.entities.OutboxEvent;
+import pl.dgrecki.models.entities.OutboxEvent.AggregateType;
+import pl.dgrecki.models.entities.OutboxEvent.EventType;
+import pl.dgrecki.models.entities.OutboxEvent.Status;
 import pl.dgrecki.repositories.OutboxEventRepository;
 import pl.dgrecki.services.OutboxService;
 

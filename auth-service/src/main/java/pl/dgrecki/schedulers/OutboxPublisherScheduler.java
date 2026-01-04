@@ -1,14 +1,14 @@
 package pl.dgrecki.schedulers;
 
-import static pl.dgrecki.models.events.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
-import static pl.dgrecki.models.events.OutboxEvent.Status.PENDING;
+import static pl.dgrecki.models.entities.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
+import static pl.dgrecki.models.entities.OutboxEvent.Status.PENDING;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import pl.dgrecki.models.events.OutboxEvent;
+import pl.dgrecki.models.entities.OutboxEvent;
 import pl.dgrecki.services.OutboxService;
 
 @Component

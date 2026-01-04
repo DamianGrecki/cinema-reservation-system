@@ -10,4 +10,6 @@ public class UserRegisterRequest {
     private final String email;
     private final String password;
     private final String confirmPassword;
+    private final String firstName;
+    private final String lastName;
 }

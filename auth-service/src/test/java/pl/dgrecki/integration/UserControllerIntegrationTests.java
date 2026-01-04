@@ -17,11 +17,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import pl.dgrecki.models.User;
+import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.repositories.UserRepository;
-import pl.dgrecki.services.UserService;
+import pl.dgrecki.services.user.UserService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,7 +44,9 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
     void shouldReturnJwtTokenWhenUserPassAuthenticationTest() {
         String email = "test@example.com";
         String password = "Password123!";
-        registerUser(email, password);
+        String firstName = "John";
+        String lastName = "Doe";
+        registerUser(email, password, firstName, lastName);
         LoginRequest request = new LoginRequest(email, password);
 
         mockMvc.perform(post(LOGIN_ENDPOINT)
@@ -59,7 +61,9 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
     void shouldReturn401WhenUserHaveIncorrectCredentialsTest() {
         String email = "test@example.com";
         String password = "Password123!";
-        registerUser(email, password);
+        String firstName = "John";
+        String lastName = "Doe";
+        registerUser(email, password, firstName, lastName);
         LoginRequest request = new LoginRequest(email, "WrongPassword!");
 
         mockMvc.perform(post(LOGIN_ENDPOINT)
@@ -75,7 +79,9 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
     void shouldReturnSuccessTrueWhenUserPassRegistrationTest() {
         String email = "test@example.com";
         String password = "Password123!";
-        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
+        String firstName = "John";
+        String lastName = "Doe";
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
 
         mockMvc.perform(post(REGISTER_CUSTOMER_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,8 +95,8 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
         assertTrue(savedUser.getPassword().startsWith("$2"));
     }
 
-    private void registerUser(String email, String password) {
-        UserRegisterRequest request = new UserRegisterRequest(email, password, password);
+    private void registerUser(String email, String password, String firstName, String lastName) {
+        UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
         userService.registerCustomer(request);
     }
 }

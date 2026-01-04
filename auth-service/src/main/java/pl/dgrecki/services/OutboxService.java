@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.dgrecki.models.events.OutboxEvent;
-import pl.dgrecki.models.events.OutboxEvent.Status;
+import pl.dgrecki.models.entities.OutboxEvent;
+import pl.dgrecki.models.entities.OutboxEvent.Status;
 import pl.dgrecki.repositories.OutboxEventRepository;
 
 @Service
