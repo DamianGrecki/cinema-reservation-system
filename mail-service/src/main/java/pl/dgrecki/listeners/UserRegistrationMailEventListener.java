@@ -1,6 +1,7 @@
 package pl.dgrecki.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -40,21 +41,25 @@ public class UserRegistrationMailEventListener {
         sendEmail(event);
     }
 
-    @SneakyThrows
-    private void sendEmail(EmailEvent event) {
-        Context context = new Context();
-        context.setVariables(event.getData());
+    private void sendEmail(EmailEvent event) throws MessagingException {
+        try {
+            Context context = new Context();
+            context.setVariables(event.getData());
 
-        String htmlContent = templateEngine.process(event.getTemplate(), context);
+            String htmlContent = templateEngine.process(event.getTemplate(), context);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
-        messageHelper.setFrom(emailFrom);
-        messageHelper.setTo(event.getTo());
-        messageHelper.setSubject(event.getSubject());
-        messageHelper.setText(htmlContent, true);
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
+            messageHelper.setFrom(emailFrom);
+            messageHelper.setTo(event.getTo());
+            messageHelper.setSubject(event.getSubject());
+            messageHelper.setText(htmlContent, true);
 
-        mailSender.send(message);
-        log.info("Sent email to '{}', EventType: '{}'", event.getTo(), event.getEventType());
+            mailSender.send(message);
+            log.info("Sent email to '{}', EventType: '{}'", event.getTo(), event.getEventType());
+        } catch (Exception ex) {
+            log.error("Sending email failed: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 }

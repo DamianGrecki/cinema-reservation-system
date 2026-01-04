@@ -1,4 +1,4 @@
-package pl.dgrecki.services;
+package pl.dgrecki.services.user;
 
 import static pl.dgrecki.constants.ExceptionMessages.USER_NOT_FOUND_MSG;
 
@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
-import pl.dgrecki.models.Role;
-import pl.dgrecki.models.User;
+import pl.dgrecki.models.entities.Role;
+import pl.dgrecki.models.entities.User;
 import pl.dgrecki.repositories.UserRepository;
 
 @Service

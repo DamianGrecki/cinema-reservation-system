@@ -1,15 +1,14 @@
 package pl.dgrecki.services;
 
 import static pl.dgrecki.constants.ExceptionMessages.EMAIL_EVENT_SERIALIZE_FAILED_MSG;
-import static pl.dgrecki.models.events.OutboxEvent.AggregateType.USER;
-import static pl.dgrecki.models.events.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.dgrecki.models.User;
+import pl.dgrecki.models.entities.OutboxEvent;
+import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.events.EmailEvent;
 import pl.dgrecki.models.events.UserRegistrationEventData;
 
@@ -33,14 +32,14 @@ public class EventService {
     }
 
     @Transactional
-    public void createUserRegistrationMailEvent(User user) {
-        // TODO Remove userName and acivationLink placeholder
-        UserRegistrationEventData data = new UserRegistrationEventData("Test", "https://example.com/");
+    public void createUserRegistrationMailEvent(User user, String activationLink) {
+        UserRegistrationEventData data = new UserRegistrationEventData(user.getFirstName(), activationLink);
         String to = user.getEmail();
         EmailEvent<UserRegistrationEventData> emailEvent =
-                new EmailEvent<>(USER_REGISTRATION_MAIL, template, to, subject, data);
+                new EmailEvent<>(OutboxEvent.EventType.USER_REGISTRATION_MAIL, template, to, subject, data);
         String jsonData = toJson(emailEvent);
-        outboxService.createOutboxEvent(USER, user.getId(), USER_REGISTRATION_MAIL, jsonData);
+        outboxService.createOutboxEvent(
+                OutboxEvent.AggregateType.USER, user.getId(), OutboxEvent.EventType.USER_REGISTRATION_MAIL, jsonData);
     }
 
     private String toJson(Object object) {

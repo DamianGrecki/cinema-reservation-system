@@ -1,4 +1,4 @@
-package pl.dgrecki.models.events;
+package pl.dgrecki.models.entities;
 
 import jakarta.persistence.*;
 import java.time.Instant;

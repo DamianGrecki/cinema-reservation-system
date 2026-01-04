@@ -1,4 +1,4 @@
-package pl.dgrecki.models;
+package pl.dgrecki.models.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;

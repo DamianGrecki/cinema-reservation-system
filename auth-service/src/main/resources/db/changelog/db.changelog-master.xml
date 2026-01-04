@@ -10,4 +10,5 @@
     <include file="db/changelog/changes/003-insert-default-roles.xml"/>
     <include file="db/changelog/changes/004-create-user-roles-table.xml"/>
     <include file="db/changelog/changes/005-create-outbox-events-table.xml"/>
+    <include file="db/changelog/changes/006-create-activation-tokens-table.xml"/>
 </databaseChangeLog>

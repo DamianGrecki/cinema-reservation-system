@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import static pl.dgrecki.constants.ExceptionMessages.USER_NOT_FOUND_MSG;
 import static pl.dgrecki.models.enums.RoleType.ADMIN;
 import static pl.dgrecki.models.enums.RoleType.CUSTOMER;
+import static pl.dgrecki.models.enums.UserStatus.PENDING_ACTIVATION;
 
 import java.util.Optional;
 import java.util.Set;
@@ -16,10 +17,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
-import pl.dgrecki.models.Role;
-import pl.dgrecki.models.User;
+import pl.dgrecki.models.entities.Role;
+import pl.dgrecki.models.entities.User;
 import pl.dgrecki.repositories.UserRepository;
-import pl.dgrecki.services.CustomUserDetailsService;
+import pl.dgrecki.services.user.CustomUserDetailsService;
 
 class CustomUserDetailsServiceUnitTests {
 
@@ -40,8 +41,10 @@ class CustomUserDetailsServiceUnitTests {
     void loadUserByUsernameSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
+        String firstName = "John";
+        String lastName = "Doe";
         Set<Role> roles = Set.of(new Role(ADMIN), new Role(CUSTOMER));
-        User user = new User(email, password, roles);
+        User user = new User(email, password, firstName, lastName, PENDING_ACTIVATION, roles);
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 

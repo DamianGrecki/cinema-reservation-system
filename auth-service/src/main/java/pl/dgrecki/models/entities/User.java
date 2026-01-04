@@ -1,10 +1,12 @@
-package pl.dgrecki.models;
+package pl.dgrecki.models.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import pl.dgrecki.models.enums.UserStatus;
 
 @Getter
 @NoArgsConstructor
@@ -23,6 +25,17 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Setter
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
     @ManyToMany
     @JoinTable(
             name = "user_roles",
@@ -30,9 +43,12 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    public User(String email, String password, Set<Role> roles) {
+    public User(String email, String password, String firstName, String lastName, UserStatus status, Set<Role> roles) {
         this.email = email;
         this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.status = status;
         this.roles = roles;
     }
 }
