@@ -60,7 +60,6 @@ public class UserService {
         return new JwtTokenResponse(token);
     }
 
-    @Transactional
     public void setUserStatus(UserStatus userStatus, User user) {
         user.setStatus(userStatus);
         userRepository.save(user);

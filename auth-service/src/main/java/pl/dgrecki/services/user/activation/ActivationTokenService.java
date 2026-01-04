@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ActivationTokenExpiredException;
 import pl.dgrecki.exceptions.ActivationTokenIsUsedException;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
@@ -23,7 +22,6 @@ public class ActivationTokenService {
 
     private static final Duration VALID_DURATION = Duration.ofHours(1);
 
-    @Transactional
     public ActivationToken createToken(User user) {
         LocalDateTime expireDate = getExpireDate();
         ActivationToken token = new ActivationToken(UUID.randomUUID(), user, expireDate);
@@ -31,7 +29,6 @@ public class ActivationTokenService {
         return token;
     }
 
-    @Transactional
     public ActivationToken checkTokenAndMarkAsUsed(UUID token) {
         ActivationToken activationToken = findActivationToken(token);
         if (activationToken.isUsed()) {
