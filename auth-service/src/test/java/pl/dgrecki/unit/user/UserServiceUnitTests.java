@@ -1,4 +1,4 @@
-package pl.dgrecki.unit;
+package pl.dgrecki.unit.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -24,6 +24,7 @@ import pl.dgrecki.exceptions.ValidationException;
 import pl.dgrecki.models.entities.Role;
 import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.enums.RoleType;
+import pl.dgrecki.models.enums.UserStatus;
 import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.models.responses.JwtTokenResponse;
@@ -174,5 +175,16 @@ class UserServiceUnitTests {
 
         assertThrows(ValidationException.class, () -> userService.registerCustomer(request));
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldSetUserStatusAndSaveUserTest() {
+        User user = new User();
+        user.setStatus(UserStatus.PENDING_ACTIVATION);
+
+        userService.setUserStatus(UserStatus.ACTIVE, user);
+
+        assertEquals(UserStatus.ACTIVE, user.getStatus());
+        verify(userRepository, times(1)).save(user);
     }
 }
