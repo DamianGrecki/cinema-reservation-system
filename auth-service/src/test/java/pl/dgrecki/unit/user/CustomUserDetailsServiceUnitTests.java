@@ -1,4 +1,4 @@
-package pl.dgrecki.unit;
+package pl.dgrecki.unit.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
