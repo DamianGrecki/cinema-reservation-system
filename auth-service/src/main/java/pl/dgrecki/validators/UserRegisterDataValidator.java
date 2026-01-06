@@ -10,11 +10,14 @@ public class UserRegisterDataValidator implements RequestDataValidator<UserRegis
 
     private final EmailAddressValidationService emailService;
     private final PasswordValidationService passwordService;
+    private final UserDataValidationService userDataService;
 
     @Override
     public void validate(UserRegisterRequest request) {
         emailService.validateEmail(request.getEmail());
         passwordService.validatePassword(request.getPassword());
         passwordService.comparePasswords(request.getPassword(), request.getConfirmPassword());
+        userDataService.validateFirstName(request.getFirstName());
+        userDataService.validateLastName(request.getLastName());
     }
 }

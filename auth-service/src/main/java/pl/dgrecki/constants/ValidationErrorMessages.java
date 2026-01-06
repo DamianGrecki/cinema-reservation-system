@@ -20,4 +20,12 @@ public class ValidationErrorMessages {
     public static final String EMAIL_ADDRESS_FORMAT_IS_INVALID_MSG = "Email format is invalid.";
     public static final String EMAIL_ADDRESS_ALREADY_EXISTS_MSG = "User with email '%s' already exists.";
     public static final String EMAIL_ADDRESS_IS_REQUIRED_MSG = "Email is required.";
+
+    public static final String FIRST_NAME_IS_REQUIRED_MSG = "First name is required.";
+    public static final String MIN_FIRST_NAME_LENGTH_MSG = "First name length should be more than %d chars.";
+    public static final String MAX_FIRST_NAME_LENGTH_MSG = "First name length should be less than %d chars.";
+
+    public static final String LAST_NAME_IS_REQUIRED_MSG = "Last name is required.";
+    public static final String MIN_LAST_NAME_LENGTH_MSG = "Last name length should be more than %d chars.";
+    public static final String MAX_LAST_NAME_LENGTH_MSG = "Last name length should be less than %d chars.";
 }
