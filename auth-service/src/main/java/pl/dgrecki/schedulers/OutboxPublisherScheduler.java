@@ -42,10 +42,8 @@ public class OutboxPublisherScheduler {
                 String message = objectMapper.writeValueAsString(outgoingEvent);
                 kafkaTemplate
                         .send(topic, String.valueOf(event.getId()), message)
-                        .thenAccept(_ -> {
-                            outboxService.markSent(event);
-                        })
-                        .exceptionally(ex -> {
+                        .thenAccept(_ -> outboxService.markSent(event))
+                        .exceptionally(_ -> {
                             outboxService.markFailed(event);
                             return null;
                         });
