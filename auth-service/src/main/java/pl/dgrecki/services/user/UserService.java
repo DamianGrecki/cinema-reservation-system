@@ -49,7 +49,7 @@ public class UserService {
         User savedUser = addUser(
                 request.getEmail(), request.getPassword(), request.getFirstName(), request.getLastName(), customerRole);
         String activationLink = userActivationLinkFacade.createActivationLink(savedUser);
-        eventService.createUserRegistrationMailEvent(savedUser, activationLink);
+        eventService.createUserRegistrationEvent(savedUser, activationLink);
         return new UserRegisterResponse(true, savedUser.getEmail());
     }
 

@@ -11,5 +11,5 @@ public class ExceptionMessages {
     public static final String TOKEN_NOT_FOUND_MSG = "Token not found";
     public static final String TOKEN_EXPIRED_MSG = "Token has expired";
     public static final String TOKEN_IS_USED_MSG = "Token has already been used";
-    public static final String EMAIL_EVENT_SERIALIZE_FAILED_MSG = "Failed to serialize EmailEvent";
+    public static final String EVENT_DATA_SERIALIZE_FAILED_MSG = "Failed to serialize Event Data";
 }

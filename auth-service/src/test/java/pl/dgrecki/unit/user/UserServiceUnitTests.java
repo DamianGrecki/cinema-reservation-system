@@ -141,7 +141,7 @@ class UserServiceUnitTests {
         assertEquals(1, savedUser.getRoles().size());
         assertTrue(savedUser.getRoles().stream().anyMatch(r -> r.getRoleType() == roleType));
 
-        verify(eventService, times(1)).createUserRegistrationMailEvent(userCaptor.capture(), eq(activationLink));
+        verify(eventService, times(1)).createUserRegistrationEvent(userCaptor.capture(), eq(activationLink));
     }
 
     @Test

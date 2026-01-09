@@ -2,9 +2,8 @@ package pl.dgrecki.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static pl.dgrecki.constants.ExceptionMessages.EMAIL_EVENT_SERIALIZE_FAILED_MSG;
-import static pl.dgrecki.models.entities.OutboxEvent.AggregateType.USER;
-import static pl.dgrecki.models.entities.OutboxEvent.EventType.USER_REGISTRATION_MAIL;
+import static pl.dgrecki.constants.ExceptionMessages.EVENT_DATA_SERIALIZE_FAILED_MSG;
+import static pl.dgrecki.models.enums.EventType.USER_REGISTRATION;
 import static pl.dgrecki.models.enums.UserStatus.PENDING_ACTIVATION;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,17 +28,14 @@ class EventServiceUnitTests {
 
     private EventService eventService;
 
-    private static final String TEMPLATE = "Template_name";
-    private static final String SUBJECT = "Subject_value";
-
     @BeforeEach
     void setUp() {
         ObjectMapper objectMapper = new ObjectMapper();
-        eventService = new EventService(outboxService, objectMapper, TEMPLATE, SUBJECT);
+        eventService = new EventService(outboxService, objectMapper);
     }
 
     @Test
-    void shouldCreateUserRegistrationMailEventTest() {
+    void shouldCreateUserRegistrationEventTest() {
         String email = "test@example.com";
         String password = "Password123!";
         String firstName = "John";
@@ -49,17 +45,15 @@ class EventServiceUnitTests {
 
         ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
 
-        eventService.createUserRegistrationMailEvent(user, activationLink);
+        eventService.createUserRegistrationEvent(user, activationLink);
 
-        verify(outboxService).createOutboxEvent(eq(USER), eq(null), eq(USER_REGISTRATION_MAIL), jsonCaptor.capture());
+        verify(outboxService).createOutboxEvent(eq(USER_REGISTRATION), jsonCaptor.capture());
 
         String json = jsonCaptor.getValue();
         assertNotNull(json);
-        assertEquals(email, JsonPath.read(json, "$.to"));
-        assertEquals(TEMPLATE, JsonPath.read(json, "$.template"));
-        assertEquals(SUBJECT, JsonPath.read(json, "$.subject"));
-        assertEquals(activationLink, JsonPath.read(json, "$.data.activationLink"));
-        assertEquals(firstName, JsonPath.read(json, "$.data.userFirstName"));
+        assertEquals(email, JsonPath.read(json, "$.userEmail"));
+        assertEquals(activationLink, JsonPath.read(json, "$.activationLink"));
+        assertEquals(firstName, JsonPath.read(json, "$.userFirstName"));
     }
 
     @Test
@@ -67,7 +61,7 @@ class EventServiceUnitTests {
         String activationLink = "https://example.com/";
         ObjectMapper failingMapper = mock(ObjectMapper.class);
 
-        EventService failingService = new EventService(outboxService, failingMapper, TEMPLATE, SUBJECT);
+        EventService failingService = new EventService(outboxService, failingMapper);
 
         when(failingMapper.writeValueAsString(any()))
                 .thenThrow(new JsonProcessingException("Json serialize failed") {});
@@ -75,10 +69,9 @@ class EventServiceUnitTests {
         User user = new User();
 
         IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> failingService.createUserRegistrationMailEvent(user, activationLink));
-        assertEquals(EMAIL_EVENT_SERIALIZE_FAILED_MSG, exception.getMessage());
+                IllegalStateException.class, () -> failingService.createUserRegistrationEvent(user, activationLink));
+        assertEquals(EVENT_DATA_SERIALIZE_FAILED_MSG, exception.getMessage());
 
-        verify(outboxService, never()).createOutboxEvent(any(), any(), any(), any());
+        verify(outboxService, never()).createOutboxEvent(any(), any());
     }
 }

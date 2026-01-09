@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import pl.dgrecki.models.enums.EventType;
 
 @Entity
 @Table(name = "outbox_events")
@@ -17,19 +20,15 @@ public class OutboxEvent {
     @GeneratedValue
     private UUID id;
 
-    private Long aggregateId;
-
-    @Enumerated(EnumType.STRING)
-    private AggregateType aggregateType;
-
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String data;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING;
+    private Status status;
 
     private Instant createdAt;
     private Instant sentAt;
@@ -38,13 +37,5 @@ public class OutboxEvent {
         PENDING,
         SENT,
         FAILED
-    }
-
-    public enum EventType {
-        USER_REGISTRATION_MAIL
-    }
-
-    public enum AggregateType {
-        USER
     }
 }

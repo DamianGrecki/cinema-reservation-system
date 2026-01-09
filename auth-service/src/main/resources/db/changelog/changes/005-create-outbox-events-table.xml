@@ -17,19 +17,11 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="aggregate_type" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="aggregate_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-
             <column name="event_type" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="data" type="TEXT"/>
+            <column name="data" type="jsonb"/>
 
             <column name="status" type="VARCHAR(50)">
                 <constraints nullable="false"/>
