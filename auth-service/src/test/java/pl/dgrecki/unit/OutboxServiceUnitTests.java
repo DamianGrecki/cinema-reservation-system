@@ -11,9 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.dgrecki.models.entities.OutboxEvent;
-import pl.dgrecki.models.entities.OutboxEvent.AggregateType;
-import pl.dgrecki.models.entities.OutboxEvent.EventType;
 import pl.dgrecki.models.entities.OutboxEvent.Status;
+import pl.dgrecki.models.enums.EventType;
 import pl.dgrecki.repositories.OutboxEventRepository;
 import pl.dgrecki.services.OutboxService;
 
@@ -28,20 +27,16 @@ class OutboxServiceUnitTests {
 
     @Test
     void shouldCreateOutboxEventAndSaveTest() {
-        AggregateType aggregateType = AggregateType.USER;
-        Long aggregateId = 1L;
-        EventType eventType = EventType.USER_REGISTRATION_MAIL;
+        EventType eventType = EventType.USER_REGISTRATION;
         String data = "{\"data\":\"Some value\"}";
 
         ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
 
-        outboxService.createOutboxEvent(aggregateType, aggregateId, eventType, data);
+        outboxService.createOutboxEvent(eventType, data);
 
         verify(outboxRepository, times(1)).save(captor.capture());
         OutboxEvent savedEvent = captor.getValue();
 
-        assertEquals(aggregateType, savedEvent.getAggregateType());
-        assertEquals(aggregateId, savedEvent.getAggregateId());
         assertEquals(eventType, savedEvent.getEventType());
         assertEquals(data, savedEvent.getData());
         assertEquals(Status.PENDING, savedEvent.getStatus());
@@ -50,7 +45,7 @@ class OutboxServiceUnitTests {
 
     @Test
     void shouldFetchEventsByStatusAndTypeTest() {
-        EventType eventType = EventType.USER_REGISTRATION_MAIL;
+        EventType eventType = EventType.USER_REGISTRATION;
         Status status = Status.PENDING;
 
         List<OutboxEvent> eventList = List.of(new OutboxEvent(), new OutboxEvent());

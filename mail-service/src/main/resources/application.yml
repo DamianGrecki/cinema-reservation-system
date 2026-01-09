@@ -27,6 +27,11 @@ kafka:
     mail-registration: mail.registration.user
     mail-registration-dlq: mail.registration.user.dlq
 
+mail:
+  user-registration:
+    subject: Welcome in Cinema Service!
+    template: user_registration_v1
+
 management:
   endpoints:
     web:

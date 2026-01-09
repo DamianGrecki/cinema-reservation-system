@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.models.entities.OutboxEvent;
 import pl.dgrecki.models.entities.OutboxEvent.Status;
+import pl.dgrecki.models.enums.EventType;
 import pl.dgrecki.repositories.OutboxEventRepository;
 
 @Service
@@ -18,12 +19,8 @@ public class OutboxService {
 
     @SneakyThrows
     @Transactional
-    public void createOutboxEvent(
-            OutboxEvent.AggregateType aggregateType, Long aggregateId, OutboxEvent.EventType eventType, String data) {
-
+    public void createOutboxEvent(EventType eventType, String data) {
         OutboxEvent event = OutboxEvent.builder()
-                .aggregateType(aggregateType)
-                .aggregateId(aggregateId)
                 .eventType(eventType)
                 .data(data)
                 .status(Status.PENDING)
@@ -32,7 +29,7 @@ public class OutboxService {
         outboxRepository.save(event);
     }
 
-    public List<OutboxEvent> fetchByStatusAndType(OutboxEvent.Status status, OutboxEvent.EventType eventType) {
+    public List<OutboxEvent> fetchByStatusAndType(OutboxEvent.Status status, EventType eventType) {
         return outboxRepository.findEventsByStatusAndType(status, eventType);
     }
 
