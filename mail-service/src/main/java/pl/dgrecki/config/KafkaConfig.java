@@ -16,7 +16,7 @@ import org.springframework.util.backoff.FixedBackOff;
 @EnableKafka
 public class KafkaConfig {
 
-    @Value("${kafka.topics.mail-registration-dlq}")
+    @Value("${kafka.topics.user-registration-dlq}")
     private String dlqTopic;
 
     private static final int INTERVAL = 5000;

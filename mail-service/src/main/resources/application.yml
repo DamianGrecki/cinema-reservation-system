@@ -5,6 +5,20 @@ app:
   log-path: logs
 
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:1012/mail_db
+    username: mail_user
+    password: 123 # It will eventually be moved to .env
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+  liquibase:
+    enabled: true
+    change-log: db/changelog/db.changelog-master.xml
+
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
@@ -12,6 +26,7 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
   mail:
     sender: no-reply@cinema-service.com
     host: sandbox.smtp.mailtrap.io
@@ -24,13 +39,8 @@ spring:
 
 kafka:
   topics:
-    mail-registration: mail.registration.user
-    mail-registration-dlq: mail.registration.user.dlq
-
-mail:
-  user-registration:
-    subject: Welcome in Cinema Service!
-    template: user_registration_v1
+    user-registration: mail.registration.user
+    user-registration-dlq: mail.registration.user.dlq
 
 management:
   endpoints:
