@@ -1,62 +1,50 @@
-package pl.dgrecki.listeners;
+package pl.dgrecki.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-import pl.dgrecki.models.EmailEvent;
+import pl.dgrecki.models.MailData;
 
 @Slf4j
-@Component
-public class UserRegistrationMailEventListener {
+@Service
+public class MailService {
 
-    private final ObjectMapper objectMapper;
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
     private final String emailFrom;
 
-    public UserRegistrationMailEventListener(
+    public MailService(
             JavaMailSender mailSender,
             SpringTemplateEngine templateEngine,
-            ObjectMapper objectMapper,
             @Value("${spring.mail.sender}") String emailFrom) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
-        this.objectMapper = objectMapper;
         this.emailFrom = emailFrom;
     }
 
     @SneakyThrows
-    @KafkaListener(topics = "${kafka.topics.mail-registration}")
-    public void handleUserRegistrationMailEvent(String message) {
-        EmailEvent event = objectMapper.readValue(message, EmailEvent.class);
-        sendEmail(event);
-    }
-
-    private void sendEmail(EmailEvent event) throws MessagingException {
+    public void send(MailData mailData) {
         try {
             Context context = new Context();
-            context.setVariables(event.getData());
+            context.setVariables(mailData.getVariables());
 
-            String htmlContent = templateEngine.process(event.getTemplate(), context);
+            String htmlContent = templateEngine.process(mailData.getTemplate(), context);
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
             messageHelper.setFrom(emailFrom);
-            messageHelper.setTo(event.getTo());
-            messageHelper.setSubject(event.getSubject());
+            messageHelper.setTo(mailData.getTo());
+            messageHelper.setSubject(mailData.getSubject());
             messageHelper.setText(htmlContent, true);
 
             mailSender.send(message);
-            log.info("Sent email to '{}', EventType: '{}'", event.getTo(), event.getEventType());
+            log.info("Sent email to '{}', Template: '{}'", mailData.getTo(), mailData.getTemplate());
         } catch (Exception ex) {
             log.error("Sending email failed: {}", ex.getMessage(), ex);
             throw ex;

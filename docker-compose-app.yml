@@ -22,3 +22,14 @@ services:
     ports:
       - "1011:5432"
     restart: always
+
+  mail-db:
+    container_name: mail-db
+    image: postgres:16
+    environment:
+      POSTGRES_USER: mail_user
+      POSTGRES_PASSWORD: 123 # It will eventually be moved to .env
+      POSTGRES_DB: mail_db
+    ports:
+      - "1012:5432"
+    restart: always
