@@ -27,18 +27,24 @@
                 <constraints nullable="false"/>
             </column>
 
+            <column name="attempts" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="max_attempts" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_error" type="VARCHAR(1000)">
+                <constraints nullable="true"/>
+            </column>
+
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
 
             <column name="processed_at" type="TIMESTAMP"/>
         </createTable>
-
-        <createIndex indexName="idx_inbox_status_event_type_created_at" tableName="inbox_events">
-            <column name="status"/>
-            <column name="event_type"/>
-            <column name="created_at"/>
-        </createIndex>
 
     </changeSet>
 </databaseChangeLog>
