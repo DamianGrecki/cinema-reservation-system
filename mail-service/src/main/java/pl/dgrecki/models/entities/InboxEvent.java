@@ -33,12 +33,22 @@ public class InboxEvent {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(nullable = false)
+    private int attempts;
+
+    @Column(nullable = false)
+    private int maxAttempts;
+
+    @Column(length = 1000)
+    private String lastError;
+
     private Instant createdAt;
     private Instant processedAt;
 
     public enum Status {
         RECEIVED,
         PROCESSED,
-        FAILED
+        FAILED,
+        DEAD
     }
 }

@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.handlers.InboxEventDispatcher;
 import pl.dgrecki.models.entities.InboxEvent;
 import pl.dgrecki.services.InboxService;
@@ -15,14 +14,14 @@ import pl.dgrecki.services.InboxService;
 @RequiredArgsConstructor
 public class InboxProcessor {
 
+    private static final int EVENTS_LIMIT = 50;
+
     private final InboxEventDispatcher dispatcher;
     private final InboxService inboxService;
 
-    @Transactional
-    @Scheduled(fixedDelay = 5000)
-    public void processInbox() {
-
-        List<InboxEvent> events = inboxService.getReceivedInboxEvent();
+    @Scheduled(fixedDelay = 10000)
+    public void processInboxEvents() {
+        List<InboxEvent> events = inboxService.getInboxEventsToProcess(EVENTS_LIMIT);
 
         for (InboxEvent event : events) {
             try {
@@ -30,7 +29,7 @@ public class InboxProcessor {
                 inboxService.markProcessed(event);
             } catch (Exception e) {
                 log.error("Failed to process inbox event {}", event.getId(), e);
-                inboxService.markFailed(event);
+                inboxService.handleFailedAttempt(event, e.getLocalizedMessage());
             }
         }
     }
