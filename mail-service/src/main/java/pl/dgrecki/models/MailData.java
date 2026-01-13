@@ -9,6 +9,7 @@ import lombok.Data;
 public class MailData {
     private String to;
     private String subject;
-    private String template;
+    private String templateName;
+    private String templateHtml;
     private Map<String, Object> variables;
 }

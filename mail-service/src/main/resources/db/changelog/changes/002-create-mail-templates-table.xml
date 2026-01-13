@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-mail-templates-table" author="Damian G">
+
+        <createTable tableName="mail_templates">
+
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="template_type" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="template_name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="subject" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="template_html" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="template_keys" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <sql>
+            CREATE UNIQUE INDEX ux_mail_templates_active_per_type
+            ON mail_templates (template_type)
+            WHERE is_active = true;
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>
