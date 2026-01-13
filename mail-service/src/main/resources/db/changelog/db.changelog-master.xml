@@ -6,4 +6,6 @@
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <include file="db/changelog/changes/001-create-inbox-events-table.xml"/>
+    <include file="db/changelog/changes/002-create-mail-templates-table.xml"/>
+    <include file="db/changelog/changes/003-insert-user-registration-template.xml"/>
 </databaseChangeLog>

@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.templateresolver.StringTemplateResolver;
 import pl.dgrecki.models.MailData;
 
 @Slf4j
@@ -16,16 +17,13 @@ import pl.dgrecki.models.MailData;
 public class MailService {
 
     private final JavaMailSender mailSender;
-    private final SpringTemplateEngine templateEngine;
     private final String emailFrom;
+    private final SpringTemplateEngine templateEngine;
 
-    public MailService(
-            JavaMailSender mailSender,
-            SpringTemplateEngine templateEngine,
-            @Value("${spring.mail.sender}") String emailFrom) {
+    public MailService(JavaMailSender mailSender, @Value("${spring.mail.sender}") String emailFrom) {
         this.mailSender = mailSender;
-        this.templateEngine = templateEngine;
         this.emailFrom = emailFrom;
+        this.templateEngine = getTemplateEngine();
     }
 
     @SneakyThrows
@@ -34,7 +32,7 @@ public class MailService {
             Context context = new Context();
             context.setVariables(mailData.getVariables());
 
-            String htmlContent = templateEngine.process(mailData.getTemplate(), context);
+            String htmlContent = templateEngine.process(mailData.getTemplateHtml(), context);
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true);
@@ -44,10 +42,20 @@ public class MailService {
             messageHelper.setText(htmlContent, true);
 
             mailSender.send(message);
-            log.info("Sent email to '{}', Template: '{}'", mailData.getTo(), mailData.getTemplate());
+            log.info("Sent email to '{}', Template: '{}'", mailData.getTo(), mailData.getTemplateName());
         } catch (Exception ex) {
             log.error("Sending email failed: {}", ex.getMessage(), ex);
             throw ex;
         }
+    }
+
+    private SpringTemplateEngine getTemplateEngine() {
+        StringTemplateResolver resolver = new StringTemplateResolver();
+        resolver.setTemplateMode("HTML");
+        resolver.setCacheable(false);
+
+        SpringTemplateEngine templateEngine = new SpringTemplateEngine();
+        templateEngine.setTemplateResolver(resolver);
+        return templateEngine;
     }
 }

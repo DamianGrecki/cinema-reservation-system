@@ -39,7 +39,6 @@ public class InboxEvent {
     @Column(nullable = false)
     private int maxAttempts;
 
-    @Column(length = 1000)
     private String lastError;
 
     private Instant createdAt;
