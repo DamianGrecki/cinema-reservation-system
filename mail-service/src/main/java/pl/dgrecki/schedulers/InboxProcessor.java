@@ -29,7 +29,7 @@ public class InboxProcessor {
                 inboxService.markProcessed(event);
             } catch (Exception e) {
                 log.error("Failed to process inbox event {}", event.getId(), e);
-                inboxService.handleFailedAttempt(event, e.getLocalizedMessage());
+                inboxService.handleFailedAttempt(event, e.getMessage());
             }
         }
     }
