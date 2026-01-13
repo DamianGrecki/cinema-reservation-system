@@ -36,6 +36,7 @@ public class InboxService {
 
     public void markProcessed(InboxEvent event) {
         event.setStatus(InboxEvent.Status.PROCESSED);
+        event.setAttempts(event.getAttempts() + 1);
         event.setProcessedAt(Instant.now());
         inboxRepository.save(event);
     }
