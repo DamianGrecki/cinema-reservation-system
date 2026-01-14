@@ -1,7 +1,10 @@
 package pl.dgrecki.services;
 
+import static pl.dgrecki.models.entities.InboxEvent.Status.PROCESSING;
+
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -57,9 +60,19 @@ public class InboxService {
         inboxRepository.save(event);
     }
 
-    public List<InboxEvent> getInboxEventsToProcess(int limit) {
-        return inboxRepository.findReadyToProcess(
+    public List<InboxEvent> claimInboxEvents(int limit) {
+        List<InboxEvent> events = inboxRepository.findReadyToProcess(
                 InboxEvent.Status.RECEIVED, InboxEvent.Status.FAILED, Pageable.ofSize(limit));
+        setEventsStatus(events, PROCESSING);
+        return events;
+    }
+
+    private void setEventsStatus(List<InboxEvent> events, InboxEvent.Status status) {
+        if (!events.isEmpty()) {
+            List<UUID> ids = events.stream().map(InboxEvent::getId).toList();
+            int updatedCount = inboxRepository.setEventsStatus(ids, status);
+            log.info("Status of {} inbox events set to {}", updatedCount, status);
+        }
     }
 
     private void throwIfEventAlreadyExists(IncomingEvent incomingEvent) {

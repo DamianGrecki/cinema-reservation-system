@@ -46,6 +46,7 @@ public class InboxEvent {
 
     public enum Status {
         RECEIVED,
+        PROCESSING,
         PROCESSED,
         FAILED,
         DEAD
