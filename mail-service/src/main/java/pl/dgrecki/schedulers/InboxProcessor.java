@@ -21,7 +21,7 @@ public class InboxProcessor {
 
     @Scheduled(fixedDelay = 10000)
     public void processInboxEvents() {
-        List<InboxEvent> events = inboxService.getInboxEventsToProcess(EVENTS_LIMIT);
+        List<InboxEvent> events = inboxService.claimInboxEvents(EVENTS_LIMIT);
 
         for (InboxEvent event : events) {
             try {
