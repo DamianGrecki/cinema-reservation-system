@@ -42,6 +42,9 @@ docker-compose -f docker-compose-monitoring.yml up -d
 W katalogu projektu uruchom każdy mikroserwis oddzielnie:
 
 ```bash
+# Budowanie modułów
+./mvnw clean install
+
 # Serwis autoryzacji
 ./mvnw -pl auth-service spring-boot:run
 
