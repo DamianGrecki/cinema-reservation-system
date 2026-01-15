@@ -1,7 +1,5 @@
 package pl.dgrecki.services;
 
-import static pl.dgrecki.models.entities.InboxEvent.Status.PROCESSING;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
 import pl.dgrecki.models.IncomingEvent;
 import pl.dgrecki.models.entities.InboxEvent;
+import pl.dgrecki.models.enums.EventStatus;
 import pl.dgrecki.repositories.InboxEventRepository;
 
 @Slf4j
@@ -29,7 +28,7 @@ public class InboxService {
                 .id(incomingEvent.getEventId())
                 .eventType(incomingEvent.getEventType())
                 .data(incomingEvent.getData())
-                .status(InboxEvent.Status.RECEIVED)
+                .status(EventStatus.RECEIVED)
                 .attempts(0)
                 .maxAttempts(3)
                 .createdAt(Instant.now())
@@ -38,7 +37,7 @@ public class InboxService {
     }
 
     public void markProcessed(InboxEvent event) {
-        event.setStatus(InboxEvent.Status.PROCESSED);
+        event.setStatus(EventStatus.PROCESSED);
         event.setAttempts(event.getAttempts() + 1);
         event.setProcessedAt(Instant.now());
         inboxRepository.save(event);
@@ -51,9 +50,9 @@ public class InboxService {
         event.setProcessedAt(Instant.now());
 
         if (attempts < event.getMaxAttempts()) {
-            event.setStatus(InboxEvent.Status.FAILED);
+            event.setStatus(EventStatus.FAILED);
         } else {
-            event.setStatus(InboxEvent.Status.DEAD);
+            event.setStatus(EventStatus.DEAD);
             log.warn("Event {} exceeded max attempts ({})", event.getId(), event.getMaxAttempts());
         }
 
@@ -61,13 +60,13 @@ public class InboxService {
     }
 
     public List<InboxEvent> claimInboxEvents(int limit) {
-        List<InboxEvent> events = inboxRepository.findReadyToProcess(
-                InboxEvent.Status.RECEIVED, InboxEvent.Status.FAILED, Pageable.ofSize(limit));
-        setEventsStatus(events, PROCESSING);
+        List<InboxEvent> events =
+                inboxRepository.findReadyToProcess(EventStatus.RECEIVED, EventStatus.FAILED, Pageable.ofSize(limit));
+        setEventsStatus(events, EventStatus.PROCESSING);
         return events;
     }
 
-    private void setEventsStatus(List<InboxEvent> events, InboxEvent.Status status) {
+    private void setEventsStatus(List<InboxEvent> events, EventStatus status) {
         if (!events.isEmpty()) {
             List<UUID> ids = events.stream().map(InboxEvent::getId).toList();
             int updatedCount = inboxRepository.setEventsStatus(ids, status);
@@ -77,7 +76,7 @@ public class InboxService {
 
     private void throwIfEventAlreadyExists(IncomingEvent incomingEvent) {
         if (inboxRepository.findById(incomingEvent.getEventId()).isPresent()) {
-            throw new ResourceAlreadyExistsException("Event already exists!");
+            throw new ResourceAlreadyExistsException("Event in inbox_events_dlq already exists!");
         }
     }
 }
