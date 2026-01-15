@@ -8,4 +8,5 @@
     <include file="db/changelog/changes/001-create-inbox-events-table.xml"/>
     <include file="db/changelog/changes/002-create-mail-templates-table.xml"/>
     <include file="db/changelog/changes/003-insert-user-registration-template.xml"/>
+    <include file="db/changelog/changes/004-create-inbox-events-dlq-table.xml"/>
 </databaseChangeLog>

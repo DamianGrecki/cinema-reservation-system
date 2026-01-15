@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.models.entities.InboxEvent;
+import pl.dgrecki.models.enums.EventStatus;
 
 @Repository
 public interface InboxEventRepository extends JpaRepository<InboxEvent, UUID> {
@@ -19,9 +20,7 @@ public interface InboxEventRepository extends JpaRepository<InboxEvent, UUID> {
         ORDER BY e.createdAt ASC
     """)
     List<InboxEvent> findReadyToProcess(
-            @Param("received") InboxEvent.Status received,
-            @Param("failed") InboxEvent.Status failed,
-            Pageable pageable);
+            @Param("received") EventStatus received, @Param("failed") EventStatus failed, Pageable pageable);
 
     @Modifying(clearAutomatically = true)
     @Transactional
@@ -30,5 +29,5 @@ public interface InboxEventRepository extends JpaRepository<InboxEvent, UUID> {
         SET e.status = :status
         WHERE e.id IN :ids
     """)
-    int setEventsStatus(@Param("ids") List<UUID> ids, @Param("status") InboxEvent.Status status);
+    int setEventsStatus(@Param("ids") List<UUID> ids, @Param("status") EventStatus status);
 }

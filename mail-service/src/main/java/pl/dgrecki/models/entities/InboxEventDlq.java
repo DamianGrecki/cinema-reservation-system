@@ -14,12 +14,12 @@ import pl.dgrecki.models.enums.EventStatus;
 import pl.dgrecki.models.enums.EventType;
 
 @Entity
-@Table(name = "inbox_events")
+@Table(name = "inbox_events_dlq")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InboxEvent {
+public class InboxEventDlq {
 
     @Id
     private UUID id;
@@ -34,14 +34,5 @@ public class InboxEvent {
     @Enumerated(EnumType.STRING)
     private EventStatus status;
 
-    @Column(nullable = false)
-    private int attempts;
-
-    @Column(nullable = false)
-    private int maxAttempts;
-
-    private String lastError;
-
     private Instant createdAt;
-    private Instant processedAt;
 }

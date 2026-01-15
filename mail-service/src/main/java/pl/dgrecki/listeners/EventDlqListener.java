@@ -6,21 +6,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import pl.dgrecki.models.IncomingEvent;
-import pl.dgrecki.services.InboxService;
+import pl.dgrecki.services.InboxDlqService;
 import pl.dgrecki.services.IncomingEventDeserializer;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EventListener {
+public class EventDlqListener {
 
-    private final InboxService inboxService;
     private final IncomingEventDeserializer incomingEventDeserializer;
+    private final InboxDlqService inboxDlqService;
 
     @SneakyThrows
-    @KafkaListener(topics = "${kafka.topics.user-registration}")
+    @KafkaListener(topics = "${kafka.topics.user-registration-dlq}")
     public void handleIncomingEvent(String message) {
         IncomingEvent incomingEvent = incomingEventDeserializer.deserialize(message);
-        inboxService.createInboxEvent(incomingEvent);
+        inboxDlqService.createInboxDlqEvent(incomingEvent);
     }
 }
