@@ -2,6 +2,7 @@ package pl.dgrecki.services.user.activation;
 
 import static pl.dgrecki.constants.ExceptionMessages.*;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,6 +21,8 @@ public class ActivationTokenService {
 
     private final ActivationTokenRepository activationTokenRepository;
 
+    private final Clock clock;
+
     private static final Duration VALID_DURATION = Duration.ofHours(1);
 
     public ActivationToken createToken(User user) {
@@ -34,7 +37,7 @@ public class ActivationTokenService {
         if (activationToken.isUsed()) {
             throw new ActivationTokenIsUsedException(TOKEN_IS_USED_MSG);
         }
-        if (activationToken.getExpirationDate().isBefore(LocalDateTime.now())) {
+        if (activationToken.getExpirationDate().isBefore(LocalDateTime.now(clock))) {
             throw new ActivationTokenExpiredException(TOKEN_EXPIRED_MSG);
         }
         activationToken.markAsUsed();
@@ -48,6 +51,6 @@ public class ActivationTokenService {
     }
 
     private LocalDateTime getExpireDate() {
-        return LocalDateTime.now().plus(VALID_DURATION);
+        return LocalDateTime.now(clock).plus(VALID_DURATION);
     }
 }
