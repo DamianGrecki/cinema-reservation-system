@@ -9,6 +9,18 @@ spring:
     url: jdbc:postgresql://localhost:1012/mail_db
     username: mail_user
     password: 123 # It will eventually be moved to .env
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: mail-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: 500
+      session-timeout-ms: 15000
+      heartbeat-interval-ms: 3000
+      isolation-level: read_committed
 
   jpa:
     hibernate:
@@ -18,14 +30,6 @@ spring:
   liquibase:
     enabled: true
     change-log: db/changelog/db.changelog-master.xml
-
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: mail-service-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
   mail:
     sender: no-reply@cinema-service.com
