@@ -4,13 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static pl.dgrecki.constants.ExceptionMessages.*;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.dgrecki.exceptions.ActivationTokenExpiredException;
@@ -27,8 +29,15 @@ class ActivationTokenServiceUnitTests {
     @Mock
     private ActivationTokenRepository repository;
 
-    @InjectMocks
+    private Clock clock;
     private ActivationTokenService service;
+
+    @BeforeEach
+    void setUp() {
+        LocalDateTime fixedTime = LocalDateTime.of(2026, 1, 1, 12, 0);
+        clock = Clock.fixed(fixedTime.toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
+        service = new ActivationTokenService(repository, clock);
+    }
 
     @Test
     void shouldCreateActivationTokenTest() {
@@ -39,9 +48,7 @@ class ActivationTokenServiceUnitTests {
         assertNotNull(activationToken.getToken());
         assertEquals(user, activationToken.getUser());
 
-        LocalDateTime now = LocalDateTime.now();
-        assertTrue(activationToken.getExpirationDate().isAfter(now.plusMinutes(59)));
-        assertTrue(activationToken.getExpirationDate().isBefore(now.plusHours(2)));
+        assertTrue(activationToken.getExpirationDate().isEqual(LocalDateTime.of(2026, 1, 1, 13, 0)));
 
         ArgumentCaptor<ActivationToken> captor = ArgumentCaptor.forClass(ActivationToken.class);
         verify(repository, times(1)).save(captor.capture());
@@ -51,8 +58,7 @@ class ActivationTokenServiceUnitTests {
     @Test
     void shouldValidateTokenAndMarkAsUsedTest() {
         UUID token = UUID.randomUUID();
-        ActivationToken activationToken =
-                new ActivationToken(token, new User(), LocalDateTime.now().plusHours(1));
+        ActivationToken activationToken = new ActivationToken(token, new User(), LocalDateTime.now(clock));
         assertFalse(activationToken.isUsed());
 
         when(repository.findByToken(token)).thenReturn(Optional.of(activationToken));
@@ -78,8 +84,7 @@ class ActivationTokenServiceUnitTests {
     void shouldThrowWhenTokenAlreadyUsedTest() {
         UUID token = UUID.randomUUID();
 
-        ActivationToken activationToken =
-                new ActivationToken(token, new User(), LocalDateTime.now().plusHours(1));
+        ActivationToken activationToken = new ActivationToken(token, new User(), LocalDateTime.now(clock));
         activationToken.markAsUsed();
 
         when(repository.findByToken(token)).thenReturn(Optional.of(activationToken));
@@ -94,8 +99,7 @@ class ActivationTokenServiceUnitTests {
     void shouldThrowWhenTokenExpiredTest() {
         UUID token = UUID.randomUUID();
 
-        ActivationToken activationToken =
-                new ActivationToken(token, new User(), LocalDateTime.now().minusMinutes(1));
+        ActivationToken activationToken = new ActivationToken(token, new User(), LocalDateTime.of(2026, 1, 1, 11, 0));
 
         when(repository.findByToken(token)).thenReturn(Optional.of(activationToken));
 
