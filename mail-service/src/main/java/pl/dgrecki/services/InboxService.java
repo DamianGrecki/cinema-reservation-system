@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
@@ -59,9 +58,10 @@ public class InboxService {
         inboxRepository.save(event);
     }
 
+    @Transactional
     public List<InboxEvent> claimInboxEvents(int limit) {
         List<InboxEvent> events =
-                inboxRepository.findReadyToProcess(EventStatus.RECEIVED, EventStatus.FAILED, Pageable.ofSize(limit));
+                inboxRepository.findReadyToProcess(EventStatus.RECEIVED.name(), EventStatus.FAILED.name(), limit);
         setEventsStatus(events, EventStatus.PROCESSING);
         return events;
     }
