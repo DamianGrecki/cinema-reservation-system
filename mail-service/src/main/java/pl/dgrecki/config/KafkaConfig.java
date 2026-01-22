@@ -1,5 +1,7 @@
 package pl.dgrecki.config;
 
+import static pl.dgrecki.utils.ExceptionUtils.getRootCauseAsString;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +15,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
+import pl.dgrecki.exceptions.DeserializationException;
 
 @Slf4j
 @Configuration
@@ -32,21 +35,22 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
-
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
 
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(
-                kafkaTemplate, (record, _) -> new TopicPartition(dlqTopic, record.partition()));
-
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, ex) -> {
+            record.headers().add("x-error-message", getRootCauseAsString(ex).getBytes());
+            return new TopicPartition(dlqTopic, record.partition());
+        });
         DefaultErrorHandler errorHandler = getDefaultErrorHandler(recoverer);
 
         factory.setCommonErrorHandler(errorHandler);
-
         return factory;
     }
 
     private DefaultErrorHandler getDefaultErrorHandler(DeadLetterPublishingRecoverer recoverer) {
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(INTERVAL, ATTEMPTS));
+
+        errorHandler.addNotRetryableExceptions(DeserializationException.class);
 
         errorHandler.setRetryListeners((record, ex, deliveryAttempt) -> {
             log.error(

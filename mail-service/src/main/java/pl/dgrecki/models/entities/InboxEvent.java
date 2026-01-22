@@ -42,6 +42,8 @@ public class InboxEvent {
 
     private String lastError;
 
+    @Column(nullable = false)
     private Instant createdAt;
+
     private Instant processedAt;
 }

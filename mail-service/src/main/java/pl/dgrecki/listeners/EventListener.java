@@ -1,7 +1,6 @@
 package pl.dgrecki.listeners;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -18,7 +17,6 @@ public class EventListener {
     private final InboxService inboxService;
     private final IncomingEventDeserializer incomingEventDeserializer;
 
-    @SneakyThrows
     @KafkaListener(topics = "${kafka.topics.user-registration}")
     public void handleIncomingEvent(String message, Acknowledgment acknowledgment) {
         IncomingEvent incomingEvent = incomingEventDeserializer.deserialize(message);

@@ -1,6 +1,5 @@
 package pl.dgrecki.models.entities;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
@@ -8,10 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import pl.dgrecki.models.enums.EventStatus;
-import pl.dgrecki.models.enums.EventType;
 
 @Entity
 @Table(name = "inbox_events_dlq")
@@ -22,17 +17,21 @@ import pl.dgrecki.models.enums.EventType;
 public class InboxEventDlq {
 
     @Id
+    @GeneratedValue
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
-    private EventType eventType;
+    @Column(nullable = false)
+    private String topic;
 
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private JsonNode data;
+    @Column(nullable = false)
+    private int partition;
 
-    @Enumerated(EnumType.STRING)
-    private EventStatus status;
+    @Column(columnDefinition = "text", nullable = false)
+    private String rawMessage;
 
+    @Column(columnDefinition = "text")
+    private String errorMessage;
+
+    @Column(nullable = false)
     private Instant createdAt;
 }
