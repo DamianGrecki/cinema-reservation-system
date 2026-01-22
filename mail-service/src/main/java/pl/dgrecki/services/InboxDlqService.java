@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
-import pl.dgrecki.models.IncomingEvent;
 import pl.dgrecki.models.entities.InboxEventDlq;
-import pl.dgrecki.models.enums.EventStatus;
 import pl.dgrecki.repositories.InboxEventDlqRepository;
 
 @Slf4j
@@ -19,21 +16,14 @@ public class InboxDlqService {
     private final InboxEventDlqRepository inboxDlqRepository;
 
     @Transactional
-    public void createInboxDlqEvent(IncomingEvent incomingEvent) {
-        throwIfEventAlreadyExists(incomingEvent);
+    public void createInboxDlqEvent(String topic, int partition, String rawMessage, String errorMessage) {
         InboxEventDlq event = InboxEventDlq.builder()
-                .id(incomingEvent.getEventId())
-                .eventType(incomingEvent.getEventType())
-                .data(incomingEvent.getData())
-                .status(EventStatus.RECEIVED)
+                .topic(topic)
+                .partition(partition)
+                .rawMessage(rawMessage)
+                .errorMessage(errorMessage)
                 .createdAt(Instant.now())
                 .build();
         inboxDlqRepository.save(event);
-    }
-
-    private void throwIfEventAlreadyExists(IncomingEvent incomingEvent) {
-        if (inboxDlqRepository.findById(incomingEvent.getEventId()).isPresent()) {
-            throw new ResourceAlreadyExistsException("Event in inbox_events_dlq already exists!");
-        }
     }
 }

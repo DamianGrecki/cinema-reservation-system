@@ -15,8 +15,6 @@ spring:
       group-id: mail-service-group
       auto-offset-reset: earliest
       enable-auto-commit: false
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       max-poll-records: 500
       session-timeout-ms: 15000
       heartbeat-interval-ms: 3000
