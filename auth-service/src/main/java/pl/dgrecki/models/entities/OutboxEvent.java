@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import pl.dgrecki.models.enums.EventStatus;
 import pl.dgrecki.models.enums.EventType;
 
 @Entity
@@ -28,14 +29,16 @@ public class OutboxEvent {
     private String data;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private EventStatus status;
+
+    @Column(nullable = false)
+    private int attempts;
+
+    @Column(nullable = false)
+    private int maxAttempts;
+
+    private String lastError;
 
     private Instant createdAt;
     private Instant sentAt;
-
-    public enum Status {
-        PENDING,
-        SENT,
-        FAILED
-    }
 }

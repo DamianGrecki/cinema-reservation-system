@@ -2,6 +2,7 @@ package pl.dgrecki.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static pl.dgrecki.models.enums.EventStatus.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.dgrecki.models.entities.OutboxEvent;
-import pl.dgrecki.models.entities.OutboxEvent.Status;
+import pl.dgrecki.models.enums.EventStatus;
 import pl.dgrecki.models.enums.EventType;
 import pl.dgrecki.repositories.OutboxEventRepository;
 import pl.dgrecki.services.OutboxService;
@@ -39,48 +40,72 @@ class OutboxServiceUnitTests {
 
         assertEquals(eventType, savedEvent.getEventType());
         assertEquals(data, savedEvent.getData());
-        assertEquals(Status.PENDING, savedEvent.getStatus());
+        assertEquals(0, savedEvent.getAttempts());
+        assertEquals(3, savedEvent.getMaxAttempts());
+        assertEquals(PENDING, savedEvent.getStatus());
         assertNotNull(savedEvent.getCreatedAt());
     }
 
     @Test
-    void shouldFetchEventsByStatusAndTypeTest() {
+    void shouldFindReadyToSendEventsTest() {
         EventType eventType = EventType.USER_REGISTRATION;
-        Status status = Status.PENDING;
+        int limit = 50;
 
         List<OutboxEvent> eventList = List.of(new OutboxEvent(), new OutboxEvent());
-        when(outboxRepository.findEventsByStatusAndType(status, eventType)).thenReturn(eventList);
+        when(outboxRepository.findReadyToSend(eventType.name(), PENDING.name(), FAILED.name(), limit))
+                .thenReturn(eventList);
 
-        List<OutboxEvent> result = outboxService.fetchByStatusAndType(status, eventType);
+        List<OutboxEvent> result = outboxService.claimOutboxEvents(eventType, limit);
 
         assertEquals(2, result.size());
-        verify(outboxRepository, times(1)).findEventsByStatusAndType(status, eventType);
+        verify(outboxRepository, times(1)).findReadyToSend(eventType.name(), PENDING.name(), FAILED.name(), limit);
     }
 
     @Test
     void shouldMarkEventAsSentTest() {
-        OutboxEvent event = OutboxEvent.builder().status(Status.PENDING).build();
+        OutboxEvent event = OutboxEvent.builder().status(PENDING).attempts(0).build();
 
         ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
 
         outboxService.markSent(event);
 
         verify(outboxRepository, times(1)).save(captor.capture());
-        assertEquals(Status.SENT, captor.getValue().getStatus());
+        assertEquals(EventStatus.SENT, captor.getValue().getStatus());
+        assertEquals(1, captor.getValue().getAttempts());
         assertNotNull(captor.getValue().getSentAt());
     }
 
     @Test
-    void shouldMarkEventAsFailedTest() {
-        OutboxEvent event = OutboxEvent.builder().status(Status.PENDING).build();
+    void shouldHandleFailedAttemptAndSetFailedStatusTest() {
+        OutboxEvent event =
+                OutboxEvent.builder().status(PENDING).attempts(0).maxAttempts(3).build();
+        String errorMessage = "error message";
 
         ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
 
-        outboxService.markFailed(event);
+        outboxService.handleFailedAttempt(event, errorMessage);
 
-        assertEquals(Status.FAILED, event.getStatus());
+        assertEquals(FAILED, event.getStatus());
         verify(outboxRepository, times(1)).save(captor.capture());
-        assertEquals(Status.FAILED, captor.getValue().getStatus());
+        assertEquals(FAILED, captor.getValue().getStatus());
+        assertEquals(1, captor.getValue().getAttempts());
+        assertNull(captor.getValue().getSentAt());
+    }
+
+    @Test
+    void shouldHandleFailedAttemptAndSetDeadStatusTest() {
+        OutboxEvent event =
+                OutboxEvent.builder().status(PENDING).attempts(2).maxAttempts(3).build();
+        String errorMessage = "error message";
+
+        ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
+
+        outboxService.handleFailedAttempt(event, errorMessage);
+
+        assertEquals(DEAD, event.getStatus());
+        verify(outboxRepository, times(1)).save(captor.capture());
+        assertEquals(DEAD, captor.getValue().getStatus());
+        assertEquals(3, captor.getValue().getAttempts());
         assertNull(captor.getValue().getSentAt());
     }
 }

@@ -1,6 +1,5 @@
 package pl.dgrecki.schedulers;
 
-import static pl.dgrecki.models.entities.OutboxEvent.Status.PENDING;
 import static pl.dgrecki.models.enums.EventType.USER_REGISTRATION;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +14,7 @@ import pl.dgrecki.services.OutboxService;
 
 @Component
 public class OutboxPublisherScheduler {
+    private static final int EVENTS_LIMIT = 50;
 
     private final OutboxService outboxService;
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -24,7 +24,7 @@ public class OutboxPublisherScheduler {
     public OutboxPublisherScheduler(
             OutboxService outboxService,
             KafkaTemplate<String, String> kafkaTemplate,
-            @Value("${kafka.topics.user-registration}") String topic,
+            @Value("${spring.kafka.topics.user-registration}") String topic,
             ObjectMapper objectMapper) {
         this.outboxService = outboxService;
         this.kafkaTemplate = kafkaTemplate;
@@ -32,9 +32,9 @@ public class OutboxPublisherScheduler {
         this.objectMapper = objectMapper;
     }
 
-    @Scheduled(fixedDelayString = "${kafka.poll-interval-ms}")
+    @Scheduled(fixedDelayString = "${spring.kafka.poll-interval-ms}")
     public void publishUserRegistrationEvents() {
-        List<OutboxEvent> events = outboxService.fetchByStatusAndType(PENDING, USER_REGISTRATION);
+        List<OutboxEvent> events = outboxService.claimOutboxEvents(USER_REGISTRATION, EVENTS_LIMIT);
         for (OutboxEvent event : events) {
             try {
                 OutgoingEvent outgoingEvent =
@@ -43,12 +43,12 @@ public class OutboxPublisherScheduler {
                 kafkaTemplate
                         .send(topic, String.valueOf(event.getId()), message)
                         .thenAccept(_ -> outboxService.markSent(event))
-                        .exceptionally(_ -> {
-                            outboxService.markFailed(event);
+                        .exceptionally(ex -> {
+                            outboxService.handleFailedAttempt(event, ex.getMessage());
                             return null;
                         });
             } catch (Exception ex) {
-                outboxService.markFailed(event);
+                outboxService.handleFailedAttempt(event, ex.getMessage());
             }
         }
     }
