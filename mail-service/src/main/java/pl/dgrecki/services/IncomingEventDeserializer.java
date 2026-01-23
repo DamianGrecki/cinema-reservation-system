@@ -1,5 +1,7 @@
 package pl.dgrecki.services;
 
+import static pl.dgrecki.constants.ExceptionMessages.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,16 +23,16 @@ public class IncomingEventDeserializer {
             return event;
         } catch (Exception e) {
             log.error("Message deserialize failed: {}", message, e);
-            throw new DeserializationException("Invalid incoming event", e);
+            throw new DeserializationException(INVALID_INCOMING_EVENT_MSG, e);
         }
     }
 
     private void validate(IncomingEvent event) throws DeserializationException {
         if (event.getEventId() == null) {
-            throw new DeserializationException("Missing required field: eventId");
+            throw new DeserializationException(MISSING_REQUIRED_FIELD_EVENT_ID_MSG);
         }
         if (event.getEventType() == null) {
-            throw new DeserializationException("Missing required field: eventType");
+            throw new DeserializationException(MISSING_REQUIRED_FIELD_EVENT_TYPE_MSG);
         }
     }
 }
