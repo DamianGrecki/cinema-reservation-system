@@ -45,7 +45,7 @@ class OutboxPublisherUnitTests {
         String data = "{\"data\":\"Some data\"}";
         UUID id = UUID.randomUUID();
         OutboxEvent event = OutboxEvent.builder().id(id).data(data).build();
-        when(outboxService.fetchByStatusAndType(any(), any())).thenReturn(List.of(event));
+        when(outboxService.claimOutboxEvents(any(), anyInt())).thenReturn(List.of(event));
 
         CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
         when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenReturn(future);
@@ -59,19 +59,20 @@ class OutboxPublisherUnitTests {
 
         verify(kafkaTemplate, times(1)).send(eq(topic), eq(id.toString()), eq(message));
         verify(outboxService, times(1)).markSent(event);
-        verify(outboxService, never()).markFailed(event);
+        verify(outboxService, never()).handleFailedAttempt(any(), any());
     }
 
     @Test
     void shouldMarkFailedWhenKafkaThrowsException() {
         String data = "{\"data\":\"Some data\"}";
+        String errorMessage = "Kafka error";
         OutboxEvent event = OutboxEvent.builder().data(data).build();
-        when(outboxService.fetchByStatusAndType(any(), any())).thenReturn(List.of(event));
-        when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenThrow(new RuntimeException("Kafka error"));
+        when(outboxService.claimOutboxEvents(any(), anyInt())).thenReturn(List.of(event));
+        when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenThrow(new RuntimeException(errorMessage));
 
         publisher.publishUserRegistrationEvents();
 
-        verify(outboxService, times(1)).markFailed(event);
+        verify(outboxService, times(1)).handleFailedAttempt(event, errorMessage);
         verify(outboxService, never()).markSent(event);
     }
 }

@@ -27,6 +27,18 @@
                 <constraints nullable="false"/>
             </column>
 
+            <column name="attempts" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="max_attempts" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_error" type="VARCHAR(1000)">
+                <constraints nullable="true"/>
+            </column>
+
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>

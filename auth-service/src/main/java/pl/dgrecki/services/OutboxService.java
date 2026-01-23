@@ -2,15 +2,18 @@ package pl.dgrecki.services;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.models.entities.OutboxEvent;
-import pl.dgrecki.models.entities.OutboxEvent.Status;
+import pl.dgrecki.models.enums.EventStatus;
 import pl.dgrecki.models.enums.EventType;
 import pl.dgrecki.repositories.OutboxEventRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OutboxService {
@@ -23,26 +26,49 @@ public class OutboxService {
         OutboxEvent event = OutboxEvent.builder()
                 .eventType(eventType)
                 .data(data)
-                .status(Status.PENDING)
+                .status(EventStatus.PENDING)
+                .attempts(0)
+                .maxAttempts(3)
                 .createdAt(Instant.now())
                 .build();
         outboxRepository.save(event);
     }
 
-    public List<OutboxEvent> fetchByStatusAndType(OutboxEvent.Status status, EventType eventType) {
-        return outboxRepository.findEventsByStatusAndType(status, eventType);
-    }
-
-    @Transactional
     public void markSent(OutboxEvent event) {
-        event.setStatus(Status.SENT);
+        event.setStatus(EventStatus.SENT);
+        event.setAttempts(event.getAttempts() + 1);
         event.setSentAt(Instant.now());
         outboxRepository.save(event);
     }
 
-    @Transactional
-    public void markFailed(OutboxEvent event) {
-        event.setStatus(Status.FAILED);
+    public void handleFailedAttempt(OutboxEvent event, String error) {
+        int attempts = event.getAttempts() + 1;
+        event.setAttempts(attempts);
+        event.setLastError(error);
+
+        if (attempts < event.getMaxAttempts()) {
+            event.setStatus(EventStatus.FAILED);
+        } else {
+            event.setStatus(EventStatus.DEAD);
+            log.warn("Event {} exceeded max attempts ({})", event.getId(), event.getMaxAttempts());
+        }
+
         outboxRepository.save(event);
+    }
+
+    @Transactional
+    public List<OutboxEvent> claimOutboxEvents(EventType eventType, int limit) {
+        List<OutboxEvent> events = outboxRepository.findReadyToSend(
+                eventType.name(), EventStatus.PENDING.name(), EventStatus.FAILED.name(), limit);
+        setEventsStatus(events, EventStatus.SENDING);
+        return events;
+    }
+
+    private void setEventsStatus(List<OutboxEvent> events, EventStatus status) {
+        if (!events.isEmpty()) {
+            List<UUID> ids = events.stream().map(OutboxEvent::getId).toList();
+            int updatedCount = outboxRepository.setEventsStatus(ids, status);
+            log.info("Status of {} outbox events set to {}", updatedCount, status);
+        }
     }
 }

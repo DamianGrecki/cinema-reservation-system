@@ -4,16 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static pl.dgrecki.models.enums.UserStatus.PENDING_ACTIVATION;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,7 +36,7 @@ import pl.dgrecki.services.user.UserService;
 import pl.dgrecki.services.user.activation.UserActivationLinkFacade;
 import pl.dgrecki.validators.RequestDataValidator;
 
-@RequiredArgsConstructor
+@ExtendWith(MockitoExtension.class)
 class UserServiceUnitTests {
 
     @Mock
@@ -66,11 +65,9 @@ class UserServiceUnitTests {
 
     private PasswordEncoder passwordEncoder;
     private UserService userService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         passwordEncoder = new BCryptPasswordEncoder();
         userService = new UserService(
                 userRepository,
@@ -87,11 +84,9 @@ class UserServiceUnitTests {
     void loginUserSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
-
         String token = "mocked-jwt-token";
 
         LoginRequest request = new LoginRequest(email, password);
-        when(auth.getName()).thenReturn(email);
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(auth);
@@ -100,6 +95,7 @@ class UserServiceUnitTests {
         JwtTokenResponse response = userService.login(request);
 
         assertEquals(token, response.getJwtToken());
+
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtService).generateToken(any(Authentication.class));
     }
