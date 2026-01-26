@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.dgrecki.models.Movie;
+import pl.dgrecki.models.entities.Movie;
 import pl.dgrecki.models.responses.movie.MovieListResponse;
 import pl.dgrecki.models.responses.movie.MovieResponse;
 import pl.dgrecki.repositories.MovieRepository;

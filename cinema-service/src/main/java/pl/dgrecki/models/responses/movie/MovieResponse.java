@@ -1,5 +1,6 @@
 package pl.dgrecki.models.responses.movie;
 
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MovieResponse {
-    private Long id;
+    private UUID id;
     private String title;
     private String description;
 }

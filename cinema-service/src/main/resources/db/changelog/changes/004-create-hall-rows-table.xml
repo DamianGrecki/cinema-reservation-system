@@ -5,31 +5,30 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="001-create-movies-table" author="Damian G">
-
-        <sql>
-            CREATE EXTENSION IF NOT EXISTS pgcrypto;
-        </sql>
-
-        <createTable tableName="movies">
+    <changeSet id="004-create-hall-rows-table" author="Damian G">
+        <createTable tableName="hall_rows">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="title" type="VARCHAR(255)">
-                <constraints unique="true" nullable="false"/>
+            <column name="cinema_hall_id" type="BIGINT">
+                <constraints nullable="false" foreignKeyName="fk_hall_rows_cinema_hall"
+                             references="cinema_halls(id)"/>
             </column>
 
-            <column name="description" type="TEXT"/>
-
-            <column name="format" type="VARCHAR(50)">
+            <column name="row_number" type="INT">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="created_at" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP">
+            <column name="seats_count" type="INT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
+        <addUniqueConstraint
+                tableName="hall_rows"
+                columnNames="cinema_hall_id,row_number"
+                constraintName="uq_hall_row_per_hall"/>
     </changeSet>
 
 </databaseChangeLog>

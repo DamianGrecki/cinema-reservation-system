@@ -5,28 +5,21 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="001-create-movies-table" author="Damian G">
-
-        <sql>
-            CREATE EXTENSION IF NOT EXISTS pgcrypto;
-        </sql>
-
-        <createTable tableName="movies">
-            <column name="id" type="UUID">
+    <changeSet id="002-create-cinemas-table" author="Damian G">
+        <createTable tableName="cinemas">
+            <column name="id" type="BIGSERIAL">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="title" type="VARCHAR(255)">
-                <constraints unique="true" nullable="false"/>
-            </column>
-
-            <column name="description" type="TEXT"/>
-
-            <column name="format" type="VARCHAR(50)">
+            <column name="name" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="created_at" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP">
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
         </createTable>
