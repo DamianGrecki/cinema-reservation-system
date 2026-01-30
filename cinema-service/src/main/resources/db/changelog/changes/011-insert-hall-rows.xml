@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="011-insert-hall-rows" author="Damian G">
+        <!-- Sala 1 -->
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="1"/>
+            <column name="row_number" valueNumeric="1"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="1"/>
+            <column name="row_number" valueNumeric="2"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="1"/>
+            <column name="row_number" valueNumeric="3"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="1"/>
+            <column name="row_number" valueNumeric="4"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+
+        <!-- Sala 2 -->
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="2"/>
+            <column name="row_number" valueNumeric="1"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="2"/>
+            <column name="row_number" valueNumeric="2"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="2"/>
+            <column name="row_number" valueNumeric="3"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+        <insert tableName="hall_rows">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" valueNumeric="2"/>
+            <column name="row_number" valueNumeric="4"/>
+            <column name="seats_count" valueNumeric="8"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="007-create-reservations-table" author="Damian G">
+        <createTable tableName="reservations">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="screening_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_reservations_screening"
+                             references="screenings(id)"/>
+            </column>
+
+            <column name="seat_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_reservations_seat"
+                             references="seats(id)"/>
+            </column>
+
+            <column name="price_in_cents" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expires_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="version" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <sql>
+            CREATE UNIQUE INDEX uq_reservation_per_seat_screening
+                ON reservations(screening_id, seat_id)
+                WHERE status IN ('CREATED', 'PAID');
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

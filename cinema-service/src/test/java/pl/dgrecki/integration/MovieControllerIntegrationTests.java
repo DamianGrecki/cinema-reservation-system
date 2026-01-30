@@ -8,6 +8,7 @@ import static pl.dgrecki.constants.Endpoints.MOVIES_ENDPOINT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,8 @@ class MovieControllerIntegrationTests extends BaseIntegrationTest {
     @Test
     @WithMockUser(roles = "CUSTOMER")
     void shouldReturnMoviesListTest() {
-        MovieResponse movie1 = new MovieResponse(1L, "Movie 1", "Desc 1");
-        MovieResponse movie2 = new MovieResponse(2L, "Movie 2", "Desc 2");
+        MovieResponse movie1 = new MovieResponse(UUID.randomUUID(), "Movie 1", "Desc 1");
+        MovieResponse movie2 = new MovieResponse(UUID.randomUUID(), "Movie 2", "Desc 2");
         MovieListResponse movieListResponse = new MovieListResponse(List.of(movie1, movie2));
 
         when(movieService.getMoviesList()).thenReturn(movieListResponse);

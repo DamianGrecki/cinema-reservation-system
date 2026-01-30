@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="012-insert-seats" author="Damian G">
+        <sql>
+            INSERT INTO seats(id, hall_row_id, seat_number, seat_type)
+            SELECT gen_random_uuid(), hr.id, s.seat_number, 'STANDARD'
+            FROM hall_rows hr,
+                 generate_series(1, hr.seats_count) AS s(seat_number);
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
