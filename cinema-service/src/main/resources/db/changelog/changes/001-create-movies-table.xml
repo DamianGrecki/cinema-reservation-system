@@ -12,7 +12,7 @@
         </sql>
 
         <createTable tableName="movies">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
@@ -22,14 +22,11 @@
 
             <column name="description" type="TEXT"/>
 
-            <column name="format" type="VARCHAR(50)">
-                <constraints nullable="false"/>
-            </column>
-
             <column name="created_at" type="TIMESTAMP" defaultValueDate="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
+
     </changeSet>
 
 </databaseChangeLog>

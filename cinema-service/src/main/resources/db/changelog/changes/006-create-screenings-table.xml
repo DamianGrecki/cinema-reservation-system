@@ -16,9 +16,9 @@
                              references="cinema_halls(id)"/>
             </column>
 
-            <column name="movie_id" type="UUID">
-                <constraints nullable="false" foreignKeyName="fk_screenings_movie"
-                             references="movies(id)"/>
+            <column name="movie_version_id" type="UUID">
+                <constraints nullable="false" foreignKeyName="fk_screenings_movie_version"
+                             references="movie_versions(id)"/>
             </column>
 
             <column name="start_time" type="TIMESTAMP">

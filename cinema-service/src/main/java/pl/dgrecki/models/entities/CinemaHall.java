@@ -2,7 +2,10 @@ package pl.dgrecki.models.entities;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.*;
+import pl.dgrecki.models.enums.MovieFormat;
 
 @Getter
 @AllArgsConstructor
@@ -19,11 +22,11 @@ public class CinemaHall {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    @Column(name = "is_2d", nullable = false)
-    private boolean is2D;
-
-    @Column(name = "is_3d", nullable = false)
-    private boolean is3D;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "cinema_hall_supported_formats", joinColumns = @JoinColumn(name = "cinema_hall_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "movie_format", nullable = false)
+    private Set<MovieFormat> supportedFormats = new HashSet<>();
 
     @Column(nullable = false)
     private Instant createdAt;

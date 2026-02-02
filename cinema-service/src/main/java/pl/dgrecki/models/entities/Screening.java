@@ -22,8 +22,11 @@ public class Screening {
     private CinemaHall cinemaHall;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "movie_id", nullable = false, foreignKey = @ForeignKey(name = "fk_screenings_movie"))
-    private Movie movie;
+    @JoinColumn(
+            name = "movie_version_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_screenings_movie_version"))
+    private MovieVersion movieVersion;
 
     @Column(nullable = false)
     private Instant startTime;

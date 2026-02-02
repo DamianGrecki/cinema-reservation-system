@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="016-insert-screenings" author="Damian G">
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="aaaa1111-1111-1111-1111-aaaaaaaa1111"/>
+            <column name="start_time" valueDate="2026-02-02 10:00:00"/>
+            <column name="end_time" valueDate="2026-02-02 12:30:00"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="2"/>
+            <column name="movie_version_id" value="bbbb2222-2222-2222-2222-bbbbbbbb2222"/>
+            <column name="start_time" valueDate="2026-02-02 11:00:00"/>
+            <column name="end_time" valueDate="2026-02-02 13:00:00"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="cccc1111-1111-1111-1111-cccccccc1111"/>
+            <column name="start_time" valueDate="2026-02-02 14:00:00"/>
+            <column name="end_time" valueDate="2026-02-02 16:45:00"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="2"/>
+            <column name="movie_version_id" value="dddd1111-1111-1111-1111-dddddddd1111"/>
+            <column name="start_time" valueDate="2026-02-02 15:00:00"/>
+            <column name="end_time" valueDate="2026-02-02 17:45:00"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>
