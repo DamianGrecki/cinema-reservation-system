@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="013-create-movie-versions-table" author="Damian G">
+
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS pgcrypto;
+        </sql>
+
+        <createTable tableName="movie_versions">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="movie_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="movie_format" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="presentation_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="audio_language" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="movie_versions" indexName="idx_movie_versions_movie_id">
+            <column name="movie_id"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                baseTableName="movie_versions"
+                baseColumnNames="movie_id"
+                referencedTableName="movies"
+                referencedColumnNames="id"
+                constraintName="fk_movie_versions_movie"
+                deferrable="true"
+                initiallyDeferred="true"/>
+
+        <addUniqueConstraint
+                tableName="movie_versions"
+                columnNames="movie_id, movie_format, presentation_type"
+                constraintName="uk_movie_versions_unique_format_presentation"/>
+
+    </changeSet>
+
+</databaseChangeLog>

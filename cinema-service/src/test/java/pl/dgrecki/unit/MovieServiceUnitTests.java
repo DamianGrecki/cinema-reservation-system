@@ -28,8 +28,8 @@ class MovieServiceUnitTests {
 
     @Test
     void getMoviesListTest() {
-        Movie movie1 = new Movie(UUID.randomUUID(), "Movie 1", "Description 1", Instant.now());
-        Movie movie2 = new Movie(UUID.randomUUID(), "Movie 2", "Description 2", Instant.now());
+        Movie movie1 = new Movie(UUID.randomUUID(), "Movie 1", "Description 1", List.of(), Instant.now());
+        Movie movie2 = new Movie(UUID.randomUUID(), "Movie 2", "Description 2", List.of(), Instant.now());
 
         when(movieRepository.findAll()).thenReturn(List.of(movie1, movie2));
 

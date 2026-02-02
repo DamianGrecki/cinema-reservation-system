@@ -10,4 +10,6 @@ public class ExceptionMessages {
     public static final String SEAT_NOT_FOUND_MSG = "Seat not found.";
     public static final String SCREENING_NOT_FOUND_MSG = "Screening not found.";
     public static final String SEAT_DOES_NOT_BELONG_TO_HALL_MSG = "Seat does not belong to the screening's cinema hall";
+    public static final String MOVIE_FORMAT_IS_NOT_SUPPORTED_BY_HALL_MSG =
+            "Movie format is not supported by cinema hall";
 }

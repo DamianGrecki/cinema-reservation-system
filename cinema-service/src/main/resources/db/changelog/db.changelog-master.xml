@@ -6,15 +6,21 @@
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <include file="/db/changelog/changes/001-create-movies-table.xml"/>
-    <include file="/db/changelog/changes/002-create-cinemas-table.xml"/>
-    <include file="/db/changelog/changes/003-create-cinema-halls-table.xml"/>
-    <include file="/db/changelog/changes/004-create-hall-rows-table.xml"/>
-    <include file="/db/changelog/changes/005-create-screenings-table.xml"/>
-    <include file="/db/changelog/changes/006-create-seats-table.xml"/>
-    <include file="/db/changelog/changes/007-create-reservations-table.xml"/>
-    <include file="/db/changelog/changes/008-create-tickets-table.xml"/>
-    <include file="/db/changelog/changes/009-insert-cinemas.xml"/>
-    <include file="/db/changelog/changes/010-insert-cinema-halls.xml"/>
-    <include file="/db/changelog/changes/011-insert-hall-rows.xml"/>
-    <include file="/db/changelog/changes/012-insert-seats.xml"/>
+    <include file="/db/changelog/changes/002-create-movie-versions-table.xml"/>
+    <include file="/db/changelog/changes/003-create-cinemas-table.xml"/>
+    <include file="/db/changelog/changes/004-create-cinema-halls-table.xml"/>
+    <include file="/db/changelog/changes/005-create-hall-rows-table.xml"/>
+    <include file="/db/changelog/changes/006-create-screenings-table.xml"/>
+    <include file="/db/changelog/changes/007-create-seats-table.xml"/>
+    <include file="/db/changelog/changes/008-create-reservations-table.xml"/>
+    <include file="/db/changelog/changes/009-create-tickets-table.xml"/>
+    <include file="/db/changelog/changes/010-insert-cinemas.xml"/>
+    <include file="/db/changelog/changes/011-insert-cinema-halls.xml"/>
+    <include file="/db/changelog/changes/012-insert-hall-rows.xml"/>
+    <include file="/db/changelog/changes/013-insert-seats.xml"/>
+    <include file="/db/changelog/changes/014-insert-movies.xml"/>
+    <include file="/db/changelog/changes/015-insert-movie_variants.xml"/>
+    <include file="/db/changelog/changes/016-insert-screenigns.xml"/>
+    <include file="/db/changelog/changes/017-create-cinema-hall-supported-formats-table.xml"/>
+    <include file="/db/changelog/changes/018-insert-cinema-hall-supported-formats.xml"/>
 </databaseChangeLog>

@@ -21,14 +21,6 @@
                 <constraints nullable="false" unique="true"/>
             </column>
 
-            <column name="is_2d" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="is_3d" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-
             <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>

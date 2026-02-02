@@ -2,6 +2,8 @@ package pl.dgrecki.models.entities;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +27,10 @@ public class Movie {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<MovieVersion> versions = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

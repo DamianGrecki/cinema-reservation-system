@@ -8,6 +8,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
+import pl.dgrecki.models.entities.MovieVersion;
 import pl.dgrecki.models.entities.Screening;
 import pl.dgrecki.models.responses.screening.ScreeningListResponse;
 import pl.dgrecki.models.responses.screening.ScreeningResponse;
@@ -22,12 +23,18 @@ public class ScreeningService {
     public ScreeningListResponse getScreeningsList() {
         List<Screening> screenings = screeningRepository.findAll();
         List<ScreeningResponse> screeningResponses = screenings.stream()
-                .map(screening -> new ScreeningResponse(
-                        screening.getId(),
-                        screening.getCinemaHall().getName(),
-                        screening.getMovie().getTitle(),
-                        screening.getStartTime(),
-                        screening.getEndTime()))
+                .map(screening -> {
+                    MovieVersion movieVersion = screening.getMovieVersion();
+                    return new ScreeningResponse(
+                            screening.getId(),
+                            screening.getCinemaHall().getName(),
+                            movieVersion.getMovie().getTitle(),
+                            movieVersion.getMovieFormat().toString(),
+                            movieVersion.getPresentationType(),
+                            movieVersion.getAudioLanguage(),
+                            screening.getStartTime(),
+                            screening.getEndTime());
+                })
                 .toList();
         return new ScreeningListResponse(screeningResponses);
     }
