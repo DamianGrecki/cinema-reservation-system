@@ -1,15 +1,17 @@
 package pl.dgrecki.services;
 
 import static pl.dgrecki.constants.ExceptionMessages.*;
-import static pl.dgrecki.models.enums.ReservationStatus.CREATED;
-import static pl.dgrecki.models.enums.ReservationStatus.PAID;
+import static pl.dgrecki.models.enums.ReservationStatus.*;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ReservationProcessException;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
 import pl.dgrecki.models.entities.Reservation;
@@ -19,6 +21,7 @@ import pl.dgrecki.models.requests.ReservationRequest;
 import pl.dgrecki.models.responses.SuccessResponse;
 import pl.dgrecki.repositories.ReservationRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -48,6 +51,16 @@ public class ReservationService {
                 .build();
         reservationRepository.save(reservation);
         return new SuccessResponse();
+    }
+
+    @Transactional
+    public int setExpireStatusOnOverdueReservations(int limit) {
+        List<Reservation> reservations = reservationRepository.claimOverdueReservations(CREATED.name(), limit);
+        if (!reservations.isEmpty()) {
+            List<UUID> ids = reservations.stream().map(Reservation::getId).toList();
+            return reservationRepository.setReservationsStatus(ids, EXPIRED);
+        }
+        return 0;
     }
 
     private void validateReservationUniqueness(Screening screening, Seat seat) {
