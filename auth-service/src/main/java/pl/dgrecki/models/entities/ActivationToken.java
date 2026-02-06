@@ -1,7 +1,7 @@
 package pl.dgrecki.models.entities;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,7 @@ public class ActivationToken {
     private UUID token;
 
     @Column(nullable = false)
-    private LocalDateTime expirationDate;
+    private Instant expirationDate;
 
     @Column(nullable = false)
     private boolean isUsed = false;
@@ -29,7 +29,7 @@ public class ActivationToken {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public ActivationToken(UUID token, User user, LocalDateTime expirationDate) {
+    public ActivationToken(UUID token, User user, Instant expirationDate) {
         this.token = token;
         this.user = user;
         this.expirationDate = expirationDate;
