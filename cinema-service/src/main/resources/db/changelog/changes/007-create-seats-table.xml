@@ -7,7 +7,7 @@
 
     <changeSet id="006-create-seats-table" author="Damian G">
         <createTable tableName="seats">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 

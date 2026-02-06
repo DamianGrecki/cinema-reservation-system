@@ -42,7 +42,7 @@ public class ScreeningService {
     public Screening getById(UUID id) {
         Optional<Screening> screeningOptional = screeningRepository.findById(id);
         if (screeningOptional.isEmpty()) {
-            throw new ResourceNotFoundException(SCREENING_NOT_FOUND_MSG);
+            throw new ResourceNotFoundException(String.format(SCREENING_NOT_FOUND_MSG, id));
         }
         return screeningOptional.get();
     }

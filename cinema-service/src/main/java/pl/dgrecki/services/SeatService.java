@@ -19,7 +19,7 @@ public class SeatService {
     public Seat getById(UUID id) {
         Optional<Seat> seatOptional = seatRepository.findById(id);
         if (seatOptional.isEmpty()) {
-            throw new ResourceNotFoundException(SEAT_NOT_FOUND_MSG);
+            throw new ResourceNotFoundException(String.format(SEAT_NOT_FOUND_MSG, id));
         }
         return seatOptional.get();
     }
