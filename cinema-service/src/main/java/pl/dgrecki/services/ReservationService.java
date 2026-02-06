@@ -37,6 +37,7 @@ public class ReservationService {
         Screening screening = screeningService.getById(request.getScreeningId());
         Seat seat = seatService.getById(request.getSeatId());
 
+        validateShowStartTime(screening);
         validateSeatAndScreening(screening, seat);
         validateReservationUniqueness(screening, seat);
 
@@ -74,6 +75,12 @@ public class ReservationService {
     private void validateSeatAndScreening(Screening screening, Seat seat) {
         if (!screening.getCinemaHall().equals(seat.getHallRow().getCinemaHall())) {
             throw new ReservationProcessException(SEAT_DOES_NOT_BELONG_TO_HALL_MSG);
+        }
+    }
+
+    private void validateShowStartTime(Screening screening) {
+        if (clock.instant().isAfter(screening.getStartTime().plus(Duration.ofMinutes(30)))) {
+            throw new ReservationProcessException(SHOW_HAS_ALREADY_STARTED_MSG);
         }
     }
 }

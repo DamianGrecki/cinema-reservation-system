@@ -11,32 +11,16 @@
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="1"/>
             <column name="movie_version_id" value="aaaa1111-1111-1111-1111-aaaaaaaa1111"/>
-            <column name="start_time" valueDate="2026-02-02 10:00:00"/>
-            <column name="end_time" valueDate="2026-02-02 12:30:00"/>
+            <column name="start_time" valueComputed="now()"/>
+            <column name="end_time" valueComputed="now() + interval '2 hours'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="2"/>
             <column name="movie_version_id" value="bbbb2222-2222-2222-2222-bbbbbbbb2222"/>
-            <column name="start_time" valueDate="2026-02-02 11:00:00"/>
-            <column name="end_time" valueDate="2026-02-02 13:00:00"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="1"/>
-            <column name="movie_version_id" value="cccc1111-1111-1111-1111-cccccccc1111"/>
-            <column name="start_time" valueDate="2026-02-02 14:00:00"/>
-            <column name="end_time" valueDate="2026-02-02 16:45:00"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="dddd1111-1111-1111-1111-dddddddd1111"/>
-            <column name="start_time" valueDate="2026-02-02 15:00:00"/>
-            <column name="end_time" valueDate="2026-02-02 17:45:00"/>
+            <column name="start_time" valueComputed="now()"/>
+            <column name="end_time" valueComputed="now() + interval '2 hours'"/>
         </insert>
 
     </changeSet>
