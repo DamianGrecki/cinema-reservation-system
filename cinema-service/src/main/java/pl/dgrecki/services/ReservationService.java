@@ -40,7 +40,7 @@ public class ReservationService {
         validateSeatAndScreening(screening, seat);
         validateReservationUniqueness(screening, seat);
 
-        Instant now = Instant.now(clock);
+        Instant now = clock.instant();
         Reservation reservation = Reservation.builder()
                 .screening(screening)
                 .seat(seat)
@@ -55,7 +55,8 @@ public class ReservationService {
 
     @Transactional
     public int setExpireStatusOnOverdueReservations(int limit) {
-        List<Reservation> reservations = reservationRepository.claimOverdueReservations(CREATED.name(), limit);
+        List<Reservation> reservations =
+                reservationRepository.claimOverdueReservations(CREATED.name(), clock.instant(), limit);
         if (!reservations.isEmpty()) {
             List<UUID> ids = reservations.stream().map(Reservation::getId).toList();
             return reservationRepository.setReservationsStatus(ids, EXPIRED);

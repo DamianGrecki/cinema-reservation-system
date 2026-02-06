@@ -66,7 +66,7 @@
                 ]]>
             </column>
             <column name="is_active" valueBoolean="true"/>
-            <column name="created_at" valueDate="NOW()"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()"/>
         </insert>
 
     </changeSet>

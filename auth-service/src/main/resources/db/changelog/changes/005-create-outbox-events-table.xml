@@ -39,11 +39,11 @@
                 <constraints nullable="true"/>
             </column>
 
-            <column name="created_at" type="TIMESTAMP" defaultValueComputed="now()">
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="sent_at" type="TIMESTAMP"/>
+            <column name="sent_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
 
         <createIndex indexName="idx_outbox_status_event_type_created_at" tableName="outbox_events">
