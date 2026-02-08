@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ReservationRequest {
+public class AddReservationRequest {
     private final UUID screeningId;
     private final UUID seatId;
 }

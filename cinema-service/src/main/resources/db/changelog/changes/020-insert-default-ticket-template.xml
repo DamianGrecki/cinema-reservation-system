@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="020-insert-default-ticket-template" author="Damian G">
+
+        <insert tableName="ticket_templates">
+            <column name="template_name" value="ticket_v1"/>
+            <column name="template_html">
+                <![CDATA[
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .ticket {
+            border: 3px solid #444;
+            border-radius: 10px;
+            width: 450px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .info {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .info span {
+            font-weight: bold;
+        }
+
+        .section {
+            border-top: 1px dashed #ccc;
+            margin: 10px 0;
+            padding-top: 10px;
+        }
+
+        .qrcode {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .qrcode img {
+            max-width: 150px;
+        }
+
+        .footer {
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="ticket">
+    <div class="title" th:text="${ticket.movieTitle}">Movie Title</div>
+    <div class="subtitle" th:text="${ticket.movieFormat} + ' | ' + ${ticket.movieLanguage}"></div>
+
+    <div class="section">
+        <div class="info">Data i godzina: <span th:text="${#temporals.format(ticket.screeningStart, 'dd.MM.yyyy HH:mm')}"></span></div>
+        <div class="info">Kino: <span th:text="${ticket.cinemaName}"></span></div>
+        <div class="info">Miasto: <span th:text="${ticket.city}"></span></div>
+        <div class="info">Sala: <span th:text="${ticket.hall}"></span></div>
+        <div class="info">Rząd: <span th:text="${ticket.row}"></span>, Miejsce: <span th:text="${ticket.seat}"></span></div>
+        <div class="info">Cena: <span th:text="${ticket.price} + ' zł'"></span></div>
+        <div class="info">Numer biletu: <span th:text="${ticket.ticketNumber}"></span></div>
+    </div>
+
+    <div class="qrcode">
+        <img th:src="${ticket.qrCodeUrl}" alt="Kod QR"/>
+    </div>
+
+    <div class="footer">
+        Prosimy o przybycie 15 minut przed seansem. Bilet jest ważny tylko w dniu seansu.
+    </div>
+</div>
+</body>
+</html>
+                ]]>
+            </column>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="created_at" valueDate="now()"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

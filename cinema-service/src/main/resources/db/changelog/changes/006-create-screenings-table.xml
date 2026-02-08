@@ -7,7 +7,7 @@
 
     <changeSet id="005-create-screenings-table" author="Damian G">
         <createTable tableName="screenings">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 

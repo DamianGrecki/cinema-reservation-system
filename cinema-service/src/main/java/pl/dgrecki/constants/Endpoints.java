@@ -7,4 +7,5 @@ public class Endpoints {
     public static final String MOVIES_ENDPOINT = "/api/movies";
     public static final String SCREENINGS_ENDPOINT = "/api/screenings";
     public static final String RESERVATION_ENDPOINT = "/api/reservation";
+    public static final String TICKET_ENDPOINT = "/api/ticket";
 }

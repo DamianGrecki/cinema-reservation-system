@@ -7,7 +7,7 @@
 
     <changeSet id="004-create-hall-rows-table" author="Damian G">
         <createTable tableName="hall_rows">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 

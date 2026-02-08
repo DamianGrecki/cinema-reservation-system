@@ -6,7 +6,7 @@ import java.util.UUID;
 import lombok.*;
 import pl.dgrecki.models.enums.ReservationStatus;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -25,9 +25,6 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seat_id", nullable = false, foreignKey = @ForeignKey(name = "fk_reservations_seat"))
     private Seat seat;
-
-    @Column(nullable = false)
-    private Integer priceInCents;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

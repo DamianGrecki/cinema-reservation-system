@@ -7,7 +7,7 @@
 
     <changeSet id="007-create-reservations-table" author="Damian G">
         <createTable tableName="reservations">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
@@ -21,10 +21,6 @@
                 <constraints nullable="false"
                              foreignKeyName="fk_reservations_seat"
                              references="seats(id)"/>
-            </column>
-
-            <column name="price_in_cents" type="INT">
-                <constraints nullable="false"/>
             </column>
 
             <column name="status" type="VARCHAR(20)">

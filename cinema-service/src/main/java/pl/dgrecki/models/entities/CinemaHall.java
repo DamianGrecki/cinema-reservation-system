@@ -22,6 +22,10 @@ public class CinemaHall {
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "cinema_id", nullable = false, foreignKey = @ForeignKey(name = "fk_cinema_halls_cinema"))
+    private Cinema cinema;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "cinema_hall_supported_formats", joinColumns = @JoinColumn(name = "cinema_hall_id"))
     @Enumerated(EnumType.STRING)

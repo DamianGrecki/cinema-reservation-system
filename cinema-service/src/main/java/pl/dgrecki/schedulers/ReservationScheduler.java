@@ -1,7 +1,9 @@
 package pl.dgrecki.schedulers;
 
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import pl.dgrecki.services.ReservationService;
@@ -11,20 +13,25 @@ import pl.dgrecki.services.ReservationService;
 @RequiredArgsConstructor
 public class ReservationScheduler {
 
-    private static final int UPDATE_LIMIT = 100;
+    @Value("${scheduler.reservation.update.limit}")
+    private int updateLimit;
+
+    @Value("${scheduler.reservation.delete.limit}")
+    private int deleteLimit;
+
+    @Value("${scheduler.reservation.delete.older-than-days}")
+    private int olderThanDays;
 
     private final ReservationService reservationService;
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelayString = "${scheduler.reservation.update.delay-ms}")
     public void expireOverdueReservations() {
-        int allUpdatedRows = 0;
-        int updated;
-        do {
-            updated = reservationService.setExpireStatusOnOverdueReservations(UPDATE_LIMIT);
-            allUpdatedRows = allUpdatedRows + updated;
-        } while (updated != 0);
-        if (allUpdatedRows > 0) {
-            log.info("Expired {} reservations", allUpdatedRows);
-        }
+        reservationService.setExpireStatusOnOverdueReservations(updateLimit);
+    }
+
+    @Scheduled(fixedDelayString = "${scheduler.reservation.delete.delay-ms}")
+    public void deleteExpiredReservations() {
+        Duration expiredOlderThan = Duration.ofDays(olderThanDays);
+        reservationService.deleteExpiredReservationsOlderThan(expiredOlderThan, deleteLimit);
     }
 }

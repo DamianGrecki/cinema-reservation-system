@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,9 +34,27 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     @Modifying(clearAutomatically = true)
     @Query(value = """
     UPDATE Reservation r
-        SET r.status = :status
-        WHERE r.id IN :ids
+    SET r.status = :status
+    WHERE r.id IN :ids
         AND r.status != :status
 """)
     int setReservationsStatus(@Param("ids") List<UUID> ids, @Param("status") ReservationStatus status);
+
+    @Query("""
+    SELECT r.id
+    FROM Reservation r
+    WHERE r.expiresAt < :expiresAt
+      AND r.status = :status
+    ORDER BY r.expiresAt ASC
+""")
+    Page<UUID> findReservationsIdsByStatusAndOlderThanExpireAt(
+            @Param("status") ReservationStatus status, @Param("expiresAt") Instant expiresAt, Pageable pageable);
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = """
+    DELETE Reservation r
+    WHERE r.id IN :ids
+        AND r.status = :status
+""")
+    int deleteReservationsByIdAndStatus(@Param("ids") List<UUID> ids, @Param("status") ReservationStatus status);
 }

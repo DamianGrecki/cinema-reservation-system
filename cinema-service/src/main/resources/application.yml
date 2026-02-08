@@ -35,3 +35,13 @@ management:
   endpoint:
     health:
       show-details: always
+
+scheduler:
+  reservation:
+    update:
+      limit: 100
+      delay-ms: 60000
+    delete:
+      older-than-days: 1
+      limit: 100
+      delay-ms: 60000

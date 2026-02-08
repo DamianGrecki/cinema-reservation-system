@@ -7,18 +7,22 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ReservationProcessException;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
+import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.entities.Screening;
 import pl.dgrecki.models.entities.Seat;
-import pl.dgrecki.models.requests.ReservationRequest;
-import pl.dgrecki.models.responses.SuccessResponse;
+import pl.dgrecki.models.requests.AddReservationRequest;
+import pl.dgrecki.models.responses.ReservationResponse;
 import pl.dgrecki.repositories.ReservationRepository;
 
 @Slf4j
@@ -33,7 +37,8 @@ public class ReservationService {
     private final SeatService seatService;
     private final Clock clock;
 
-    public SuccessResponse addReservation(ReservationRequest request) {
+    @Transactional
+    public ReservationResponse addReservation(AddReservationRequest request) {
         Screening screening = screeningService.getById(request.getScreeningId());
         Seat seat = seatService.getById(request.getSeatId());
 
@@ -45,24 +50,43 @@ public class ReservationService {
         Reservation reservation = Reservation.builder()
                 .screening(screening)
                 .seat(seat)
-                .priceInCents(0)
                 .status(CREATED)
                 .expiresAt(now.plus(RESERVATION_DURATION))
                 .createdAt(now)
                 .build();
-        reservationRepository.save(reservation);
-        return new SuccessResponse();
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return new ReservationResponse(savedReservation.getId());
     }
 
     @Transactional
-    public int setExpireStatusOnOverdueReservations(int limit) {
+    public void setExpireStatusOnOverdueReservations(int limit) {
         List<Reservation> reservations =
                 reservationRepository.claimOverdueReservations(CREATED.name(), clock.instant(), limit);
         if (!reservations.isEmpty()) {
             List<UUID> ids = reservations.stream().map(Reservation::getId).toList();
-            return reservationRepository.setReservationsStatus(ids, EXPIRED);
+            int updatedCount = reservationRepository.setReservationsStatus(ids, EXPIRED);
+            log.info("Expired {} reservations", updatedCount);
         }
-        return 0;
+    }
+
+    @Transactional
+    public void deleteExpiredReservationsOlderThan(Duration expiredDuration, int limit) {
+        Instant expireOlderThanDate = clock.instant().minus(expiredDuration);
+        Page<UUID> page = reservationRepository.findReservationsIdsByStatusAndOlderThanExpireAt(
+                EXPIRED, expireOlderThanDate, Pageable.ofSize(limit));
+        if (!page.isEmpty()) {
+            List<UUID> ids = page.getContent();
+            int deletedCount = reservationRepository.deleteReservationsByIdAndStatus(ids, EXPIRED);
+            log.info("Deleted {} expired reservations", deletedCount);
+        }
+    }
+
+    public Reservation getReservationById(UUID id) {
+        Optional<Reservation> reservationOptional = reservationRepository.findById(id);
+        if (reservationOptional.isEmpty()) {
+            throw new ResourceNotFoundException(String.format(RESERVATION_NOT_FOUND_MSG, id));
+        }
+        return reservationOptional.get();
     }
 
     private void validateReservationUniqueness(Screening screening, Seat seat) {

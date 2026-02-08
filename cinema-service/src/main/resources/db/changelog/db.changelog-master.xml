@@ -23,4 +23,6 @@
     <include file="/db/changelog/changes/016-insert-screenigns.xml"/>
     <include file="/db/changelog/changes/017-create-cinema-hall-supported-formats-table.xml"/>
     <include file="/db/changelog/changes/018-insert-cinema-hall-supported-formats.xml"/>
+    <include file="/db/changelog/changes/019-create-ticket-templates-table.xml"/>
+    <include file="/db/changelog/changes/020-insert-default-ticket-template.xml"/>
 </databaseChangeLog>
