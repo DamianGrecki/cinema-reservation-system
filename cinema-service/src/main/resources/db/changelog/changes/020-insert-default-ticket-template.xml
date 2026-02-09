@@ -96,7 +96,7 @@
     </div>
 
     <div class="qrcode">
-        <img th:src="${ticket.qrCodeUrl}" alt="Kod QR"/>
+        <img th:src="'data:image/png;base64,' + ${ticket.qrCodeBase64}" alt="Kod QR"/>
     </div>
 
     <div class="footer">
@@ -107,6 +107,8 @@
 </html>
                 ]]>
             </column>
+            <column name="qr_width" value="250"/>
+            <column name="qr_height" value="250"/>
             <column name="is_active" valueBoolean="true"/>
             <column name="created_at" valueDate="now()"/>
         </insert>

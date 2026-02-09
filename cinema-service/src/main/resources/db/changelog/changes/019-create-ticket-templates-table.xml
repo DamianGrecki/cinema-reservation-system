@@ -21,6 +21,14 @@
                 <constraints nullable="false"/>
             </column>
 
+            <column name="qr_width" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="qr_height" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
                 <constraints nullable="false"/>
             </column>

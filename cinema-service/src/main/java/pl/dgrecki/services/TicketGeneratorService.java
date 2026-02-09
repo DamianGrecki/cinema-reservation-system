@@ -2,6 +2,7 @@ package pl.dgrecki.services;
 
 import static pl.dgrecki.constants.ExceptionMessages.TICKET_NOT_FOUND_MSG;
 import static pl.dgrecki.utils.PdfGenerator.generatePdf;
+import static pl.dgrecki.utils.QrCodeGenerator.generateBase64QrCode;
 
 import java.time.Clock;
 import java.util.UUID;
@@ -43,15 +44,21 @@ public class TicketGeneratorService {
         Ticket ticket = ticketRepository
                 .findDataForTicketPdf(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(TICKET_NOT_FOUND_MSG, ticketId)));
-        String html = generateHtml(ticket);
+        String html = buildTicketHtml(ticket);
         generatePdf(html, String.format("%s_ticket.pdf", ticketId));
     }
 
-    private String generateHtml(Ticket ticket) {
-        TicketPdf ticketPdf = ticketPdfMapper.map(ticket, clock.getZone());
+    private String buildTicketHtml(Ticket ticket) {
+        TicketTemplate ticketTemplate = ticketTemplateService.getActiveTemplate();
+
+        String qrCodeInBase64 = generateBase64QrCode(
+                ticket.getId().toString(), ticketTemplate.getQrWidth(), ticketTemplate.getQrHeight());
+
+        TicketPdf ticketPdf = ticketPdfMapper.map(ticket, qrCodeInBase64, clock.getZone());
+
         Context context = new Context();
         context.setVariable("ticket", ticketPdf);
-        TicketTemplate ticketTemplate = ticketTemplateService.getActiveTemplate();
+
         return templateEngine.process(ticketTemplate.getTemplateHtml(), context);
     }
 

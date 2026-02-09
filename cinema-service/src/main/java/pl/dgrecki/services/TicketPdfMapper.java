@@ -9,7 +9,7 @@ import pl.dgrecki.models.entities.*;
 @Component
 public class TicketPdfMapper {
 
-    public TicketPdf map(Ticket ticket, ZoneId zoneId) {
+    public TicketPdf map(Ticket ticket, String qrCodeBase64, ZoneId zoneId) {
         Reservation reservation = ticket.getReservation();
         Screening screening = reservation.getScreening();
         MovieVersion movieVersion = screening.getMovieVersion();
@@ -29,6 +29,6 @@ public class TicketPdfMapper {
                 seat.getSeatNumber(),
                 ticket.getPrice(),
                 ticket.getId(),
-                "#"); // TODO Add qr code
+                qrCodeBase64);
     }
 }

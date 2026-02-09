@@ -26,6 +26,12 @@ public class TicketTemplate {
     private String templateHtml;
 
     @Column(nullable = false)
+    private int qrWidth;
+
+    @Column(nullable = false)
+    private int qrHeight;
+
+    @Column(nullable = false)
     private boolean isActive;
 
     @Column(nullable = false)
