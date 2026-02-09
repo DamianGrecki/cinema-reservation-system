@@ -16,4 +16,4 @@ public record TicketPdf(
         int seat,
         BigDecimal price,
         UUID ticketNumber,
-        String qrCodeUrl) {}
+        String qrCodeBase64) {}
