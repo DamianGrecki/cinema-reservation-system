@@ -15,6 +15,7 @@ import pl.dgrecki.models.enums.ReservationStatus;
 import pl.dgrecki.models.requests.CreateTicketRequest;
 import pl.dgrecki.models.responses.SuccessResponse;
 import pl.dgrecki.repositories.TicketRepository;
+import pl.dgrecki.services.prices.PriceService;
 
 @Slf4j
 @Service
