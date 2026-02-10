@@ -24,17 +24,19 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final TicketGeneratorService ticketGeneratorService;
     private final ReservationService reservationService;
+    private final PriceService priceService;
     private final Clock clock;
 
     @Transactional
     public SuccessResponse createTicket(CreateTicketRequest request) {
         Reservation reservation = reservationService.getReservationById(request.getReservationId());
+        BigDecimal price = priceService.calculatePrice(reservation, request.getTicketType());
 
         validateTicketUniqueness(reservation);
         validateReservationStatus(reservation);
 
         Ticket ticket = Ticket.builder()
-                .price(BigDecimal.ONE)
+                .price(price)
                 .reservation(reservation)
                 .createdAt(clock.instant())
                 .build();
