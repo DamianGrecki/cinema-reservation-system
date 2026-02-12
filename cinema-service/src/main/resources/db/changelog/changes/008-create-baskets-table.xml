@@ -5,24 +5,22 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="003-create-cinemas-table" author="Damian G">
-        <createTable tableName="cinemas">
-            <column name="id" type="BIGSERIAL">
+    <changeSet id="008-create-baskets-table" author="Damian G">
+        <createTable tableName="baskets">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="name" type="VARCHAR(100)">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="city" type="VARCHAR(100)">
+            <column name="expires_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
 
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
+
         </createTable>
+
     </changeSet>
 
 </databaseChangeLog>

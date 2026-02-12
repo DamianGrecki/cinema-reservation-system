@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="017-create-cinema-hall-supported-formats" author="Damian G">
+    <changeSet id="018-create-cinema-hall-supported-formats" author="Damian G">
 
         <createTable tableName="cinema_hall_supported_formats">
             <column name="cinema_hall_id" type="BIGINT">

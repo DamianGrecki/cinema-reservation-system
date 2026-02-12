@@ -2,6 +2,7 @@ package pl.dgrecki.controllers;
 
 import static pl.dgrecki.constants.Endpoints.TICKET_ENDPOINT;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping
-    public ResponseEntity<SuccessResponse> createTicket(@RequestBody CreateTicketRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.createTicket(request));
+    public ResponseEntity<SuccessResponse> createTicket(@RequestBody List<CreateTicketRequest> request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ticketService.createTickets(request));
     }
 }

@@ -1,4 +1,4 @@
-package pl.dgrecki.models.requests;
+package pl.dgrecki.models.responses;
 
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -6,8 +6,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AddReservationRequest {
+public class BasketResponse {
     private final UUID basketId;
-    private final UUID screeningId;
-    private final UUID seatId;
 }

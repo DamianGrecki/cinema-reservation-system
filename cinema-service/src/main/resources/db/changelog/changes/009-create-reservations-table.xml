@@ -5,10 +5,16 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="007-create-reservations-table" author="Damian G">
+    <changeSet id="009-create-reservations-table" author="Damian G">
         <createTable tableName="reservations">
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="basket_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_reservations_basket"
+                             references="baskets(id)"/>
             </column>
 
             <column name="screening_id" type="UUID">
@@ -24,10 +30,6 @@
             </column>
 
             <column name="status" type="VARCHAR(20)">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="expires_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>
 

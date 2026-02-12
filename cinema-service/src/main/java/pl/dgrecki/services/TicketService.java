@@ -4,6 +4,7 @@ import static pl.dgrecki.constants.ExceptionMessages.*;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,12 @@ public class TicketService {
     private final Clock clock;
 
     @Transactional
-    public SuccessResponse createTicket(CreateTicketRequest request) {
+    public SuccessResponse createTickets(List<CreateTicketRequest> requests) {
+        requests.forEach(this::createTicket);
+        return new SuccessResponse();
+    }
+
+    private void createTicket(CreateTicketRequest request) {
         Reservation reservation = reservationService.getReservationById(request.getReservationId());
         BigDecimal price = priceService.calculatePrice(reservation, request.getTicketType());
 
@@ -44,8 +50,7 @@ public class TicketService {
 
         ticketRepository.save(ticket);
         reservation.setStatus(ReservationStatus.PAID);
-        ticketGeneratorService.createTicketPdf(ticket.getId());
-        return new SuccessResponse();
+        ticketGeneratorService.createTicketPdf(ticket.getId()); // TODO Add retry
     }
 
     private void validateReservationStatus(Reservation reservation) {
