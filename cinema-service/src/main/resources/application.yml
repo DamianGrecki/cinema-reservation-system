@@ -45,3 +45,9 @@ scheduler:
       older-than-days: 1
       limit: 100
       delay-ms: 60000
+  basket:
+    delete:
+      older-than-days: 1
+      limit: 100
+      delay-ms: 60000
+

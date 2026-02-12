@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -22,14 +21,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     @Query(value = """
     SELECT *
     FROM reservations
-    WHERE status = :createdStatus
-        AND expires_at < :now
-    ORDER BY expires_at
+    WHERE basket_id IN :basketIds
+        AND status = :createdStatus
+    ORDER BY created_at
     FOR UPDATE SKIP LOCKED
-    LIMIT :limit
 """, nativeQuery = true)
-    List<Reservation> claimOverdueReservations(
-            @Param("createdStatus") String createdStatus, @Param("now") Instant now, @Param("limit") int limit);
+    List<Reservation> claimReservationsByBasketIds(
+            @Param("basketIds") List<UUID> basketIds, @Param("createdStatus") String createdStatus);
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
@@ -43,12 +41,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     @Query("""
     SELECT r.id
     FROM Reservation r
-    WHERE r.expiresAt < :expiresAt
+    WHERE r.basket.id IN :basketsIds
       AND r.status = :status
-    ORDER BY r.expiresAt ASC
 """)
-    Page<UUID> findReservationsIdsByStatusAndOlderThanExpireAt(
-            @Param("status") ReservationStatus status, @Param("expiresAt") Instant expiresAt, Pageable pageable);
+    List<UUID> findReservationsIdsByBasketIdsAndStatus(
+            @Param("basketsIds") List<UUID> basketIds, @Param("status") ReservationStatus status);
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
@@ -57,4 +54,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         AND r.status = :status
 """)
     int deleteReservationsByIdAndStatus(@Param("ids") List<UUID> ids, @Param("status") ReservationStatus status);
+
+    @Query("""
+        SELECT b.id
+        FROM Basket b
+        LEFT JOIN Reservation r ON r.basket = b
+        WHERE r.id IS NULL
+            AND b.expiresAt < :instant
+        ORDER BY b.expiresAt ASC
+    """)
+    List<UUID> findExpiredBasketsIdsWithoutReservations(@Param("instant") Instant instant, Pageable pageable);
 }

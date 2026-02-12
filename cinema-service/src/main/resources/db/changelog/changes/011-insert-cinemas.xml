@@ -5,13 +5,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="012-insert-seats" author="Damian G">
-        <sql>
-            INSERT INTO seats(id, hall_row_id, seat_number, seat_type)
-            SELECT gen_random_uuid(), hr.id, s.seat_number, 'STANDARD'
-            FROM hall_rows hr,
-                 generate_series(1, hr.seats_count) AS s(seat_number);
-        </sql>
+    <changeSet id="011-insert-cinemas" author="Damian G">
+        <insert tableName="cinemas">
+            <column name="id" valueNumeric="1"/>
+            <column name="name" value="Cinema 1"/>
+            <column name="city" value="Łódź"/>
+            <column name="created_at" valueDate="now()"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>

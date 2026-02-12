@@ -11,13 +11,12 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ReservationProcessException;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
+import pl.dgrecki.models.entities.Basket;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.entities.Screening;
 import pl.dgrecki.models.entities.Seat;
@@ -30,15 +29,17 @@ import pl.dgrecki.repositories.ReservationRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private static final Duration RESERVATION_DURATION = Duration.ofMinutes(15);
-
     private final ReservationRepository reservationRepository;
+    private final BasketService basketService;
     private final ScreeningService screeningService;
     private final SeatService seatService;
     private final Clock clock;
 
     @Transactional
     public ReservationResponse addReservation(AddReservationRequest request) {
+        Basket basket = basketService.getById(request.getBasketId());
+        validateBasket(basket);
+
         Screening screening = screeningService.getById(request.getScreeningId());
         Seat seat = seatService.getById(request.getSeatId());
 
@@ -48,10 +49,10 @@ public class ReservationService {
 
         Instant now = clock.instant();
         Reservation reservation = Reservation.builder()
+                .basket(basket)
                 .screening(screening)
                 .seat(seat)
                 .status(CREATED)
-                .expiresAt(now.plus(RESERVATION_DURATION))
                 .createdAt(now)
                 .build();
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -60,23 +61,23 @@ public class ReservationService {
 
     @Transactional
     public void setExpireStatusOnOverdueReservations(int limit) {
-        List<Reservation> reservations =
-                reservationRepository.claimOverdueReservations(CREATED.name(), clock.instant(), limit);
-        if (!reservations.isEmpty()) {
-            List<UUID> ids = reservations.stream().map(Reservation::getId).toList();
-            int updatedCount = reservationRepository.setReservationsStatus(ids, EXPIRED);
-            log.info("Expired {} reservations", updatedCount);
+        List<UUID> basketsIds = basketService.getExpiredBasketsIds(limit);
+        if (!basketsIds.isEmpty()) {
+            List<Reservation> reservations =
+                    reservationRepository.claimReservationsByBasketIds(basketsIds, CREATED.name());
+            if (!reservations.isEmpty()) {
+                List<UUID> ids = reservations.stream().map(Reservation::getId).toList();
+                int updatedCount = reservationRepository.setReservationsStatus(ids, EXPIRED);
+                log.info("Expired {} reservations", updatedCount);
+            }
         }
     }
 
     @Transactional
-    public void deleteExpiredReservationsOlderThan(Duration expiredDuration, int limit) {
-        Instant expireOlderThanDate = clock.instant().minus(expiredDuration);
-        Page<UUID> page = reservationRepository.findReservationsIdsByStatusAndOlderThanExpireAt(
-                EXPIRED, expireOlderThanDate, Pageable.ofSize(limit));
-        if (!page.isEmpty()) {
-            List<UUID> ids = page.getContent();
-            int deletedCount = reservationRepository.deleteReservationsByIdAndStatus(ids, EXPIRED);
+    public void deleteExpiredReservationsByBasketsIds(List<UUID> basketsIds) {
+        List<UUID> reservationsIds = reservationRepository.findReservationsIdsByBasketIdsAndStatus(basketsIds, EXPIRED);
+        if (!reservationsIds.isEmpty()) {
+            int deletedCount = reservationRepository.deleteReservationsByIdAndStatus(reservationsIds, EXPIRED);
             log.info("Deleted {} expired reservations", deletedCount);
         }
     }
@@ -87,6 +88,12 @@ public class ReservationService {
             throw new ResourceNotFoundException(String.format(RESERVATION_NOT_FOUND_MSG, id));
         }
         return reservationOptional.get();
+    }
+
+    private void validateBasket(Basket basket) {
+        if (clock.instant().isAfter(basket.getExpiresAt())) {
+            throw new ReservationProcessException(BASKET_EXPIRED_MSG);
+        }
     }
 
     private void validateReservationUniqueness(Screening screening, Seat seat) {

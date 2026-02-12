@@ -19,6 +19,10 @@ public class Reservation {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "basket_id", nullable = false, foreignKey = @ForeignKey(name = "fk_reservations_basket"))
+    private Basket basket;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "screening_id", nullable = false, foreignKey = @ForeignKey(name = "fk_reservations_screening"))
     private Screening screening;
 
@@ -29,9 +33,6 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus status;
-
-    @Column(nullable = false)
-    private Instant expiresAt;
 
     @Column(nullable = false)
     private Instant createdAt;

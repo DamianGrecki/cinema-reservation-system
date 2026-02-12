@@ -7,5 +7,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ReservationResponse {
-    private final UUID reservationId;
+    private final UUID basketId;
 }
