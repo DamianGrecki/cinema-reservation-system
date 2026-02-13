@@ -3,15 +3,12 @@ package pl.dgrecki.models.entities;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import pl.dgrecki.models.enums.AudioLanguage;
 import pl.dgrecki.models.enums.MovieFormat;
 import pl.dgrecki.models.enums.PresentationType;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

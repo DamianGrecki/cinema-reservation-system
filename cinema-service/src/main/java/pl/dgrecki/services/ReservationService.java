@@ -55,8 +55,8 @@ public class ReservationService {
                 .status(CREATED)
                 .createdAt(now)
                 .build();
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return new ReservationResponse(savedReservation.getId());
+        reservationRepository.save(reservation);
+        return new ReservationResponse(basket.getId());
     }
 
     @Transactional
