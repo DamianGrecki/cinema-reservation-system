@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

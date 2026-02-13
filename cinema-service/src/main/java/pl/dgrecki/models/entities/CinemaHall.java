@@ -7,7 +7,7 @@ import java.util.Set;
 import lombok.*;
 import pl.dgrecki.models.enums.MovieFormat;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

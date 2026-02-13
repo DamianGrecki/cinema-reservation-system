@@ -5,7 +5,7 @@ import java.util.UUID;
 import lombok.*;
 import pl.dgrecki.models.enums.SeatType;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
