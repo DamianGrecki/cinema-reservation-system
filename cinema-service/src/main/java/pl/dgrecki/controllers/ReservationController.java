@@ -2,6 +2,7 @@ package pl.dgrecki.controllers;
 
 import static pl.dgrecki.constants.Endpoints.RESERVATION_ENDPOINT;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@RequestBody AddReservationRequest request) {
+    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody AddReservationRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.addReservation(request));
     }
 }
