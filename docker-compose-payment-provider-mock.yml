@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  payment-mock:
+    build: ./mocks/payment/provider
+    container_name: payment-provider-mock-server
+    ports:
+      - "1080:1080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
