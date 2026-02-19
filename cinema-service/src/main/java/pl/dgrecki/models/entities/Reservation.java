@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
+import pl.dgrecki.models.enums.PricingType;
 import pl.dgrecki.models.enums.ReservationStatus;
 
 @Data
@@ -34,7 +35,14 @@ public class Reservation {
     @Column(nullable = false)
     private ReservationStatus status;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private PricingType pricingType;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "order_id", foreignKey = @ForeignKey(name = "fk_reservations_order"))
+    private Order order;
+
     private Instant createdAt;
 
     @Version

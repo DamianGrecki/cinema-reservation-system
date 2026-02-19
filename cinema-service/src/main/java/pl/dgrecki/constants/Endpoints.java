@@ -9,4 +9,5 @@ public class Endpoints {
     public static final String BASKET_ENDPOINT = "/api/basket";
     public static final String RESERVATION_ENDPOINT = "/api/reservation";
     public static final String TICKET_ENDPOINT = "/api/ticket";
+    public static final String PAYMENT_ENDPOINT = "/api/payment";
 }

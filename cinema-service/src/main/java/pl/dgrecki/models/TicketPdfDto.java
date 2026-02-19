@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record TicketPdf(
+public record TicketPdfDto(
         String movieTitle,
         String movieFormat,
         String movieLanguage,

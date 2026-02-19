@@ -1,12 +1,11 @@
 package pl.dgrecki.models.requests;
 
-import java.util.UUID;
+import static pl.dgrecki.constants.ExceptionMessages.*;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import static pl.dgrecki.constants.ExceptionMessages.*;
 
 @Getter
 @AllArgsConstructor

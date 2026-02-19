@@ -1,6 +1,6 @@
 package pl.dgrecki.models.enums;
 
-public enum TicketType {
+public enum PricingType {
     NORMAL,
     REDUCED;
 }

@@ -1,5 +1,7 @@
 package pl.dgrecki.config;
 
+import static pl.dgrecki.constants.Webhooks.PAYMENT_PROVIDER_WEBHOOK;
+
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +30,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(
                         ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint).accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(PAYMENT_PROVIDER_WEBHOOK)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

@@ -29,6 +29,12 @@ public class ExceptionsHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(PaymentProcessException.class)
+    public ResponseEntity<ErrorResponse> orderProcessError(PaymentProcessException ex) {
+        log.warn("Order process exception occurred", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(TicketCreatingException.class)
     public ResponseEntity<ErrorResponse> ticketCreatingError(TicketCreatingException ex) {
         log.warn("Ticket creating exception occurred", ex);

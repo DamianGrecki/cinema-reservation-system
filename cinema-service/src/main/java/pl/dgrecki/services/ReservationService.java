@@ -1,6 +1,7 @@
 package pl.dgrecki.services;
 
 import static pl.dgrecki.constants.ExceptionMessages.*;
+import static pl.dgrecki.models.enums.PricingType.NORMAL;
 import static pl.dgrecki.models.enums.ReservationStatus.*;
 
 import java.time.Clock;
@@ -20,8 +21,11 @@ import pl.dgrecki.models.entities.Basket;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.entities.Screening;
 import pl.dgrecki.models.entities.Seat;
+import pl.dgrecki.models.enums.ReservationStatus;
 import pl.dgrecki.models.requests.AddReservationRequest;
+import pl.dgrecki.models.requests.UpdateReservationPricingTypeRequest;
 import pl.dgrecki.models.responses.ReservationResponse;
+import pl.dgrecki.models.responses.SuccessResponse;
 import pl.dgrecki.repositories.ReservationRepository;
 
 @Slf4j
@@ -53,10 +57,19 @@ public class ReservationService {
                 .screening(screening)
                 .seat(seat)
                 .status(CREATED)
+                .pricingType(NORMAL)
                 .createdAt(now)
                 .build();
-        reservationRepository.save(reservation);
-        return new ReservationResponse(basket.getId());
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return new ReservationResponse(basket.getId(), savedReservation.getId());
+    }
+
+    @Transactional
+    public SuccessResponse updateReservationPricingType(
+            UUID reservationId, UpdateReservationPricingTypeRequest request) {
+        Reservation reservation = getReservationById(reservationId);
+        reservation.setPricingType(request.pricingType());
+        return new SuccessResponse();
     }
 
     @Transactional
@@ -82,6 +95,12 @@ public class ReservationService {
         }
     }
 
+    @Transactional
+    public List<Reservation> claimReservationsByStatusAndBasketId(UUID basketId, ReservationStatus status) {
+        return reservationRepository.claimReservationsByBasketIds(List.of(basketId), status.name());
+    }
+
+    @Transactional
     public Reservation getReservationById(UUID id) {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
         if (reservationOptional.isEmpty()) {
@@ -98,7 +117,7 @@ public class ReservationService {
 
     private void validateReservationUniqueness(Screening screening, Seat seat) {
         if (reservationRepository.existsByScreeningIdAndSeatIdAndStatusIn(
-                screening.getId(), seat.getId(), List.of(CREATED, PAID))) {
+                screening.getId(), seat.getId(), List.of(CREATED, PENDING_PAYMENT, PAID))) {
             throw new ResourceAlreadyExistsException(RESERVATION_ALREADY_EXISTS_MSG);
         }
     }

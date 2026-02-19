@@ -5,31 +5,37 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="010-create-tickets-table" author="Damian G">
-        <createTable tableName="tickets">
-            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+    <changeSet id="023-create-price-modifiers-table" author="Damian G">
+
+        <createTable tableName="price_modifiers">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="reservation_id" type="UUID">
-                <constraints nullable="false"
-                             foreignKeyName="fk_tickets_reservation"
-                             references="reservations(id)"/>
+            <column name="modifier_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
             </column>
 
-            <column name="price" type="NUMERIC(10,2)">
+            <column name="subject_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="amount" type="DECIMAL(10,2)">
                 <constraints nullable="false"/>
             </column>
 
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
+
         </createTable>
 
         <addUniqueConstraint
-                tableName="tickets"
-                columnNames="reservation_id"
-                constraintName="uq_ticket_reservation"/>
+                tableName="price_modifiers"
+                columnNames="modifier_type, subject_type"
+                constraintName="uk_price_modifiers_type_subject"/>
+
     </changeSet>
 
 </databaseChangeLog>

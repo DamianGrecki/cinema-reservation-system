@@ -3,13 +3,13 @@ package pl.dgrecki.services;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import org.springframework.stereotype.Component;
-import pl.dgrecki.models.TicketPdf;
+import pl.dgrecki.models.TicketPdfDto;
 import pl.dgrecki.models.entities.*;
 
 @Component
 public class TicketPdfMapper {
 
-    public TicketPdf map(Ticket ticket, String qrCodeBase64, ZoneId zoneId) {
+    public TicketPdfDto map(Ticket ticket, String qrCodeBase64, ZoneId zoneId) {
         Reservation reservation = ticket.getReservation();
         Screening screening = reservation.getScreening();
         MovieVersion movieVersion = screening.getMovieVersion();
@@ -17,7 +17,7 @@ public class TicketPdfMapper {
         Cinema cinema = cinemaHall.getCinema();
         Seat seat = reservation.getSeat();
 
-        return new TicketPdf(
+        return new TicketPdfDto(
                 movieVersion.getMovie().getTitle(),
                 movieVersion.getMovieFormat().toString(),
                 movieVersion.getAudioLanguage().toString(),
