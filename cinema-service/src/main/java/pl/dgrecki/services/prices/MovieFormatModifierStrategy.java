@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import pl.dgrecki.models.entities.PriceModifier;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.enums.PriceModifierType;
-import pl.dgrecki.models.enums.TicketType;
 
 @Component
 public class MovieFormatModifierStrategy implements PriceModifierStrategy {
@@ -15,7 +14,7 @@ public class MovieFormatModifierStrategy implements PriceModifierStrategy {
     }
 
     @Override
-    public boolean matches(PriceModifier modifier, Reservation reservation, TicketType ticketType) {
+    public boolean matches(PriceModifier modifier, Reservation reservation) {
         return modifier.getSubjectType()
                 .equals(reservation
                         .getScreening()

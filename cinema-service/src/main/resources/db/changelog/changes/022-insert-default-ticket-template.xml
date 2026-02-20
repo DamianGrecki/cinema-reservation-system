@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="020-insert-default-ticket-template" author="Damian G">
+    <changeSet id="022-insert-default-ticket-template" author="Damian G">
 
         <insert tableName="ticket_templates">
             <column name="template_name" value="ticket_v1"/>

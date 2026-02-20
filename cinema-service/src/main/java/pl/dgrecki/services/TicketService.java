@@ -37,7 +37,7 @@ public class TicketService {
 
     private void createTicket(CreateTicketRequest request) {
         Reservation reservation = reservationService.getReservationById(request.getReservationId());
-        BigDecimal price = priceService.calculatePrice(reservation, request.getTicketType());
+        BigDecimal price = priceService.calculate(reservation);
 
         validateTicketUniqueness(reservation);
         validateReservationStatus(reservation);

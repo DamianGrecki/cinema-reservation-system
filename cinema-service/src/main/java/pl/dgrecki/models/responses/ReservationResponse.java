@@ -8,4 +8,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ReservationResponse {
     private final UUID basketId;
+    private final UUID reservationId;
 }

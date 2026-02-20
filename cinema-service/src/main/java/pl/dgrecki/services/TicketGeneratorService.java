@@ -13,7 +13,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
-import pl.dgrecki.models.TicketPdf;
+import pl.dgrecki.models.TicketPdfDto;
 import pl.dgrecki.models.entities.*;
 import pl.dgrecki.repositories.TicketRepository;
 
@@ -54,7 +54,7 @@ public class TicketGeneratorService {
         String qrCodeInBase64 = generateBase64QrCode(
                 ticket.getId().toString(), ticketTemplate.getQrWidth(), ticketTemplate.getQrHeight());
 
-        TicketPdf ticketPdf = ticketPdfMapper.map(ticket, qrCodeInBase64, clock.getZone());
+        TicketPdfDto ticketPdf = ticketPdfMapper.map(ticket, qrCodeInBase64, clock.getZone());
 
         Context context = new Context();
         context.setVariable("ticket", ticketPdf);

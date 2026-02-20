@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="022-insert-default-price-modifiers" author="Damian G">
+    <changeSet id="024-insert-default-price-modifiers" author="Damian G">
 
         <insert tableName="price_modifiers">
             <column name="modifier_type" value="SEAT"/>
