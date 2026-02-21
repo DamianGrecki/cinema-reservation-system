@@ -3,11 +3,11 @@ package pl.dgrecki.repositories;
 import java.util.UUID;
 
 public interface RowWithSeatAndStatus {
-    Integer getRowNumber();
+    int getRowNumber();
 
-    Integer getSeatNumber();
+    int getSeatNumber();
 
     UUID getSeatId();
 
-    Boolean getReserved();
+    boolean getReserved();
 }
