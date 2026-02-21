@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     @Bean
     @SneakyThrows
-    @Order(2)
+    @Order(3)
     public SecurityFilterChain apiChain(HttpSecurity http) {
         http.securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -37,6 +37,15 @@ public class SecurityConfig {
                                 .anyRequest()
                                 .authenticated())
                 .authenticationProvider(daoAuthenticationProvider());
+        return http.build();
+    }
+
+    @Bean
+    @Order(4)
+    @SneakyThrows
+    public SecurityFilterChain defaultChain(HttpSecurity http) {
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
         return http.build();
     }
 

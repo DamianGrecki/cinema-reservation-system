@@ -1,5 +1,6 @@
 package pl.dgrecki.config;
 
+import static pl.dgrecki.constants.Endpoints.*;
 import static pl.dgrecki.constants.Webhooks.PAYMENT_PROVIDER_WEBHOOK;
 
 import lombok.RequiredArgsConstructor;
@@ -24,17 +25,33 @@ public class SecurityConfig {
 
     @Bean
     @SneakyThrows
-    @Order(2)
+    @Order(3)
     public SecurityFilterChain apiChain(HttpSecurity http) {
         return http.securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(
                         ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint).accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(PAYMENT_PROVIDER_WEBHOOK)
+                .authorizeHttpRequests(auth -> auth.requestMatchers(MOVIES_ENDPOINT,
+                                SCREENINGS_ENDPOINT,
+                                SCREENINGS_SEATS_ENDPOINT,
+                                BASKET_ENDPOINT,
+                                RESERVATION_ENDPOINT,
+                                TICKET_ENDPOINT,
+                                PAYMENT_ENDPOINT,
+                                PAYMENT_PROVIDER_WEBHOOK)
                         .permitAll()
                         .anyRequest()
                         .authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    @Order(4)
+    @SneakyThrows
+    public SecurityFilterChain defaultChain(HttpSecurity http) {
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
+        return http.build();
     }
 }

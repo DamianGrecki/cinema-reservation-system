@@ -19,7 +19,6 @@ public class MovieController {
     private final MovieService movieService;
 
     @GetMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<MovieListResponse> getMovies() {
         return ResponseEntity.ok(movieService.getMoviesList());
     }
