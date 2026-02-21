@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.dgrecki.models.requests.AddReservationRequest;
+import pl.dgrecki.models.requests.PatchReservationPricingTypeRequest;
 import pl.dgrecki.models.requests.ReservationsCancelRequest;
-import pl.dgrecki.models.requests.UpdateReservationPricingTypeRequest;
 import pl.dgrecki.models.responses.ReservationResponse;
 import pl.dgrecki.models.responses.SuccessResponse;
 import pl.dgrecki.services.ReservationService;
@@ -34,8 +34,8 @@ public class ReservationController {
     }
 
     @PatchMapping(RESERVATION_PRICING_TYPE_ENDPOINT)
-    public ResponseEntity<SuccessResponse> updateReservationPricingType(
-            @PathVariable UUID id, @Valid @RequestBody UpdateReservationPricingTypeRequest request) {
+    public ResponseEntity<SuccessResponse> patchReservationPricingType(
+            @PathVariable UUID id, @Valid @RequestBody PatchReservationPricingTypeRequest request) {
         return ResponseEntity.status(HttpStatus.OK).body(reservationService.updateReservationPricingType(id, request));
     }
 }
