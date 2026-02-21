@@ -1,7 +1,10 @@
 package pl.dgrecki.controllers;
 
 import static pl.dgrecki.constants.Endpoints.SCREENINGS_ENDPOINT;
+import static pl.dgrecki.constants.Endpoints.SCREENINGS_SEATS_ENDPOINT;
 
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,24 +16,21 @@ import pl.dgrecki.models.responses.screening.ScreeningListResponse;
 import pl.dgrecki.services.ScreeningService;
 import pl.dgrecki.services.SeatService;
 
-import java.util.List;
-import java.util.UUID;
-
 @RestController
-@RequestMapping(SCREENINGS_ENDPOINT)
+@RequestMapping
 @RequiredArgsConstructor
 public class ScreeningController {
 
     private final ScreeningService screeningService;
     private final SeatService seatService;
 
-    @GetMapping
+    @GetMapping(SCREENINGS_ENDPOINT)
     public ResponseEntity<ScreeningListResponse> getScreenings() {
         return ResponseEntity.ok(screeningService.getScreeningsList());
     }
 
-    @GetMapping("/{screeningId}/seats")
+    @GetMapping(SCREENINGS_SEATS_ENDPOINT)
     public ResponseEntity<List<RowSeatsMapResponse>> getRowSeatsMap(@PathVariable UUID screeningId) {
-        return ResponseEntity.ok(seatService.getRowSeatsMapByScreeningId(screeningId));
+        return ResponseEntity.ok(seatService.getRowsSeatsMapByScreeningId(screeningId));
     }
 }

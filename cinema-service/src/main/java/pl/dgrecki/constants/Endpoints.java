@@ -4,11 +4,14 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Endpoints {
-    public static final String MOVIES_ENDPOINT = "/api/movies";
-    public static final String SCREENINGS_ENDPOINT = "/api/screenings";
-    public static final String SCREENINGS_SEATS_ENDPOINT = "/api/screenings/*/seats";
-    public static final String BASKET_ENDPOINT = "/api/basket";
-    public static final String RESERVATION_ENDPOINT = "/api/reservation";
-    public static final String TICKET_ENDPOINT = "/api/ticket";
-    public static final String PAYMENT_ENDPOINT = "/api/payment";
+
+    public static final String API = "/api";
+
+    public static final String MOVIES_ENDPOINT = API + "/movies";
+    public static final String SCREENINGS_ENDPOINT = API + "/screenings";
+    public static final String SCREENINGS_SEATS_ENDPOINT = SCREENINGS_ENDPOINT + "/{screeningId}/seats";
+    public static final String BASKET_ENDPOINT = API + "/basket";
+    public static final String RESERVATION_ENDPOINT = API + "/reservation";
+    public static final String TICKET_ENDPOINT = API + "/ticket";
+    public static final String PAYMENT_ENDPOINT = API + "/payment";
 }

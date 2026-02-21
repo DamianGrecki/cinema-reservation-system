@@ -2,18 +2,16 @@ package pl.dgrecki.services;
 
 import static pl.dgrecki.constants.ExceptionMessages.SEAT_NOT_FOUND_MSG;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
-import pl.dgrecki.models.entities.CinemaHall;
-import pl.dgrecki.models.entities.HallRow;
-import pl.dgrecki.models.entities.Screening;
+import pl.dgrecki.models.SeatStatusDto;
 import pl.dgrecki.models.entities.Seat;
+import pl.dgrecki.models.enums.ReservationStatus;
 import pl.dgrecki.models.responses.RowSeatsMapResponse;
+import pl.dgrecki.repositories.RowWithSeatAndStatus;
 import pl.dgrecki.repositories.SeatRepository;
 
 @Service
@@ -21,8 +19,6 @@ import pl.dgrecki.repositories.SeatRepository;
 public class SeatService {
 
     private final SeatRepository seatRepository;
-    private final ScreeningService screeningService;
-    private final HallRowService hallRowService;
 
     public Seat getById(UUID id) {
         Optional<Seat> seatOptional = seatRepository.findById(id);
@@ -32,15 +28,20 @@ public class SeatService {
         return seatOptional.get();
     }
 
-    public List<RowSeatsMapResponse> getRowSeatsMapByScreeningId(UUID screeningId) {
-            Screening screening = screeningService.getById(screeningId);
-            CinemaHall cinemaHall = screening.getCinemaHall();
-            List<HallRow> hallRows = hallRowService.getRowsByCinemaHallId(cinemaHall);
-            List<RowSeatsMapResponse> response = new ArrayList<>();
-            for(HallRow row : hallRows){
-                List<UUID> seatsIds = seatRepository.findIdsByHallRow(row);
-                response.add(new RowSeatsMapResponse(row.getRowNumber(), seatsIds));
-            }
-            return response;
+    public List<RowSeatsMapResponse> getRowsSeatsMapByScreeningId(UUID screeningId) {
+        List<RowWithSeatAndStatus> seats =
+                seatRepository.findSeatsWithRowAndStatuses(screeningId, ReservationStatus.EXPIRED);
+
+        Map<Integer, List<SeatStatusDto>> grouped = seats.stream()
+                .collect(Collectors.groupingBy(
+                        RowWithSeatAndStatus::getRowNumber,
+                        LinkedHashMap::new,
+                        Collectors.mapping(
+                                e -> new SeatStatusDto(e.getSeatNumber(), e.getSeatId(), e.getReserved()),
+                                Collectors.toList())));
+
+        return grouped.entrySet().stream()
+                .map(e -> new RowSeatsMapResponse(e.getKey(), e.getValue()))
+                .toList();
     }
 }

@@ -1,8 +1,6 @@
 package pl.dgrecki.models.responses;
 
 import java.util.List;
-import java.util.UUID;
+import pl.dgrecki.models.SeatStatusDto;
 
-public record RowSeatsMapResponse(
-        int rowNumber,
-        List<UUID> seatsIds) {}
+public record RowSeatsMapResponse(int rowNumber, List<SeatStatusDto> seats) {}
