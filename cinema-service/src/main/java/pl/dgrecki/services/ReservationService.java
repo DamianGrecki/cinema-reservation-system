@@ -73,6 +73,28 @@ public class ReservationService {
     }
 
     @Transactional
+    public SuccessResponse cancelReservations(List<UUID> reservationsIds) {
+        List<Reservation> reservations = reservationRepository.findAllById(reservationsIds);
+
+        if (reservations.isEmpty()) {
+            throw new ReservationProcessException(String.format(RESERVATIONS_NOT_FOUND_MSG));
+        }
+
+        List<UUID> invalidReservationsIds = reservations.stream()
+                .filter(r -> !r.getStatus().canTransitionTo(CANCELED))
+                .map(Reservation::getId)
+                .toList();
+
+        if (!invalidReservationsIds.isEmpty()) {
+            throw new ReservationProcessException(
+                    String.format(RESERVATIONS_CANCEL_FAILED_MSG, invalidReservationsIds));
+        }
+
+        reservations.forEach(r -> r.setStatus(CANCELED));
+        return new SuccessResponse();
+    }
+
+    @Transactional
     public void setExpireStatusOnOverdueReservations(int limit) {
         List<UUID> basketsIds = basketService.getExpiredBasketsIds(limit);
         if (!basketsIds.isEmpty()) {
@@ -100,7 +122,6 @@ public class ReservationService {
         return reservationRepository.claimReservationsByBasketIds(List.of(basketId), status.name());
     }
 
-    @Transactional
     public Reservation getReservationById(UUID id) {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
         if (reservationOptional.isEmpty()) {

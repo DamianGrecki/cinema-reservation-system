@@ -1,5 +1,6 @@
 package pl.dgrecki.repositories;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,17 +14,17 @@ import pl.dgrecki.models.enums.ReservationStatus;
 public interface SeatRepository extends JpaRepository<Seat, UUID> {
 
     @Query("""
-    SELECT s.hallRow.rowNumber as rowNumber,
-           s.seatNumber as seatNumber,
-           s.id as seatId,
-           CASE WHEN res.id IS NOT NULL THEN true ELSE false END as reserved
+    SELECT s.hallRow.rowNumber AS rowNumber,
+           s.seatNumber AS seatNumber,
+           s.id AS seatId,
+           CASE WHEN res.id IS NOT NULL THEN true ELSE false END AS reserved
     FROM Seat s
     JOIN s.hallRow r
     JOIN r.cinemaHall ch
     LEFT JOIN Reservation res
         ON res.seat = s
        AND res.screening.id = :screeningId
-       AND res.status != :expiredStatus
+       AND res.status IN (:reservedStatuses)
     WHERE ch.id = (
         SELECT sc.cinemaHall.id
         FROM Screening sc
@@ -32,5 +33,5 @@ public interface SeatRepository extends JpaRepository<Seat, UUID> {
     ORDER BY r.rowNumber, s.seatNumber
 """)
     List<RowWithSeatAndStatus> findSeatsWithRowAndStatuses(
-            UUID screeningId, @Param("expiredStatus") ReservationStatus expiredStatus);
+            UUID screeningId, @Param("reservedStatuses") Collection<ReservationStatus> reservedStatuses);
 }
