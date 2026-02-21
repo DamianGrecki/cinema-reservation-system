@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 BASKET_ENDPOINT,
                                 RESERVATION_ENDPOINT,
                                 RESERVATIONS_CANCEL_ENDPOINT,
+                                RESERVATION_PRICING_TYPE_ENDPOINT,
                                 TICKET_ENDPOINT,
                                 PAYMENT_ENDPOINT,
                                 PAYMENT_PROVIDER_WEBHOOK)
