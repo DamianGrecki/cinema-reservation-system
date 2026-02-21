@@ -20,7 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @RequiredArgsConstructor
-public class PrometheusSecurityConfig {
+public class CommonSecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
 
@@ -36,6 +36,16 @@ public class PrometheusSecurityConfig {
                 .authenticationManager(prometheusAuthenticationManager())
                 .httpBasic(Customizer.withDefaults())
                 .build();
+    }
+
+    @Bean
+    @SneakyThrows
+    @Order(2)
+    public SecurityFilterChain swaggerChain(HttpSecurity http) {
+        http.securityMatcher("/swagger-ui/**", "/v3/api-docs/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        return http.build();
     }
 
     @Bean
