@@ -23,7 +23,7 @@ import pl.dgrecki.models.entities.Screening;
 import pl.dgrecki.models.entities.Seat;
 import pl.dgrecki.models.enums.ReservationStatus;
 import pl.dgrecki.models.requests.AddReservationRequest;
-import pl.dgrecki.models.requests.UpdateReservationPricingTypeRequest;
+import pl.dgrecki.models.requests.PatchReservationPricingTypeRequest;
 import pl.dgrecki.models.responses.ReservationResponse;
 import pl.dgrecki.models.responses.SuccessResponse;
 import pl.dgrecki.repositories.ReservationRepository;
@@ -66,7 +66,7 @@ public class ReservationService {
 
     @Transactional
     public SuccessResponse updateReservationPricingType(
-            UUID reservationId, UpdateReservationPricingTypeRequest request) {
+            UUID reservationId, PatchReservationPricingTypeRequest request) {
         Reservation reservation = getReservationById(reservationId);
         reservation.setPricingType(request.pricingType());
         return new SuccessResponse();
