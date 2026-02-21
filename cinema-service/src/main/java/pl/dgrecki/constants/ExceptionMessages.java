@@ -24,6 +24,7 @@ public class ExceptionMessages {
     public static final String RESERVATION_EXPIRED_MSG = "Reservation has expired";
     public static final String RESERVATION_PAID_MSG = "Reservation already paid";
     public static final String RESERVATION_ID_IS_REQUIRED_MSG = "ReservationId is required";
+    public static final String RESERVATIONS_CANCEL_FAILED_MSG = "Reservations %s cannot be canceled";
     public static final String TICKET_TYPE_IS_REQUIRED_MSG = "ticketType is required";
     public static final String CUSTOMER_DATA_REQUIRED_MSG = "customerId or guestEmail required";
     public static final String PROVIDER_IS_REQUIRED_MSG = "Provider required";
