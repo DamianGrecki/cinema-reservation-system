@@ -31,7 +31,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(
                         ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint).accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(MOVIES_ENDPOINT,
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                                MOVIES_ENDPOINT,
                                 SCREENINGS_ENDPOINT,
                                 SCREENINGS_SEATS_ENDPOINT,
                                 BASKET_ENDPOINT,

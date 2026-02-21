@@ -6,11 +6,31 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import pl.dgrecki.models.entities.HallRow;
 import pl.dgrecki.models.entities.Seat;
+import pl.dgrecki.models.enums.ReservationStatus;
 
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, UUID> {
-    @Query("SELECT s.id FROM Seat s WHERE s.hallRow = :hallRow")
-    List<UUID> findIdsByHallRow(@Param("hallRow") HallRow hallRow);
+
+    @Query("""
+    SELECT s.hallRow.rowNumber as rowNumber,
+           s.seatNumber as seatNumber,
+           s.id as seatId,
+           CASE WHEN res.id IS NOT NULL THEN true ELSE false END as reserved
+    FROM Seat s
+    JOIN s.hallRow r
+    JOIN r.cinemaHall ch
+    LEFT JOIN Reservation res
+        ON res.seat = s
+       AND res.screening.id = :screeningId
+       AND res.status != :expiredStatus
+    WHERE ch.id = (
+        SELECT sc.cinemaHall.id
+        FROM Screening sc
+        WHERE sc.id = :screeningId
+    )
+    ORDER BY r.rowNumber, s.seatNumber
+""")
+    List<RowWithSeatAndStatus> findSeatsWithRowAndStatuses(
+            UUID screeningId, @Param("expiredStatus") ReservationStatus expiredStatus);
 }
