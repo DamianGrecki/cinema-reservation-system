@@ -6,11 +6,11 @@ import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.enums.PriceModifierType;
 
 @Component
-public class TicketModifierStrategy implements PriceModifierStrategy {
+public class TicketPricingModifierStrategy implements PriceModifierStrategy {
 
     @Override
     public PriceModifierType supports() {
-        return PriceModifierType.TICKET_TYPE;
+        return PriceModifierType.PRICING_TYPE;
     }
 
     @Override
