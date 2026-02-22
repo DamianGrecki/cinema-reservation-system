@@ -20,9 +20,15 @@
         </insert>
 
         <insert tableName="price_modifiers">
-            <column name="modifier_type" value="TICKET_TYPE"/>
+            <column name="modifier_type" value="PRICING_TYPE"/>
             <column name="subject_type" value="NORMAL"/>
             <column name="amount" value="20.00"/>
+        </insert>
+
+        <insert tableName="price_modifiers">
+            <column name="modifier_type" value="PRICING_TYPE"/>
+            <column name="subject_type" value="REDUCED"/>
+            <column name="amount" value="15.00"/>
         </insert>
 
     </changeSet>
