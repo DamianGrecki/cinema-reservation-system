@@ -41,11 +41,11 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse addReservation(AddReservationRequest request) {
-        Basket basket = basketService.getById(request.getBasketId());
+        Basket basket = basketService.getById(request.basketId());
         validateBasket(basket);
 
-        Screening screening = screeningService.getById(request.getScreeningId());
-        Seat seat = seatService.getById(request.getSeatId());
+        Screening screening = screeningService.getById(request.screeningId());
+        Seat seat = seatService.getById(request.seatId());
 
         validateShowStartTime(screening);
         validateSeatAndScreening(screening, seat);
