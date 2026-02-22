@@ -55,7 +55,7 @@
         <sql>
             CREATE UNIQUE INDEX uq_reservation_per_seat_screening
                 ON reservations(screening_id, seat_id)
-                WHERE status IN ('CREATED', 'PAID');
+                WHERE status IN ('CREATED', 'PENDING_PAYMENT', 'PAID');
         </sql>
     </changeSet>
 
