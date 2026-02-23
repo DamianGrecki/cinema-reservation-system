@@ -7,6 +7,7 @@ import static pl.dgrecki.constants.ExceptionMessages.*;
 import static pl.dgrecki.models.enums.PaymentStatus.*;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import pl.dgrecki.models.external.SandboxPaymentResponse;
 import pl.dgrecki.models.requests.CreatePaymentRequest;
 import pl.dgrecki.services.OrderService;
 import pl.dgrecki.services.payments.PaymentAttemptService;
+import pl.dgrecki.services.payments.PaymentFailureService;
 import pl.dgrecki.services.payments.SandboxPaymentService;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +34,9 @@ class SandboxPaymentServiceUnitTests {
 
     @Mock
     private PaymentAttemptService paymentAttemptService;
+
+    @Mock
+    private PaymentFailureService paymentFailureService;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private WebClient sandboxPaymentProviderWebClient;
@@ -71,6 +76,28 @@ class SandboxPaymentServiceUnitTests {
         sandboxPaymentService.createPayment(request);
 
         verify(paymentAttemptService, times(1)).createAttempt(order, transactionId.toString(), PENDING, null);
+    }
+
+    @Test
+    void createPaymentWhenAttemptsLimitReachedShouldThrowTest() {
+        UUID customerId = UUID.randomUUID();
+        UUID basketId = UUID.randomUUID();
+
+        CreatePaymentRequest request = new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null);
+
+        Order existingOrder = Order.builder().id(UUID.randomUUID()).build();
+
+        when(orderService.findExistingOrderByBasketId(basketId)).thenReturn(Optional.of(existingOrder));
+        doThrow(new PaymentProcessException(PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG))
+                .when(paymentFailureService)
+                .failPaymentAfterRetryLimit(existingOrder, basketId);
+
+        PaymentProcessException ex =
+                assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
+
+        assertEquals(PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG, ex.getMessage());
+        verify(orderService, never()).prepareOrder(any(), any(), any(), any());
+        verify(paymentAttemptService, never()).createAttempt(any(), any(), any(), any());
     }
 
     @Test
@@ -114,8 +141,8 @@ class SandboxPaymentServiceUnitTests {
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_CANNOT_CREATE_PAYMENT_MSG, ex.getMessage());
-        verify(paymentAttemptService, times(1))
-                .createAttempt(eq(order), isNull(), eq(FAILED), eq(networkError.getMessage()));
+        verify(paymentFailureService, times(1))
+                .failPaymentAttempt(eq(order), isNull(), eq(basketId), eq(networkError.getMessage()));
     }
 
     @Test
@@ -145,7 +172,7 @@ class SandboxPaymentServiceUnitTests {
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_NO_RESPONSE_MSG, ex.getMessage());
-        verify(paymentAttemptService, times(1)).createAttempt(eq(order), isNull(), eq(FAILED), any());
+        verify(paymentFailureService, times(1)).failPaymentAttempt(eq(order), isNull(), eq(basketId), anyString());
     }
 
     @Test
@@ -179,7 +206,7 @@ class SandboxPaymentServiceUnitTests {
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_BAD_PAYMENT_STATUS_MSG, ex.getMessage());
-        verify(paymentAttemptService, times(1))
-                .createAttempt(eq(order), eq(transactionId.toString()), eq(FAILED), any());
+        verify(paymentFailureService, times(1))
+                .failPaymentAttempt(eq(order), eq(transactionId.toString()), eq(basketId), anyString());
     }
 }

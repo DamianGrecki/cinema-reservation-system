@@ -52,6 +52,7 @@ scheduler:
       delay-ms: 60000
 
 payment-provider:
+  attempts-limit: 3
   sandbox:
     host: http://localhost:1080
 

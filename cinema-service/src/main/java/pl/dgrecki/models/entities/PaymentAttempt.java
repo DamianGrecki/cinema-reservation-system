@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
+import pl.dgrecki.models.enums.PaymentProvider;
 import pl.dgrecki.models.enums.PaymentStatus;
 
 @Data
@@ -27,6 +28,10 @@ public class PaymentAttempt {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentProvider provider;
 
     private String providerError;
 

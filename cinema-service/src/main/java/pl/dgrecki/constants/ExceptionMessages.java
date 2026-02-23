@@ -26,7 +26,8 @@ public class ExceptionMessages {
     public static final String RESERVATION_ID_IS_REQUIRED_MSG = "ReservationId is required";
     public static final String RESERVATIONS_IDS_IS_REQUIRED_MSG = "reservationsIds is required";
     public static final String RESERVATIONS_IDS_CANNOT_BE_EMPTY_MSG = "reservationsIds cannot be empty";
-    public static final String RESERVATIONS_CANCEL_FAILED_MSG = "Reservations %s cannot be canceled";
+    public static final String RESERVATIONS_STATUS_TRANSITION_FAILED_MSG =
+            "Reservations %s cannot transition to status %s";
     public static final String PRICING_TYPE_IS_REQUIRED_MSG = "pricingType is required";
     public static final String CUSTOMER_DATA_REQUIRED_MSG = "customerId or guestEmail required";
     public static final String PROVIDER_IS_REQUIRED_MSG = "Provider required";
@@ -34,4 +35,7 @@ public class ExceptionMessages {
     public static final String PROVIDER_CANNOT_CREATE_PAYMENT_MSG = "Provider cannot create payment";
     public static final String PROVIDER_NO_RESPONSE_MSG = "No response from the provider";
     public static final String PROVIDER_BAD_PAYMENT_STATUS_MSG = "Bad payment status returned from provider";
+    public static final String PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG = "Payment failed, reached payment attempts limit";
+    public static final String PAYMENT_ATTEMPT_ALREADY_EXISTS_MSG =
+            "Payment failed, pending payment attempt already exists";
 }

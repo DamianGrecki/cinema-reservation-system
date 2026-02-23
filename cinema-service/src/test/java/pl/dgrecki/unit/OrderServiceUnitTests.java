@@ -4,13 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static pl.dgrecki.constants.ExceptionMessages.*;
-import static pl.dgrecki.models.enums.ReservationStatus.PENDING_PAYMENT;
+import static pl.dgrecki.models.enums.ReservationStatus.PAYMENT_PENDING;
 
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,6 @@ import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.enums.Currency;
 import pl.dgrecki.models.enums.PaymentProvider;
-import pl.dgrecki.models.enums.ReservationStatus;
 import pl.dgrecki.repositories.OrderRepository;
 import pl.dgrecki.services.BasketService;
 import pl.dgrecki.services.OrderService;
@@ -78,7 +78,7 @@ class OrderServiceUnitTests {
                 .build();
 
         when(clock.instant()).thenReturn(FIXED_NOW);
-        when(reservationService.claimReservationsByStatusAndBasketId(basketId, ReservationStatus.CREATED))
+        when(reservationService.claimReservationsByStatusesAndBasketId(eq(basketId), anySet()))
                 .thenReturn(List.of(reservation));
         when(basketService.getById(basketId)).thenReturn(basket);
         when(priceService.calculateReservationsTotalPrice(anyList())).thenReturn(amount);
@@ -87,7 +87,7 @@ class OrderServiceUnitTests {
         Order result = orderService.prepareOrder(customerId, null, basketId, provider);
 
         assertEquals(orderId, result.getId());
-        assertEquals(PENDING_PAYMENT, reservation.getStatus());
+        assertEquals(PAYMENT_PENDING, reservation.getStatus());
         assertEquals(savedOrder, reservation.getOrder());
 
         ArgumentCaptor<Order> captor = ArgumentCaptor.forClass(Order.class);
@@ -105,7 +105,7 @@ class OrderServiceUnitTests {
     void prepareOrderWhenNoReservationsShouldThrowTest() {
         UUID basketId = UUID.randomUUID();
 
-        when(reservationService.claimReservationsByStatusAndBasketId(basketId, ReservationStatus.CREATED))
+        when(reservationService.claimReservationsByStatusesAndBasketId(eq(basketId), anySet()))
                 .thenReturn(List.of());
 
         PaymentProcessException ex = assertThrows(
@@ -114,6 +114,32 @@ class OrderServiceUnitTests {
 
         assertEquals(RESERVATIONS_NOT_FOUND_MSG, ex.getMessage());
         verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void findExistingOrderByBasketIdWhenExistsShouldReturnOrderTest() {
+        UUID basketId = UUID.randomUUID();
+        Order order = Order.builder().id(UUID.randomUUID()).build();
+
+        when(orderRepository.findByBasketId(basketId)).thenReturn(Optional.of(order));
+
+        Optional<Order> result = orderService.findExistingOrderByBasketId(basketId);
+
+        assertTrue(result.isPresent());
+        assertEquals(order, result.get());
+        verify(orderRepository, times(1)).findByBasketId(basketId);
+    }
+
+    @Test
+    void findExistingOrderByBasketIdWhenNotExistsShouldReturnEmptyTest() {
+        UUID basketId = UUID.randomUUID();
+
+        when(orderRepository.findByBasketId(basketId)).thenReturn(Optional.empty());
+
+        Optional<Order> result = orderService.findExistingOrderByBasketId(basketId);
+
+        assertTrue(result.isEmpty());
+        verify(orderRepository, times(1)).findByBasketId(basketId);
     }
 
     @Test
@@ -128,7 +154,7 @@ class OrderServiceUnitTests {
                 .build();
 
         when(clock.instant()).thenReturn(FIXED_NOW);
-        when(reservationService.claimReservationsByStatusAndBasketId(basketId, ReservationStatus.CREATED))
+        when(reservationService.claimReservationsByStatusesAndBasketId(eq(basketId), anySet()))
                 .thenReturn(List.of(reservation));
         when(basketService.getById(basketId)).thenReturn(basket);
 

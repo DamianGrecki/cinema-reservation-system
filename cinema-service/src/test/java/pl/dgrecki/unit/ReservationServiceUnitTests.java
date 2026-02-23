@@ -77,7 +77,7 @@ class ReservationServiceUnitTests {
         when(basketService.getById(basketId)).thenReturn(basket);
         when(screeningService.getById(screeningId)).thenReturn(screening);
         when(seatService.getById(seatId)).thenReturn(seat);
-        when(reservationRepository.existsByScreeningIdAndSeatIdAndStatusIn(any(), any(), anyList()))
+        when(reservationRepository.existsByScreeningIdAndSeatIdAndStatusIn(any(), any(), anySet()))
                 .thenReturn(false);
 
         Reservation reservation = Reservation.builder()
@@ -223,7 +223,7 @@ class ReservationServiceUnitTests {
         when(screeningService.getById(screeningId)).thenReturn(screening);
         when(seatService.getById(seatId)).thenReturn(seat);
 
-        when(reservationRepository.existsByScreeningIdAndSeatIdAndStatusIn(any(), any(), anyList()))
+        when(reservationRepository.existsByScreeningIdAndSeatIdAndStatusIn(any(), any(), anySet()))
                 .thenReturn(true);
 
         AddReservationRequest request = new AddReservationRequest(basketId, screeningId, seatId);
@@ -263,7 +263,7 @@ class ReservationServiceUnitTests {
 
         Reservation r2 = new Reservation();
         r2.setId(id2);
-        r2.setStatus(PENDING_PAYMENT);
+        r2.setStatus(PAYMENT_PENDING);
 
         when(reservationRepository.findAllById(ids)).thenReturn(List.of(r1, r2));
 
@@ -298,8 +298,36 @@ class ReservationServiceUnitTests {
         ReservationProcessException ex = assertThrows(
                 ReservationProcessException.class, () -> reservationService.cancelReservations(List.of(id)));
 
-        assertEquals(String.format(RESERVATIONS_CANCEL_FAILED_MSG, List.of(id)), ex.getMessage());
+        assertEquals(String.format(RESERVATIONS_STATUS_TRANSITION_FAILED_MSG, List.of(id), CANCELED), ex.getMessage());
         assertEquals(PAID, reservation.getStatus());
+    }
+
+    @Test
+    void setPaymentAttemptFailedForReservationsInBasketShouldUpdateStatusTest() {
+        UUID basketId = UUID.randomUUID();
+
+        Reservation reservation = new Reservation();
+        reservation.setId(UUID.randomUUID());
+        reservation.setStatus(PAYMENT_PENDING);
+
+        when(reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_PENDING))
+                .thenReturn(List.of(reservation));
+
+        reservationService.setPaymentAttemptFailedForReservationsInBasket(basketId);
+
+        assertEquals(PAYMENT_ATTEMPT_FAILED, reservation.getStatus());
+    }
+
+    @Test
+    void setPaymentAttemptFailedForReservationsInBasketWhenNoReservationsDoesNothingTest() {
+        UUID basketId = UUID.randomUUID();
+
+        when(reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_PENDING))
+                .thenReturn(List.of());
+
+        reservationService.setPaymentAttemptFailedForReservationsInBasket(basketId);
+
+        verify(reservationRepository, never()).save(any());
     }
 
     @Test
