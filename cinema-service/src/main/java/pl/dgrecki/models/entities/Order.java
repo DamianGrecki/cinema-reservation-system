@@ -6,7 +6,6 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
 import pl.dgrecki.models.enums.Currency;
-import pl.dgrecki.models.enums.OrderStatus;
 import pl.dgrecki.models.enums.PaymentProvider;
 
 @Entity
@@ -25,10 +24,6 @@ public class Order {
 
     private String guestEmail;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status;
-
     @Column(nullable = false)
     private BigDecimal price;
 
@@ -39,8 +34,6 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentProvider provider;
-
-    private String transactionId;
 
     @Column(nullable = false)
     private Instant createdAt;

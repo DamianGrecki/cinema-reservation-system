@@ -31,6 +31,7 @@ public class ExceptionMessages {
     public static final String CUSTOMER_DATA_REQUIRED_MSG = "customerId or guestEmail required";
     public static final String PROVIDER_IS_REQUIRED_MSG = "Provider required";
     public static final String PROVIDER_IS_UNKNOWN_MSG = "Unknown provider";
+    public static final String PROVIDER_CANNOT_CREATE_PAYMENT_MSG = "Provider cannot create payment";
     public static final String PROVIDER_NO_RESPONSE_MSG = "No response from the provider";
     public static final String PROVIDER_BAD_PAYMENT_STATUS_MSG = "Bad payment status returned from provider";
 }

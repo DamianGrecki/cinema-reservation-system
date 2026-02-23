@@ -3,11 +3,13 @@ package pl.dgrecki.unit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static pl.dgrecki.constants.ExceptionMessages.*;
 import static pl.dgrecki.models.enums.ReservationStatus.*;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -16,7 +18,9 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.dgrecki.exceptions.*;
 import pl.dgrecki.models.entities.*;
+import pl.dgrecki.models.enums.PricingType;
 import pl.dgrecki.models.requests.AddReservationRequest;
+import pl.dgrecki.models.requests.PatchReservationPricingTypeRequest;
 import pl.dgrecki.models.responses.ReservationResponse;
 import pl.dgrecki.repositories.ReservationRepository;
 import pl.dgrecki.services.*;
@@ -42,7 +46,7 @@ class ReservationServiceUnitTests {
     @InjectMocks
     private ReservationService reservationService;
 
-    private static final Instant FIXED_NOW = Instant.parse("2025-01-01T10:00:00Z");
+    private static final Instant FIXED_NOW = Instant.parse("2026-01-01T10:00:00Z");
 
     @Test
     void addReservationTest() {
@@ -116,8 +120,42 @@ class ReservationServiceUnitTests {
 
         AddReservationRequest request = new AddReservationRequest(basketId, UUID.randomUUID(), UUID.randomUUID());
 
-        assertThrows(ReservationProcessException.class, () -> reservationService.addReservation(request));
+        ReservationProcessException ex =
+                assertThrows(ReservationProcessException.class, () -> reservationService.addReservation(request));
 
+        assertEquals(BASKET_EXPIRED_MSG, ex.getMessage());
+        verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    @Test
+    void addReservationWhenShowAlreadyStartedShouldThrowTest() {
+        UUID basketId = UUID.randomUUID();
+        UUID screeningId = UUID.randomUUID();
+        UUID seatId = UUID.randomUUID();
+
+        Basket basket = Basket.builder()
+                .id(basketId)
+                .expiresAt(FIXED_NOW.plus(Duration.ofMinutes(10)))
+                .build();
+
+        Screening screening = Screening.builder()
+                .id(screeningId)
+                .startTime(FIXED_NOW.minus(Duration.ofMinutes(31)))
+                .cinemaHall(new CinemaHall())
+                .build();
+
+        when(clock.instant()).thenReturn(FIXED_NOW);
+        when(basketService.getById(basketId)).thenReturn(basket);
+        when(screeningService.getById(screeningId)).thenReturn(screening);
+        when(seatService.getById(seatId))
+                .thenReturn(Seat.builder().hallRow(new HallRow()).build());
+
+        AddReservationRequest request = new AddReservationRequest(basketId, screeningId, seatId);
+
+        ReservationProcessException ex =
+                assertThrows(ReservationProcessException.class, () -> reservationService.addReservation(request));
+
+        assertEquals(SHOW_HAS_ALREADY_STARTED_MSG, ex.getMessage());
         verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
@@ -152,8 +190,10 @@ class ReservationServiceUnitTests {
 
         AddReservationRequest request = new AddReservationRequest(basketId, screeningId, seatId);
 
-        assertThrows(ReservationProcessException.class, () -> reservationService.addReservation(request));
+        ReservationProcessException ex =
+                assertThrows(ReservationProcessException.class, () -> reservationService.addReservation(request));
 
+        assertEquals(SEAT_DOES_NOT_BELONG_TO_HALL_MSG, ex.getMessage());
         verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
@@ -188,9 +228,78 @@ class ReservationServiceUnitTests {
 
         AddReservationRequest request = new AddReservationRequest(basketId, screeningId, seatId);
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> reservationService.addReservation(request));
+        ResourceAlreadyExistsException ex =
+                assertThrows(ResourceAlreadyExistsException.class, () -> reservationService.addReservation(request));
 
+        assertEquals(RESERVATION_ALREADY_EXISTS_MSG, ex.getMessage());
         verify(reservationRepository, never()).save(any(Reservation.class));
+    }
+
+    @Test
+    void updateReservationPricingTypeTest() {
+        UUID reservationId = UUID.randomUUID();
+
+        Reservation reservation = new Reservation();
+        reservation.setId(reservationId);
+        reservation.setPricingType(PricingType.NORMAL);
+
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+        reservationService.updateReservationPricingType(
+                reservationId, new PatchReservationPricingTypeRequest(PricingType.REDUCED));
+
+        assertEquals(PricingType.REDUCED, reservation.getPricingType());
+    }
+
+    @Test
+    void cancelReservationsTest() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        List<UUID> ids = List.of(id1, id2);
+
+        Reservation r1 = new Reservation();
+        r1.setId(id1);
+        r1.setStatus(CREATED);
+
+        Reservation r2 = new Reservation();
+        r2.setId(id2);
+        r2.setStatus(PENDING_PAYMENT);
+
+        when(reservationRepository.findAllById(ids)).thenReturn(List.of(r1, r2));
+
+        reservationService.cancelReservations(ids);
+
+        assertEquals(CANCELED, r1.getStatus());
+        assertEquals(CANCELED, r2.getStatus());
+    }
+
+    @Test
+    void cancelReservationsWhenEmptyShouldThrowTest() {
+        List<UUID> ids = List.of(UUID.randomUUID());
+
+        when(reservationRepository.findAllById(ids)).thenReturn(List.of());
+
+        ReservationProcessException ex =
+                assertThrows(ReservationProcessException.class, () -> reservationService.cancelReservations(ids));
+
+        assertEquals(RESERVATIONS_NOT_FOUND_MSG, ex.getMessage());
+    }
+
+    @Test
+    void cancelReservationsWhenCannotTransitionShouldThrowTest() {
+        UUID id = UUID.randomUUID();
+
+        Reservation reservation = new Reservation();
+        reservation.setId(id);
+        reservation.setStatus(PAID);
+
+        when(reservationRepository.findAllById(List.of(id))).thenReturn(List.of(reservation));
+
+        ReservationProcessException ex = assertThrows(
+                ReservationProcessException.class, () -> reservationService.cancelReservations(List.of(id)));
+
+        assertEquals(String.format(RESERVATIONS_CANCEL_FAILED_MSG, List.of(id)), ex.getMessage());
+        assertEquals(PAID, reservation.getStatus());
     }
 
     @Test
@@ -214,8 +323,10 @@ class ReservationServiceUnitTests {
 
         when(reservationRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> reservationService.getReservationById(id));
+        ResourceNotFoundException ex =
+                assertThrows(ResourceNotFoundException.class, () -> reservationService.getReservationById(id));
 
+        assertEquals(String.format(RESERVATION_NOT_FOUND_MSG, id), ex.getMessage());
         verify(reservationRepository, times(1)).findById(id);
     }
 }

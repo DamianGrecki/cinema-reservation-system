@@ -5,36 +5,38 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="009-create-orders-table" author="Damian G">
+    <changeSet id="025-create-payment-attempts-table" author="Damian G">
 
-        <createTable tableName="orders">
+        <createTable tableName="payment_attempts">
 
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="customer_id" type="UUID">
+            <column name="order_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_payment_attempts_order"
+                             references="orders(id)"/>
+            </column>
+
+            <column name="transaction_id" type="VARCHAR(255)">
                 <constraints nullable="true"/>
             </column>
 
-            <column name="guest_email" type="VARCHAR(255)">
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="provider_error" type="TEXT">
                 <constraints nullable="true"/>
-            </column>
-
-            <column name="price" type="NUMERIC(10,2)">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="currency" type="VARCHAR(3)">
-                <constraints nullable="false"/>
-            </column>
-
-            <column name="provider" type="VARCHAR(50)">
-                <constraints nullable="false"/>
             </column>
 
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
                 <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="true"/>
             </column>
 
         </createTable>
