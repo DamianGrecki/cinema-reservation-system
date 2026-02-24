@@ -1,13 +1,18 @@
 package pl.dgrecki.repositories;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pl.dgrecki.models.entities.Reservation;
@@ -18,16 +23,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     boolean existsByScreeningIdAndSeatIdAndStatusIn(
             UUID screeningId, UUID seatId, Collection<ReservationStatus> statuses);
 
-    @Query(value = """
-    SELECT *
-    FROM reservations
-    WHERE basket_id IN :basketIds
-        AND status = :createdStatus
-    ORDER BY created_at
-    FOR UPDATE SKIP LOCKED
-""", nativeQuery = true)
-    List<Reservation> claimReservationsByBasketIds(
-            @Param("basketIds") List<UUID> basketIds, @Param("createdStatus") String createdStatus);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "-2"))
+    @Query("""
+    SELECT r
+    FROM Reservation r
+    WHERE r.basket.id IN :basketIds
+        AND r.status IN :statuses
+    ORDER BY r.createdAt
+""")
+    List<Reservation> claimReservationsByStatusesAndBasketIds(
+            @Param("basketIds") List<UUID> basketIds, @Param("statuses") Set<ReservationStatus> statuses);
 
     @Modifying(clearAutomatically = true)
     @Query(value = """
@@ -39,19 +45,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     int setReservationsStatus(@Param("ids") List<UUID> ids, @Param("status") ReservationStatus status);
 
     @Query("""
-    SELECT r.id
+    SELECT r
     FROM Reservation r
     WHERE r.basket.id IN :basketsIds
       AND r.status = :status
 """)
-    List<UUID> findReservationsIdsByBasketIdsAndStatus(
+    List<Reservation> findReservationsByBasketIdsAndStatus(
             @Param("basketsIds") List<UUID> basketIds, @Param("status") ReservationStatus status);
 
     @Modifying(clearAutomatically = true)
-    @Query(value = """
+    @Query("""
     DELETE Reservation r
     WHERE r.id IN :ids
         AND r.status = :status
+        AND r.order IS NULL
 """)
     int deleteReservationsByIdAndStatus(@Param("ids") List<UUID> ids, @Param("status") ReservationStatus status);
 

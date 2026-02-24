@@ -27,6 +27,10 @@
                 <constraints nullable="false"/>
             </column>
 
+            <column name="provider" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="provider_error" type="TEXT">
                 <constraints nullable="true"/>
             </column>

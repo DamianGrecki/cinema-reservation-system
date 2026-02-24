@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.SeatStatusDto;
 import pl.dgrecki.models.entities.Seat;
+import pl.dgrecki.models.enums.ReservationStatus;
 import pl.dgrecki.models.responses.RowSeatsMapResponse;
 import pl.dgrecki.repositories.RowWithSeatAndStatus;
 import pl.dgrecki.repositories.SeatRepository;
@@ -30,7 +31,7 @@ public class SeatService {
 
     public List<RowSeatsMapResponse> getRowsSeatsMapByScreeningId(UUID screeningId) {
         List<RowWithSeatAndStatus> seats =
-                seatRepository.findSeatsWithRowAndStatuses(screeningId, List.of(CREATED, PENDING_PAYMENT, PAID));
+                seatRepository.findSeatsWithRowAndStatuses(screeningId, ReservationStatus.getStatusesBlockingSeat());
 
         Map<Integer, List<SeatStatusDto>> grouped = seats.stream()
                 .collect(Collectors.groupingBy(

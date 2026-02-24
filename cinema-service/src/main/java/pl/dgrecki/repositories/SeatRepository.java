@@ -1,7 +1,7 @@
 package pl.dgrecki.repositories;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,5 +33,5 @@ public interface SeatRepository extends JpaRepository<Seat, UUID> {
     ORDER BY r.rowNumber, s.seatNumber
 """)
     List<RowWithSeatAndStatus> findSeatsWithRowAndStatuses(
-            UUID screeningId, @Param("reservedStatuses") Collection<ReservationStatus> reservedStatuses);
+            UUID screeningId, @Param("reservedStatuses") Set<ReservationStatus> reservedStatuses);
 }

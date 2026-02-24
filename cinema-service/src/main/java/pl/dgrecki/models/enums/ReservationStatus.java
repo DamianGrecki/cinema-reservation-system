@@ -1,10 +1,14 @@
 package pl.dgrecki.models.enums;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public enum ReservationStatus {
     CREATED,
-    PENDING_PAYMENT,
+    PAYMENT_PENDING,
+    PAYMENT_ATTEMPT_FAILED,
+    PAYMENT_FAILED,
     PAID,
     EXPIRED,
     CANCELED;
@@ -13,11 +17,22 @@ public enum ReservationStatus {
         return allowedTransitions().contains(target);
     }
 
+    public static Set<ReservationStatus> statusesThatCanTransitionTo(ReservationStatus finalStatus) {
+        return Arrays.stream(values())
+                .filter(s -> s.allowedTransitions().contains(finalStatus))
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public static Set<ReservationStatus> getStatusesBlockingSeat() {
+        return Set.of(CREATED, PAYMENT_PENDING, PAYMENT_ATTEMPT_FAILED, PAID);
+    }
+
     private Set<ReservationStatus> allowedTransitions() {
         return switch (this) {
-            case CREATED -> Set.of(PENDING_PAYMENT, CANCELED, EXPIRED);
-            case PENDING_PAYMENT -> Set.of(PAID, CANCELED);
-            case PAID, EXPIRED, CANCELED -> Set.of();
+            case CREATED -> Set.of(PAYMENT_PENDING, CANCELED, EXPIRED);
+            case PAYMENT_PENDING -> Set.of(PAYMENT_ATTEMPT_FAILED, PAID, CANCELED);
+            case PAYMENT_ATTEMPT_FAILED -> Set.of(PAYMENT_PENDING, PAYMENT_FAILED, EXPIRED);
+            case PAID, EXPIRED, CANCELED, PAYMENT_FAILED -> Set.of();
         };
     }
 }

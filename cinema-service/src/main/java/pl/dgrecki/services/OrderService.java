@@ -2,11 +2,13 @@ package pl.dgrecki.services;
 
 import static pl.dgrecki.constants.ExceptionMessages.*;
 import static pl.dgrecki.models.enums.Currency.PLN;
-import static pl.dgrecki.models.enums.ReservationStatus.PENDING_PAYMENT;
+import static pl.dgrecki.models.enums.ReservationStatus.*;
 
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,16 +35,26 @@ public class OrderService {
 
     @Transactional
     public Order prepareOrder(UUID customerId, String guestEmail, UUID basketId, PaymentProvider provider) {
-        List<Reservation> reservations = claimReservations(basketId);
-        reservations.forEach(r -> r.setStatus(PENDING_PAYMENT));
+        List<Reservation> reservations = claimReservationsForOrder(basketId);
+        reservations.forEach(r -> r.setStatus(PAYMENT_PENDING));
 
         validateBasket(basketId);
 
-        BigDecimal amount = priceService.calculateReservationsTotalPrice(reservations);
+        return resolveOrder(reservations, customerId, guestEmail, provider);
+    }
 
-        Order savedOrder = createOrder(customerId, guestEmail, amount, PLN, provider);
-        reservations.forEach(r -> r.setOrder(savedOrder));
-        return savedOrder;
+    private Order resolveOrder(
+            List<Reservation> reservations, UUID customerId, String guestEmail, PaymentProvider provider) {
+        return reservations.stream()
+                .map(Reservation::getOrder)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseGet(() -> {
+                    BigDecimal amount = priceService.calculateReservationsTotalPrice(reservations);
+                    Order newOrder = createOrder(customerId, guestEmail, amount, PLN, provider);
+                    reservations.forEach(r -> r.setOrder(newOrder));
+                    return newOrder;
+                });
     }
 
     private Order createOrder(
@@ -58,13 +70,17 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    private List<Reservation> claimReservations(UUID basketId) {
-        List<Reservation> reservations =
-                reservationService.claimReservationsByStatusAndBasketId(basketId, ReservationStatus.CREATED);
+    private List<Reservation> claimReservationsForOrder(UUID basketId) {
+        List<Reservation> reservations = reservationService.claimReservationsByStatusesAndBasketId(
+                basketId, ReservationStatus.statusesThatCanTransitionTo(PAYMENT_PENDING));
         if (reservations.isEmpty()) {
             throw new PaymentProcessException(RESERVATIONS_NOT_FOUND_MSG);
         }
         return reservations;
+    }
+
+    public Optional<Order> findExistingOrderByBasketId(UUID basketId) {
+        return orderRepository.findByBasketId(basketId);
     }
 
     private void validateBasket(UUID basketId) {

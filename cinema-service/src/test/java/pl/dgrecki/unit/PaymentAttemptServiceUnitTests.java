@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -25,8 +26,14 @@ class PaymentAttemptServiceUnitTests {
     @Mock
     private Clock clock;
 
-    @InjectMocks
+    private static final int ATTEMPTS_LIMIT = 3;
+
     private PaymentAttemptService paymentAttemptService;
+
+    @BeforeEach
+    void setUp() {
+        paymentAttemptService = new PaymentAttemptService(paymentAttemptRepository, clock, ATTEMPTS_LIMIT);
+    }
 
     private static final Instant FIXED_NOW = Instant.parse("2026-01-01T10:00:00Z");
 
@@ -67,5 +74,23 @@ class PaymentAttemptServiceUnitTests {
         assertNull(saved.getTransactionId());
         assertEquals(errorMessage, saved.getProviderError());
         assertEquals(FIXED_NOW, saved.getCreatedAt());
+    }
+
+    @Test
+    void isAttemptsLimitReachedWhenBelowLimitShouldReturnFalseTest() {
+        Order order = Order.builder().id(UUID.randomUUID()).build();
+
+        when(paymentAttemptRepository.countPaymentAttemptByOrder(order)).thenReturn(2);
+
+        assertFalse(paymentAttemptService.isAttemptsLimitReached(order));
+    }
+
+    @Test
+    void isAttemptsLimitReachedWhenAtLimitShouldReturnTrueTest() {
+        Order order = Order.builder().id(UUID.randomUUID()).build();
+
+        when(paymentAttemptRepository.countPaymentAttemptByOrder(order)).thenReturn(3);
+
+        assertTrue(paymentAttemptService.isAttemptsLimitReached(order));
     }
 }

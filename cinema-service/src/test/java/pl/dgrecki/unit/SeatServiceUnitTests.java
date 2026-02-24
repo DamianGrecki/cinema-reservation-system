@@ -72,7 +72,7 @@ class SeatServiceUnitTests {
         when(row1seat2.getSeatId()).thenReturn(seatId2);
         when(row1seat2.getReserved()).thenReturn(true);
 
-        when(seatRepository.findSeatsWithRowAndStatuses(eq(screeningId), anyCollection()))
+        when(seatRepository.findSeatsWithRowAndStatuses(eq(screeningId), anySet()))
                 .thenReturn(List.of(row1seat1, row1seat2));
 
         List<RowSeatsMapResponse> result = seatService.getRowsSeatsMapByScreeningId(screeningId);
@@ -93,6 +93,6 @@ class SeatServiceUnitTests {
         assertEquals(seatId2, second.seatId());
         assertTrue(second.reserved());
 
-        verify(seatRepository, times(1)).findSeatsWithRowAndStatuses(eq(screeningId), anyCollection());
+        verify(seatRepository, times(1)).findSeatsWithRowAndStatuses(eq(screeningId), anySet());
     }
 }

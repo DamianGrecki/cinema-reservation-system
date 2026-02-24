@@ -2,7 +2,6 @@ package pl.dgrecki.services.payments;
 
 import static pl.dgrecki.constants.ExceptionMessages.*;
 import static pl.dgrecki.models.enums.PaymentProvider.SANDBOX;
-import static pl.dgrecki.models.enums.PaymentStatus.FAILED;
 import static pl.dgrecki.models.enums.PaymentStatus.PENDING;
 
 import java.util.Objects;
@@ -28,6 +27,7 @@ public class SandboxPaymentService implements PaymentProviderService {
 
     private final OrderService orderService;
     private final PaymentAttemptService paymentAttemptService;
+    private final PaymentFailureService paymentFailureService;
     private final WebClient sandboxPaymentProviderWebClient;
 
     @Override
@@ -42,9 +42,11 @@ public class SandboxPaymentService implements PaymentProviderService {
 
         validateCustomerData(customerId, guestEmail);
 
+        validatePaymentsIfAlreadyExists(basketId);
+
         Order order = orderService.prepareOrder(customerId, guestEmail, basketId, getProviderName());
 
-        SandboxPaymentResponse sandboxPaymentResponse = sendPaymentRequestToProvider(order);
+        SandboxPaymentResponse sandboxPaymentResponse = sendPaymentRequestToProvider(order, basketId);
         paymentAttemptService.createAttempt(
                 order,
                 sandboxPaymentResponse.transactionId().toString(),
@@ -53,7 +55,7 @@ public class SandboxPaymentService implements PaymentProviderService {
         return new SuccessResponse();
     }
 
-    private SandboxPaymentResponse sendPaymentRequestToProvider(Order order) {
+    private SandboxPaymentResponse sendPaymentRequestToProvider(Order order, UUID basketId) {
         SandboxPaymentRequest body = new SandboxPaymentRequest(order.getId(), order.getPrice(), order.getCurrency());
 
         SandboxPaymentResponse response;
@@ -67,10 +69,10 @@ public class SandboxPaymentService implements PaymentProviderService {
                     .block();
         } catch (Exception e) {
             log.error("Cannot send request for create payment to Sandbox Payment Provider", e);
-            paymentAttemptService.createAttempt(order, null, FAILED, e.getMessage());
+            paymentFailureService.failPaymentAttempt(order, null, basketId, e.getMessage());
             throw new PaymentProcessException(PROVIDER_CANNOT_CREATE_PAYMENT_MSG);
         }
-        validateProviderResponse(response, order);
+        handleProviderResponse(response, order, basketId);
         return response;
     }
 
@@ -80,19 +82,26 @@ public class SandboxPaymentService implements PaymentProviderService {
         }
     }
 
-    private void validateProviderResponse(SandboxPaymentResponse response, Order order) {
+    private void validatePaymentsIfAlreadyExists(UUID basketId) {
+        orderService.findExistingOrderByBasketId(basketId).ifPresent(order -> {
+            paymentFailureService.stopNewPaymentIfPendingAttemptExists(order);
+            paymentFailureService.failPaymentAfterRetryLimit(order, basketId);
+        });
+    }
+
+    private void handleProviderResponse(SandboxPaymentResponse response, Order order, UUID basketId) {
         if (Objects.isNull(response)) {
             log.error("Empty response from Sandbox Payment Provider, payment failed");
-            paymentAttemptService.createAttempt(order, null, FAILED, "Empty response");
+            paymentFailureService.failPaymentAttempt(order, null, basketId, "EmptyResponse");
             throw new PaymentProcessException(PROVIDER_NO_RESPONSE_MSG);
         }
 
         if (response.status() != (PaymentStatus.PENDING)) {
             log.error("Bad transaction status from Sandbox Payment Provider, payment failed");
-            paymentAttemptService.createAttempt(
+            paymentFailureService.failPaymentAttempt(
                     order,
                     response.transactionId().toString(),
-                    FAILED,
+                    basketId,
                     String.format("Expected status %s, but got %s", PENDING, response.status()));
             throw new PaymentProcessException(PROVIDER_BAD_PAYMENT_STATUS_MSG);
         }

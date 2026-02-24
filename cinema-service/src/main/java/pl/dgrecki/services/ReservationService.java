@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,31 +76,49 @@ public class ReservationService {
     @Transactional
     public SuccessResponse cancelReservations(List<UUID> reservationsIds) {
         List<Reservation> reservations = reservationRepository.findAllById(reservationsIds);
-
         if (reservations.isEmpty()) {
-            throw new ReservationProcessException(String.format(RESERVATIONS_NOT_FOUND_MSG));
+            throw new ReservationProcessException(RESERVATIONS_NOT_FOUND_MSG);
         }
+        setReservationsStatus(reservations, CANCELED);
+        return new SuccessResponse();
+    }
 
+    @Transactional
+    public void setPaymentAttemptFailedForReservationsInBasket(UUID basketId) {
+        List<Reservation> reservations =
+                reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_PENDING);
+        if (!reservations.isEmpty()) {
+            setReservationsStatus(reservations, PAYMENT_ATTEMPT_FAILED);
+        }
+    }
+
+    @Transactional
+    public void setPaymentFailedForReservationsInBasket(UUID basketId) {
+        List<Reservation> reservations =
+                reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_ATTEMPT_FAILED);
+        if (!reservations.isEmpty()) {
+            setReservationsStatus(reservations, PAYMENT_FAILED);
+        }
+    }
+
+    private void setReservationsStatus(List<Reservation> reservations, ReservationStatus targetStatus) {
         List<UUID> invalidReservationsIds = reservations.stream()
-                .filter(r -> !r.getStatus().canTransitionTo(CANCELED))
+                .filter(r -> !r.getStatus().canTransitionTo(targetStatus))
                 .map(Reservation::getId)
                 .toList();
-
         if (!invalidReservationsIds.isEmpty()) {
             throw new ReservationProcessException(
-                    String.format(RESERVATIONS_CANCEL_FAILED_MSG, invalidReservationsIds));
+                    String.format(RESERVATIONS_STATUS_TRANSITION_FAILED_MSG, invalidReservationsIds, targetStatus));
         }
-
-        reservations.forEach(r -> r.setStatus(CANCELED));
-        return new SuccessResponse();
+        reservations.forEach(r -> r.setStatus(targetStatus));
     }
 
     @Transactional
     public void setExpireStatusOnOverdueReservations(int limit) {
         List<UUID> basketsIds = basketService.getExpiredBasketsIds(limit);
         if (!basketsIds.isEmpty()) {
-            List<Reservation> reservations =
-                    reservationRepository.claimReservationsByBasketIds(basketsIds, CREATED.name());
+            List<Reservation> reservations = reservationRepository.claimReservationsByStatusesAndBasketIds(
+                    basketsIds, ReservationStatus.statusesThatCanTransitionTo(EXPIRED));
             if (!reservations.isEmpty()) {
                 List<UUID> ids = reservations.stream().map(Reservation::getId).toList();
                 int updatedCount = reservationRepository.setReservationsStatus(ids, EXPIRED);
@@ -110,16 +129,19 @@ public class ReservationService {
 
     @Transactional
     public void deleteExpiredReservationsByBasketsIds(List<UUID> basketsIds) {
-        List<UUID> reservationsIds = reservationRepository.findReservationsIdsByBasketIdsAndStatus(basketsIds, EXPIRED);
-        if (!reservationsIds.isEmpty()) {
+        List<Reservation> reservations =
+                reservationRepository.findReservationsByBasketIdsAndStatus(basketsIds, EXPIRED);
+        if (!reservations.isEmpty()) {
+            List<UUID> reservationsIds =
+                    reservations.stream().map(Reservation::getId).toList();
             int deletedCount = reservationRepository.deleteReservationsByIdAndStatus(reservationsIds, EXPIRED);
             log.info("Deleted {} expired reservations", deletedCount);
         }
     }
 
     @Transactional
-    public List<Reservation> claimReservationsByStatusAndBasketId(UUID basketId, ReservationStatus status) {
-        return reservationRepository.claimReservationsByBasketIds(List.of(basketId), status.name());
+    public List<Reservation> claimReservationsByStatusesAndBasketId(UUID basketId, Set<ReservationStatus> statuses) {
+        return reservationRepository.claimReservationsByStatusesAndBasketIds(List.of(basketId), statuses);
     }
 
     public Reservation getReservationById(UUID id) {
@@ -138,7 +160,7 @@ public class ReservationService {
 
     private void validateReservationUniqueness(Screening screening, Seat seat) {
         if (reservationRepository.existsByScreeningIdAndSeatIdAndStatusIn(
-                screening.getId(), seat.getId(), List.of(CREATED, PENDING_PAYMENT, PAID))) {
+                screening.getId(), seat.getId(), ReservationStatus.getStatusesBlockingSeat())) {
             throw new ResourceAlreadyExistsException(RESERVATION_ALREADY_EXISTS_MSG);
         }
     }
