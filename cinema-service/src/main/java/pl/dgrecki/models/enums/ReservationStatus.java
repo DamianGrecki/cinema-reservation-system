@@ -30,7 +30,7 @@ public enum ReservationStatus {
     private Set<ReservationStatus> allowedTransitions() {
         return switch (this) {
             case CREATED -> Set.of(PAYMENT_PENDING, CANCELED, EXPIRED);
-            case PAYMENT_PENDING -> Set.of(PAYMENT_ATTEMPT_FAILED, PAID, CANCELED);
+            case PAYMENT_PENDING -> Set.of(PAYMENT_ATTEMPT_FAILED, PAID, CANCELED, PAYMENT_FAILED);
             case PAYMENT_ATTEMPT_FAILED -> Set.of(PAYMENT_PENDING, PAYMENT_FAILED, EXPIRED);
             case PAID, EXPIRED, CANCELED, PAYMENT_FAILED -> Set.of();
         };

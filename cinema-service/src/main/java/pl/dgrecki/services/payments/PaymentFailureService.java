@@ -4,7 +4,6 @@ import static pl.dgrecki.constants.ExceptionMessages.PAYMENT_ATTEMPTS_LIMIT_REAC
 import static pl.dgrecki.constants.ExceptionMessages.PAYMENT_ATTEMPT_ALREADY_EXISTS_MSG;
 import static pl.dgrecki.models.enums.PaymentStatus.FAILED;
 
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,18 +19,18 @@ public class PaymentFailureService {
     private final ReservationService reservationService;
 
     @Transactional
-    public void failPaymentAttempt(Order order, String transactionId, UUID basketId, String errorMessage) {
+    public void failPaymentAttempt(Order order, String transactionId, String errorMessage) {
         paymentAttemptService.createAttempt(order, transactionId, FAILED, errorMessage);
         if (paymentAttemptService.isAttemptsLimitReached(order)) {
-            reservationService.setPaymentFailedForReservationsInBasket(basketId);
+            reservationService.setPaymentFailedForReservationsByOrder(order);
             return;
         }
-        reservationService.setPaymentAttemptFailedForReservationsInBasket(basketId);
+        reservationService.setPaymentAttemptFailedForReservationsByOrder(order);
     }
 
-    public void failPaymentAfterRetryLimit(Order order, UUID basketId) {
+    public void failPaymentAfterRetryLimit(Order order) {
         if (paymentAttemptService.isAttemptsLimitReached(order)) {
-            reservationService.setPaymentFailedForReservationsInBasket(basketId);
+            reservationService.setPaymentFailedForReservationsByOrder(order);
             throw new PaymentProcessException(PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG);
         }
     }

@@ -32,59 +32,55 @@ class PaymentFailureServiceUnitTests {
 
     @Test
     void failPaymentAttemptWhenLimitNotReachedShouldSetPaymentAttemptFailedReservationStatusTest() {
-        UUID basketId = UUID.randomUUID();
         Order order = Order.builder().id(UUID.randomUUID()).build();
         String errorMessage = "Connection refused";
 
         when(paymentAttemptService.isAttemptsLimitReached(order)).thenReturn(false);
 
-        paymentFailureService.failPaymentAttempt(order, null, basketId, errorMessage);
+        paymentFailureService.failPaymentAttempt(order, null, errorMessage);
 
         verify(paymentAttemptService, times(1)).createAttempt(order, null, FAILED, errorMessage);
-        verify(reservationService, times(1)).setPaymentAttemptFailedForReservationsInBasket(basketId);
-        verify(reservationService, never()).setPaymentFailedForReservationsInBasket(any());
+        verify(reservationService, times(1)).setPaymentAttemptFailedForReservationsByOrder(order);
+        verify(reservationService, never()).setPaymentFailedForReservationsByOrder(any());
     }
 
     @Test
     void failPaymentAttemptWhenLimitReachedShouldSetPaymentFailedStatusTest() {
-        UUID basketId = UUID.randomUUID();
         Order order = Order.builder().id(UUID.randomUUID()).build();
         String transactionId = UUID.randomUUID().toString();
         String errorMessage = "Connection refused";
 
         when(paymentAttemptService.isAttemptsLimitReached(order)).thenReturn(true);
 
-        paymentFailureService.failPaymentAttempt(order, transactionId, basketId, errorMessage);
+        paymentFailureService.failPaymentAttempt(order, transactionId, errorMessage);
 
         verify(paymentAttemptService, times(1)).createAttempt(order, transactionId, FAILED, errorMessage);
-        verify(reservationService, times(1)).setPaymentFailedForReservationsInBasket(basketId);
-        verify(reservationService, never()).setPaymentAttemptFailedForReservationsInBasket(any());
+        verify(reservationService, times(1)).setPaymentFailedForReservationsByOrder(order);
+        verify(reservationService, never()).setPaymentAttemptFailedForReservationsByOrder(any());
     }
 
     @Test
     void failPaymentAfterRetryLimitWhenLimitNotReachedShouldDoNothingTest() {
-        UUID basketId = UUID.randomUUID();
         Order order = Order.builder().id(UUID.randomUUID()).build();
 
         when(paymentAttemptService.isAttemptsLimitReached(order)).thenReturn(false);
 
-        assertDoesNotThrow(() -> paymentFailureService.failPaymentAfterRetryLimit(order, basketId));
+        assertDoesNotThrow(() -> paymentFailureService.failPaymentAfterRetryLimit(order));
 
-        verify(reservationService, never()).setPaymentFailedForReservationsInBasket(any());
+        verify(reservationService, never()).setPaymentFailedForReservationsByOrder(any());
     }
 
     @Test
     void failPaymentAfterRetryLimitWhenLimitReachedShouldSetFailedStatusAndThrowTest() {
-        UUID basketId = UUID.randomUUID();
         Order order = Order.builder().id(UUID.randomUUID()).build();
 
         when(paymentAttemptService.isAttemptsLimitReached(order)).thenReturn(true);
 
         PaymentProcessException ex = assertThrows(
-                PaymentProcessException.class, () -> paymentFailureService.failPaymentAfterRetryLimit(order, basketId));
+                PaymentProcessException.class, () -> paymentFailureService.failPaymentAfterRetryLimit(order));
 
         assertEquals(PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG, ex.getMessage());
-        verify(reservationService, times(1)).setPaymentFailedForReservationsInBasket(basketId);
+        verify(reservationService, times(1)).setPaymentFailedForReservationsByOrder(order);
     }
 
     @Test

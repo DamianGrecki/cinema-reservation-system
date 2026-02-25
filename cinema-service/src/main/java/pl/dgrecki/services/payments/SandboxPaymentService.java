@@ -46,7 +46,7 @@ public class SandboxPaymentService implements PaymentProviderService {
 
         Order order = orderService.prepareOrder(customerId, guestEmail, basketId, getProviderName());
 
-        SandboxPaymentResponse sandboxPaymentResponse = sendPaymentRequestToProvider(order, basketId);
+        SandboxPaymentResponse sandboxPaymentResponse = sendPaymentRequestToProvider(order);
         paymentAttemptService.createAttempt(
                 order,
                 sandboxPaymentResponse.transactionId().toString(),
@@ -55,7 +55,7 @@ public class SandboxPaymentService implements PaymentProviderService {
         return new SuccessResponse();
     }
 
-    private SandboxPaymentResponse sendPaymentRequestToProvider(Order order, UUID basketId) {
+    private SandboxPaymentResponse sendPaymentRequestToProvider(Order order) {
         SandboxPaymentRequest body = new SandboxPaymentRequest(order.getId(), order.getPrice(), order.getCurrency());
 
         SandboxPaymentResponse response;
@@ -69,10 +69,10 @@ public class SandboxPaymentService implements PaymentProviderService {
                     .block();
         } catch (Exception e) {
             log.error("Cannot send request for create payment to Sandbox Payment Provider", e);
-            paymentFailureService.failPaymentAttempt(order, null, basketId, e.getMessage());
+            paymentFailureService.failPaymentAttempt(order, null, e.getMessage());
             throw new PaymentProcessException(PROVIDER_CANNOT_CREATE_PAYMENT_MSG);
         }
-        handleProviderResponse(response, order, basketId);
+        handleProviderResponse(response, order);
         return response;
     }
 
@@ -85,14 +85,14 @@ public class SandboxPaymentService implements PaymentProviderService {
     private void validatePaymentsIfAlreadyExists(UUID basketId) {
         orderService.findExistingOrderByBasketId(basketId).ifPresent(order -> {
             paymentFailureService.stopNewPaymentIfPendingAttemptExists(order);
-            paymentFailureService.failPaymentAfterRetryLimit(order, basketId);
+            paymentFailureService.failPaymentAfterRetryLimit(order);
         });
     }
 
-    private void handleProviderResponse(SandboxPaymentResponse response, Order order, UUID basketId) {
+    private void handleProviderResponse(SandboxPaymentResponse response, Order order) {
         if (Objects.isNull(response)) {
             log.error("Empty response from Sandbox Payment Provider, payment failed");
-            paymentFailureService.failPaymentAttempt(order, null, basketId, "EmptyResponse");
+            paymentFailureService.failPaymentAttempt(order, null, "EmptyResponse");
             throw new PaymentProcessException(PROVIDER_NO_RESPONSE_MSG);
         }
 
@@ -101,7 +101,6 @@ public class SandboxPaymentService implements PaymentProviderService {
             paymentFailureService.failPaymentAttempt(
                     order,
                     response.transactionId().toString(),
-                    basketId,
                     String.format("Expected status %s, but got %s", PENDING, response.status()));
             throw new PaymentProcessException(PROVIDER_BAD_PAYMENT_STATUS_MSG);
         }

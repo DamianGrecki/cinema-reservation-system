@@ -1,9 +1,12 @@
 package pl.dgrecki.services.payments;
 
+import static pl.dgrecki.constants.ExceptionMessages.PAYMENT_ATTEMPT_NOT_FOUND_MSG;
+
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.PaymentAttempt;
 import pl.dgrecki.models.enums.PaymentStatus;
@@ -44,6 +47,17 @@ public class PaymentAttemptService {
 
     public boolean hasPendingPaymentAttempt(Order order) {
         return paymentAttemptRepository.existsByOrderAndStatus(order, PaymentStatus.PENDING);
+    }
+
+    @Transactional
+    public PaymentAttempt updateAttemptStatus(String transactionId, PaymentStatus status) {
+        PaymentAttempt attempt = paymentAttemptRepository
+                .findByTransactionId(transactionId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(String.format(PAYMENT_ATTEMPT_NOT_FOUND_MSG, transactionId)));
+        attempt.setStatus(status);
+        attempt.setUpdatedAt(clock.instant());
+        return attempt;
     }
 
     private int getAttemptCountByOrder(Order order) {

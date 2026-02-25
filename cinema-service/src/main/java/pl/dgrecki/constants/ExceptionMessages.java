@@ -21,9 +21,6 @@ public class ExceptionMessages {
     public static final String SHOW_HAS_ALREADY_STARTED_MSG = "Reservation failed the show has already started";
     public static final String BASKET_EXPIRED_MSG = "Basket has expired";
     public static final String BASKET_ID_IS_REQUIRED_MSG = "basketId is required";
-    public static final String RESERVATION_EXPIRED_MSG = "Reservation has expired";
-    public static final String RESERVATION_PAID_MSG = "Reservation already paid";
-    public static final String RESERVATION_ID_IS_REQUIRED_MSG = "ReservationId is required";
     public static final String RESERVATIONS_IDS_IS_REQUIRED_MSG = "reservationsIds is required";
     public static final String RESERVATIONS_IDS_CANNOT_BE_EMPTY_MSG = "reservationsIds cannot be empty";
     public static final String RESERVATIONS_STATUS_TRANSITION_FAILED_MSG =
@@ -38,4 +35,5 @@ public class ExceptionMessages {
     public static final String PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG = "Payment failed, reached payment attempts limit";
     public static final String PAYMENT_ATTEMPT_ALREADY_EXISTS_MSG =
             "Payment failed, pending payment attempt already exists";
+    public static final String PAYMENT_ATTEMPT_NOT_FOUND_MSG = "Payment attempt with transaction ID %s not found";
 }
