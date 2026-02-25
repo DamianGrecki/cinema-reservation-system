@@ -1,5 +1,6 @@
 package pl.dgrecki.repositories;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,6 @@ public interface PaymentAttemptRepository extends JpaRepository<PaymentAttempt, 
     int countPaymentAttemptByOrder(Order order);
 
     boolean existsByOrderAndStatus(Order order, PaymentStatus paymentStatus);
+
+    Optional<PaymentAttempt> findByTransactionId(String transactionId);
 }

@@ -19,6 +19,7 @@ import pl.dgrecki.exceptions.ReservationProcessException;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.entities.Basket;
+import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.entities.Screening;
 import pl.dgrecki.models.entities.Seat;
@@ -84,36 +85,6 @@ public class ReservationService {
     }
 
     @Transactional
-    public void setPaymentAttemptFailedForReservationsInBasket(UUID basketId) {
-        List<Reservation> reservations =
-                reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_PENDING);
-        if (!reservations.isEmpty()) {
-            setReservationsStatus(reservations, PAYMENT_ATTEMPT_FAILED);
-        }
-    }
-
-    @Transactional
-    public void setPaymentFailedForReservationsInBasket(UUID basketId) {
-        List<Reservation> reservations =
-                reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_ATTEMPT_FAILED);
-        if (!reservations.isEmpty()) {
-            setReservationsStatus(reservations, PAYMENT_FAILED);
-        }
-    }
-
-    private void setReservationsStatus(List<Reservation> reservations, ReservationStatus targetStatus) {
-        List<UUID> invalidReservationsIds = reservations.stream()
-                .filter(r -> !r.getStatus().canTransitionTo(targetStatus))
-                .map(Reservation::getId)
-                .toList();
-        if (!invalidReservationsIds.isEmpty()) {
-            throw new ReservationProcessException(
-                    String.format(RESERVATIONS_STATUS_TRANSITION_FAILED_MSG, invalidReservationsIds, targetStatus));
-        }
-        reservations.forEach(r -> r.setStatus(targetStatus));
-    }
-
-    @Transactional
     public void setExpireStatusOnOverdueReservations(int limit) {
         List<UUID> basketsIds = basketService.getExpiredBasketsIds(limit);
         if (!basketsIds.isEmpty()) {
@@ -140,8 +111,52 @@ public class ReservationService {
     }
 
     @Transactional
+    public void setPaidForReservationsByOrder(Order order) {
+        List<Reservation> reservations = reservationRepository.findByOrderAndStatusIn(
+                order, ReservationStatus.statusesThatCanTransitionTo(PAID));
+        if (!reservations.isEmpty()) {
+            setReservationsStatus(reservations, PAID);
+        }
+    }
+
+    @Transactional
+    public void setPaymentAttemptFailedForReservationsByOrder(Order order) {
+        List<Reservation> reservations = reservationRepository.findByOrderAndStatusIn(
+                order, ReservationStatus.statusesThatCanTransitionTo(PAYMENT_ATTEMPT_FAILED));
+        if (!reservations.isEmpty()) {
+            setReservationsStatus(reservations, PAYMENT_ATTEMPT_FAILED);
+        }
+    }
+
+    @Transactional
+    public void setPaymentFailedForReservationsByOrder(Order order) {
+        List<Reservation> reservations = reservationRepository.findByOrderAndStatusIn(
+                order, ReservationStatus.statusesThatCanTransitionTo(PAYMENT_FAILED));
+        if (!reservations.isEmpty()) {
+            setReservationsStatus(reservations, PAYMENT_FAILED);
+        }
+    }
+
+    @Transactional
+    public List<Reservation> getPaidReservationsByOrder(Order order) {
+        return reservationRepository.findByOrderAndStatusIn(order, Set.of(PAID));
+    }
+
+    @Transactional
     public List<Reservation> claimReservationsByStatusesAndBasketId(UUID basketId, Set<ReservationStatus> statuses) {
         return reservationRepository.claimReservationsByStatusesAndBasketIds(List.of(basketId), statuses);
+    }
+
+    private void setReservationsStatus(List<Reservation> reservations, ReservationStatus targetStatus) {
+        List<UUID> invalidReservationsIds = reservations.stream()
+                .filter(r -> !r.getStatus().canTransitionTo(targetStatus))
+                .map(Reservation::getId)
+                .toList();
+        if (!invalidReservationsIds.isEmpty()) {
+            throw new ReservationProcessException(
+                    String.format(RESERVATIONS_STATUS_TRANSITION_FAILED_MSG, invalidReservationsIds, targetStatus));
+        }
+        reservations.forEach(r -> r.setStatus(targetStatus));
     }
 
     public Reservation getReservationById(UUID id) {

@@ -30,7 +30,7 @@ async def send_webhook(order_id, transaction_id):
     payload = {
         "transactionId": transaction_id,
         "orderId": order_id,
-        "status": "SUCCESS",
+        "status": "COMPLETED",
     }
 
     try:

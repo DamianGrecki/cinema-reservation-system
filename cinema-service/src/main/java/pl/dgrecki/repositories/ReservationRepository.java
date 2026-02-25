@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.enums.ReservationStatus;
 
@@ -52,6 +53,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 """)
     List<Reservation> findReservationsByBasketIdsAndStatus(
             @Param("basketsIds") List<UUID> basketIds, @Param("status") ReservationStatus status);
+
+    @Query("""
+    SELECT r
+    FROM Reservation r
+    WHERE r.order = :order
+        AND r.status IN :statuses
+""")
+    List<Reservation> findByOrderAndStatusIn(
+            @Param("order") Order order, @Param("statuses") Set<ReservationStatus> statuses);
 
     @Modifying(clearAutomatically = true)
     @Query("""

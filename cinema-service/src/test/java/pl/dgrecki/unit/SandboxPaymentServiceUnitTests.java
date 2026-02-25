@@ -90,7 +90,7 @@ class SandboxPaymentServiceUnitTests {
         when(orderService.findExistingOrderByBasketId(basketId)).thenReturn(Optional.of(existingOrder));
         doThrow(new PaymentProcessException(PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG))
                 .when(paymentFailureService)
-                .failPaymentAfterRetryLimit(existingOrder, basketId);
+                .failPaymentAfterRetryLimit(existingOrder);
 
         PaymentProcessException ex =
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
@@ -141,8 +141,7 @@ class SandboxPaymentServiceUnitTests {
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_CANNOT_CREATE_PAYMENT_MSG, ex.getMessage());
-        verify(paymentFailureService, times(1))
-                .failPaymentAttempt(eq(order), isNull(), eq(basketId), eq(networkError.getMessage()));
+        verify(paymentFailureService, times(1)).failPaymentAttempt(eq(order), isNull(), eq(networkError.getMessage()));
     }
 
     @Test
@@ -172,7 +171,7 @@ class SandboxPaymentServiceUnitTests {
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_NO_RESPONSE_MSG, ex.getMessage());
-        verify(paymentFailureService, times(1)).failPaymentAttempt(eq(order), isNull(), eq(basketId), anyString());
+        verify(paymentFailureService, times(1)).failPaymentAttempt(eq(order), isNull(), anyString());
     }
 
     @Test
@@ -207,6 +206,6 @@ class SandboxPaymentServiceUnitTests {
 
         assertEquals(PROVIDER_BAD_PAYMENT_STATUS_MSG, ex.getMessage());
         verify(paymentFailureService, times(1))
-                .failPaymentAttempt(eq(order), eq(transactionId.toString()), eq(basketId), anyString());
+                .failPaymentAttempt(eq(order), eq(transactionId.toString()), anyString());
     }
 }

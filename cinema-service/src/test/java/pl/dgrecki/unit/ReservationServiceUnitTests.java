@@ -303,29 +303,27 @@ class ReservationServiceUnitTests {
     }
 
     @Test
-    void setPaymentAttemptFailedForReservationsInBasketShouldUpdateStatusTest() {
-        UUID basketId = UUID.randomUUID();
+    void setPaymentAttemptFailedForReservationsByOrderShouldUpdateStatusTest() {
+        Order order = Order.builder().id(UUID.randomUUID()).build();
 
         Reservation reservation = new Reservation();
         reservation.setId(UUID.randomUUID());
         reservation.setStatus(PAYMENT_PENDING);
 
-        when(reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_PENDING))
-                .thenReturn(List.of(reservation));
+        when(reservationRepository.findByOrderAndStatusIn(eq(order), anySet())).thenReturn(List.of(reservation));
 
-        reservationService.setPaymentAttemptFailedForReservationsInBasket(basketId);
+        reservationService.setPaymentAttemptFailedForReservationsByOrder(order);
 
         assertEquals(PAYMENT_ATTEMPT_FAILED, reservation.getStatus());
     }
 
     @Test
-    void setPaymentAttemptFailedForReservationsInBasketWhenNoReservationsDoesNothingTest() {
-        UUID basketId = UUID.randomUUID();
+    void setPaymentAttemptFailedForReservationsByOrderWhenNoReservationsDoesNothingTest() {
+        Order order = Order.builder().id(UUID.randomUUID()).build();
 
-        when(reservationRepository.findReservationsByBasketIdsAndStatus(List.of(basketId), PAYMENT_PENDING))
-                .thenReturn(List.of());
+        when(reservationRepository.findByOrderAndStatusIn(eq(order), anySet())).thenReturn(List.of());
 
-        reservationService.setPaymentAttemptFailedForReservationsInBasket(basketId);
+        reservationService.setPaymentAttemptFailedForReservationsByOrder(order);
 
         verify(reservationRepository, never()).save(any());
     }

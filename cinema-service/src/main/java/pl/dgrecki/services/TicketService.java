@@ -10,13 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.TicketCreatingException;
+import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.entities.Ticket;
 import pl.dgrecki.models.enums.ReservationStatus;
-import pl.dgrecki.models.requests.CreateTicketRequest;
-import pl.dgrecki.models.responses.SuccessResponse;
 import pl.dgrecki.repositories.TicketRepository;
-import pl.dgrecki.services.prices.PriceService;
 
 @Slf4j
 @Service
@@ -26,24 +24,22 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final TicketGeneratorService ticketGeneratorService;
     private final ReservationService reservationService;
-    private final PriceService priceService;
     private final Clock clock;
 
     @Transactional
-    public SuccessResponse createTickets(List<CreateTicketRequest> requests) {
-        requests.forEach(this::createTicket);
-        return new SuccessResponse();
+    public void createTickets(Order order) {
+        List<Reservation> reservations = reservationService.getPaidReservationsByOrder(order);
+        if (reservations.isEmpty()) {
+            log.warn("Cannot create tickets, there is no paid reservations in order: '{}'", order.getId());
+        }
+        reservations.forEach(this::createTicket);
     }
 
-    private void createTicket(CreateTicketRequest request) {
-        Reservation reservation = reservationService.getReservationById(request.reservationId());
-        BigDecimal price = priceService.calculate(reservation);
-
+    private void createTicket(Reservation reservation) {
         validateTicketUniqueness(reservation);
-        validateReservationStatus(reservation);
 
         Ticket ticket = Ticket.builder()
-                .price(price)
+                .price(new BigDecimal("20.00")) // TODO Add single ticket price
                 .reservation(reservation)
                 .createdAt(clock.instant())
                 .build();
@@ -51,15 +47,6 @@ public class TicketService {
         ticketRepository.save(ticket);
         reservation.setStatus(ReservationStatus.PAID);
         ticketGeneratorService.createTicketPdf(ticket.getId()); // TODO Add retry
-    }
-
-    private void validateReservationStatus(Reservation reservation) {
-        if (reservation.getStatus().equals(ReservationStatus.EXPIRED)) {
-            throw new TicketCreatingException(RESERVATION_EXPIRED_MSG);
-        }
-        if (reservation.getStatus().equals(ReservationStatus.PAID)) {
-            throw new TicketCreatingException(RESERVATION_PAID_MSG);
-        }
     }
 
     private void validateTicketUniqueness(Reservation reservation) {
