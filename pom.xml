@@ -19,7 +19,33 @@
     <properties>
         <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skip.unit.pattern>__none__</skip.unit.pattern>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>skip-integration-tests</id>
+            <activation>
+                <property>
+                    <name>skipITs</name>
+                </property>
+            </activation>
+            <properties>
+                <skipITs>true</skipITs>
+            </properties>
+        </profile>
+        <profile>
+            <id>skip-unit-tests</id>
+            <activation>
+                <property>
+                    <name>skipUTs</name>
+                </property>
+            </activation>
+            <properties>
+                <skip.unit.pattern>**/unit/**</skip.unit.pattern>
+            </properties>
+        </profile>
+    </profiles>
 
     <modules>
         <module>common-lib</module>
@@ -127,6 +153,38 @@
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <excludes>
+                            <exclude>**/integration/**</exclude>
+                            <exclude>${skip.unit.pattern}</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <configuration>
+                        <includes>
+                            <include>**/integration/**/*Test*.java</include>
+                            <include>**/integration/**/*Tests*.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/integration/**/Base*.java</exclude>
+                            <exclude>**/integration/**/Postgres*.java</exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
