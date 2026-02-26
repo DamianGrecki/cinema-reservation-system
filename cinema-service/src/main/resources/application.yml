@@ -50,6 +50,10 @@ scheduler:
       older-than-days: 1
       limit: 100
       delay-ms: 60000
+  ticket-pdf:
+    limit: 50
+    delay-ms: 10000
+    max-attempts: 3
 
 payment-provider:
   attempts-limit: 3

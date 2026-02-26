@@ -22,7 +22,7 @@ import pl.dgrecki.repositories.TicketRepository;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
-    private final TicketGeneratorService ticketGeneratorService;
+    private final TicketPdfJobService ticketPdfJobService;
     private final ReservationService reservationService;
     private final Clock clock;
 
@@ -46,7 +46,7 @@ public class TicketService {
 
         ticketRepository.save(ticket);
         reservation.setStatus(ReservationStatus.PAID);
-        ticketGeneratorService.createTicketPdf(ticket.getId()); // TODO Add retry
+        ticketPdfJobService.createTicketPdfJob(ticket.getId());
     }
 
     private void validateTicketUniqueness(Reservation reservation) {
