@@ -9,11 +9,14 @@ import static pl.dgrecki.models.enums.PaymentStatus.*;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.Answers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 import pl.dgrecki.exceptions.PaymentProcessException;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.enums.Currency;
@@ -24,7 +27,6 @@ import pl.dgrecki.services.OrderService;
 import pl.dgrecki.services.payments.PaymentAttemptService;
 import pl.dgrecki.services.payments.PaymentFailureService;
 import pl.dgrecki.services.payments.SandboxPaymentService;
-import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class SandboxPaymentServiceUnitTests {
@@ -38,11 +40,23 @@ class SandboxPaymentServiceUnitTests {
     @Mock
     private PaymentFailureService paymentFailureService;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private WebClient sandboxPaymentProviderWebClient;
+    @Mock
+    private RestClient sandboxPaymentProviderRestClient;
+
+    @Mock(answer = Answers.RETURNS_SELF)
+    private RestClient.RequestBodyUriSpec requestBodyUriSpec;
+
+    @Mock
+    private RestClient.ResponseSpec responseSpec;
 
     @InjectMocks
     private SandboxPaymentService sandboxPaymentService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(sandboxPaymentProviderRestClient.post()).thenReturn(requestBodyUriSpec);
+        lenient().when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
+    }
 
     @Test
     void createPaymentTest() {
@@ -65,17 +79,11 @@ class SandboxPaymentServiceUnitTests {
 
         when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
-        when(sandboxPaymentProviderWebClient
-                        .post()
-                        .uri(anyString())
-                        .bodyValue(any())
-                        .retrieve()
-                        .bodyToMono(SandboxPaymentResponse.class))
-                .thenReturn(Mono.just(providerResponse));
+        when(responseSpec.body(SandboxPaymentResponse.class)).thenReturn(providerResponse);
 
         sandboxPaymentService.createPayment(request);
 
-        verify(paymentAttemptService, times(1)).createAttempt(order, transactionId.toString(), PENDING, null);
+        verify(paymentAttemptService).createAttempt(order, transactionId.toString(), PENDING, null);
     }
 
     @Test
@@ -129,19 +137,13 @@ class SandboxPaymentServiceUnitTests {
 
         when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
-        when(sandboxPaymentProviderWebClient
-                        .post()
-                        .uri(anyString())
-                        .bodyValue(any())
-                        .retrieve()
-                        .bodyToMono(SandboxPaymentResponse.class))
-                .thenReturn(Mono.error(networkError));
+        when(responseSpec.body(SandboxPaymentResponse.class)).thenThrow(networkError);
 
         PaymentProcessException ex =
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_CANNOT_CREATE_PAYMENT_MSG, ex.getMessage());
-        verify(paymentFailureService, times(1)).failPaymentAttempt(eq(order), isNull(), eq(networkError.getMessage()));
+        verify(paymentFailureService).failPaymentAttempt(eq(order), isNull(), eq(networkError.getMessage()));
     }
 
     @Test
@@ -159,19 +161,12 @@ class SandboxPaymentServiceUnitTests {
 
         when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
-        when(sandboxPaymentProviderWebClient
-                        .post()
-                        .uri(anyString())
-                        .bodyValue(any())
-                        .retrieve()
-                        .bodyToMono(SandboxPaymentResponse.class))
-                .thenReturn(Mono.empty());
 
         PaymentProcessException ex =
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_NO_RESPONSE_MSG, ex.getMessage());
-        verify(paymentFailureService, times(1)).failPaymentAttempt(eq(order), isNull(), anyString());
+        verify(paymentFailureService).failPaymentAttempt(eq(order), isNull(), anyString());
     }
 
     @Test
@@ -193,19 +188,12 @@ class SandboxPaymentServiceUnitTests {
 
         when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
-        when(sandboxPaymentProviderWebClient
-                        .post()
-                        .uri(anyString())
-                        .bodyValue(any())
-                        .retrieve()
-                        .bodyToMono(SandboxPaymentResponse.class))
-                .thenReturn(Mono.just(badStatusResponse));
+        when(responseSpec.body(SandboxPaymentResponse.class)).thenReturn(badStatusResponse);
 
         PaymentProcessException ex =
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PROVIDER_BAD_PAYMENT_STATUS_MSG, ex.getMessage());
-        verify(paymentFailureService, times(1))
-                .failPaymentAttempt(eq(order), eq(transactionId.toString()), anyString());
+        verify(paymentFailureService).failPaymentAttempt(eq(order), eq(transactionId.toString()), anyString());
     }
 }
