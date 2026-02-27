@@ -9,7 +9,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 import pl.dgrecki.constants.SandboxPaymentProviderEndpoints;
 import pl.dgrecki.exceptions.PaymentProcessException;
 import pl.dgrecki.models.entities.Order;
@@ -28,13 +28,14 @@ public class SandboxPaymentService implements PaymentProviderService {
     private final OrderService orderService;
     private final PaymentAttemptService paymentAttemptService;
     private final PaymentFailureService paymentFailureService;
-    private final WebClient sandboxPaymentProviderWebClient;
+    private final RestClient sandboxPaymentProviderRestClient;
 
     @Override
     public PaymentProvider getProviderName() {
         return SANDBOX;
     }
 
+    @Override
     public SuccessResponse createPayment(CreatePaymentRequest request) {
         UUID customerId = request.customerId();
         String guestEmail = request.guestEmail();
@@ -60,13 +61,12 @@ public class SandboxPaymentService implements PaymentProviderService {
 
         SandboxPaymentResponse response;
         try {
-            response = sandboxPaymentProviderWebClient
+            response = sandboxPaymentProviderRestClient
                     .post()
                     .uri(SandboxPaymentProviderEndpoints.PAYMENT_ENDPOINT)
-                    .bodyValue(body)
+                    .body(body)
                     .retrieve()
-                    .bodyToMono(SandboxPaymentResponse.class)
-                    .block();
+                    .body(SandboxPaymentResponse.class);
         } catch (Exception e) {
             log.error("Cannot send request for create payment to Sandbox Payment Provider", e);
             paymentFailureService.failPaymentAttempt(order, null, e.getMessage());
@@ -96,7 +96,7 @@ public class SandboxPaymentService implements PaymentProviderService {
             throw new PaymentProcessException(PROVIDER_NO_RESPONSE_MSG);
         }
 
-        if (response.status() != (PaymentStatus.PENDING)) {
+        if (!response.status().equals(PaymentStatus.PENDING)) {
             log.error("Bad transaction status from Sandbox Payment Provider, payment failed");
             paymentFailureService.failPaymentAttempt(
                     order,
