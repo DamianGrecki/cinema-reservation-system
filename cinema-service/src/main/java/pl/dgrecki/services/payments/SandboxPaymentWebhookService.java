@@ -34,6 +34,7 @@ public class SandboxPaymentWebhookService implements PaymentWebhook {
                     reservationService.setPaymentFailedForReservationsByOrder(order);
                 }
             }
+            case PENDING -> {}
         }
     }
 }
