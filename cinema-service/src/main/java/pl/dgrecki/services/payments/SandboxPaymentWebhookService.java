@@ -1,6 +1,7 @@
 package pl.dgrecki.services.payments;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.models.entities.Order;
@@ -9,6 +10,7 @@ import pl.dgrecki.models.external.SandboxPaymentResponse;
 import pl.dgrecki.services.ReservationService;
 import pl.dgrecki.services.TicketService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SandboxPaymentWebhookService implements PaymentWebhook {
@@ -19,11 +21,11 @@ public class SandboxPaymentWebhookService implements PaymentWebhook {
 
     @Override
     @Transactional
-    public void handleWebhook(SandboxPaymentResponse payload) {
+    public void handleWebhook(SandboxPaymentResponse response) {
         PaymentAttempt attempt = paymentAttemptService.updateAttemptStatus(
-                payload.transactionId().toString(), payload.status());
+                response.transactionId().toString(), response.status());
         Order order = attempt.getOrder();
-        switch (payload.status()) {
+        switch (response.status()) {
             case COMPLETED -> {
                 reservationService.setPaidForReservationsByOrder(order);
                 ticketService.createTickets(order);
@@ -34,7 +36,7 @@ public class SandboxPaymentWebhookService implements PaymentWebhook {
                     reservationService.setPaymentFailedForReservationsByOrder(order);
                 }
             }
-            case PENDING -> {}
+            case PENDING -> log.warn("Payment {} still in PENDING status", response.transactionId());
         }
     }
 }
