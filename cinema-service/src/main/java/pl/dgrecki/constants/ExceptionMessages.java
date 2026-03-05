@@ -36,4 +36,5 @@ public class ExceptionMessages {
     public static final String PAYMENT_ATTEMPT_ALREADY_EXISTS_MSG =
             "Payment failed, pending payment attempt already exists";
     public static final String PAYMENT_ATTEMPT_NOT_FOUND_MSG = "Payment attempt with transaction ID %s not found";
+    public static final String DATA_INTEGRITY_CONFLICT_MSG = "Data integrity conflict";
 }

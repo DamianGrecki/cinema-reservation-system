@@ -31,7 +31,6 @@
             <column name="audio_language" value="POLISH"/>
         </insert>
 
-        <!-- The Matrix -->
         <insert tableName="movie_versions">
             <column name="id" value="bbbb1111-1111-1111-1111-bbbbbbbb1111"/>
             <column name="movie_id" value="22222222-2222-2222-2222-222222222222"/>
@@ -48,7 +47,6 @@
             <column name="audio_language" value="POLISH"/>
         </insert>
 
-        <!-- Interstellar -->
         <insert tableName="movie_versions">
             <column name="id" value="cccc1111-1111-1111-1111-cccccccc1111"/>
             <column name="movie_id" value="33333333-3333-3333-3333-333333333333"/>
@@ -57,10 +55,81 @@
             <column name="audio_language" value="ENGLISH"/>
         </insert>
 
-        <!-- The Dark Knight -->
+        <insert tableName="movie_versions">
+            <column name="id" value="cccc2222-2222-2222-2222-cccccccc2222"/>
+            <column name="movie_id" value="33333333-3333-3333-3333-333333333333"/>
+            <column name="movie_format" value="FORMAT_3D"/>
+            <column name="presentation_type" value="ORIGINAL_WITH_SUBTITLES"/>
+            <column name="audio_language" value="ENGLISH"/>
+        </insert>
+
         <insert tableName="movie_versions">
             <column name="id" value="dddd1111-1111-1111-1111-dddddddd1111"/>
             <column name="movie_id" value="44444444-4444-4444-4444-444444444444"/>
+            <column name="movie_format" value="FORMAT_2D"/>
+            <column name="presentation_type" value="DUBBED"/>
+            <column name="audio_language" value="POLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="dddd2222-2222-2222-2222-dddddddd2222"/>
+            <column name="movie_id" value="44444444-4444-4444-4444-444444444444"/>
+            <column name="movie_format" value="FORMAT_2D"/>
+            <column name="presentation_type" value="ORIGINAL"/>
+            <column name="audio_language" value="ENGLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="eeee1111-1111-1111-1111-eeeeeeee1111"/>
+            <column name="movie_id" value="55555555-5555-5555-5555-555555555555"/>
+            <column name="movie_format" value="FORMAT_2D"/>
+            <column name="presentation_type" value="ORIGINAL"/>
+            <column name="audio_language" value="ENGLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="eeee2222-2222-2222-2222-eeeeeeee2222"/>
+            <column name="movie_id" value="55555555-5555-5555-5555-555555555555"/>
+            <column name="movie_format" value="FORMAT_2D"/>
+            <column name="presentation_type" value="DUBBED"/>
+            <column name="audio_language" value="POLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="ffff1111-1111-1111-1111-ffffffffffff"/>
+            <column name="movie_id" value="66666666-6666-6666-6666-666666666666"/>
+            <column name="movie_format" value="FORMAT_2D"/>
+            <column name="presentation_type" value="ORIGINAL_WITH_SUBTITLES"/>
+            <column name="audio_language" value="ENGLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="aabb1111-1111-1111-1111-aabbccdd1111"/>
+            <column name="movie_id" value="77777777-7777-7777-7777-777777777777"/>
+            <column name="movie_format" value="FORMAT_3D"/>
+            <column name="presentation_type" value="DUBBED"/>
+            <column name="audio_language" value="POLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="aabb2222-2222-2222-2222-aabbccdd2222"/>
+            <column name="movie_id" value="77777777-7777-7777-7777-777777777777"/>
+            <column name="movie_format" value="FORMAT_2D"/>
+            <column name="presentation_type" value="ORIGINAL"/>
+            <column name="audio_language" value="ENGLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="bbcc1111-1111-1111-1111-bbccddee1111"/>
+            <column name="movie_id" value="88888888-8888-8888-8888-888888888888"/>
+            <column name="movie_format" value="FORMAT_3D"/>
+            <column name="presentation_type" value="ORIGINAL"/>
+            <column name="audio_language" value="ENGLISH"/>
+        </insert>
+
+        <insert tableName="movie_versions">
+            <column name="id" value="bbcc2222-2222-2222-2222-bbccddee2222"/>
+            <column name="movie_id" value="88888888-8888-8888-8888-888888888888"/>
             <column name="movie_format" value="FORMAT_2D"/>
             <column name="presentation_type" value="DUBBED"/>
             <column name="audio_language" value="POLISH"/>

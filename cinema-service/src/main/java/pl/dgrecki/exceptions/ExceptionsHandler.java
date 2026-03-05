@@ -1,7 +1,10 @@
 package pl.dgrecki.exceptions;
 
+import static pl.dgrecki.constants.ExceptionMessages.DATA_INTEGRITY_CONFLICT_MSG;
+
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -51,5 +54,11 @@ public class ExceptionsHandler {
     public ResponseEntity<ErrorResponse> ticketCreatingError(TicketCreatingException ex) {
         log.warn("Ticket creating exception occurred", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation occurred", ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(DATA_INTEGRITY_CONFLICT_MSG));
     }
 }
