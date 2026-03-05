@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  mailpit:
+    container_name: mailpit
+    image: axllent/mailpit:v1.29
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: always
