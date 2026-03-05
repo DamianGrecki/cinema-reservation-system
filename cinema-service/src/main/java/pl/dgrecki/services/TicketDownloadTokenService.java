@@ -19,22 +19,22 @@ public class TicketDownloadTokenService {
         this.secret = secret;
     }
 
-    public String generateUrl(UUID ticketId) {
-        String signature = sign(ticketId);
-        return String.format("/api/ticket/%s/download?signature=%s", ticketId, signature);
+    public String generateUrl(UUID orderId) {
+        String signature = sign(orderId);
+        return String.format("/api/orders/%s/tickets/download?signature=%s", orderId, signature);
     }
 
-    public boolean isValidSignature(UUID ticketId, String signature) {
-        String expectedSignature = sign(ticketId);
+    public boolean isValidSignature(UUID orderId, String signature) {
+        String expectedSignature = sign(orderId);
         return expectedSignature.equals(signature);
     }
 
-    private String sign(UUID ticketId) {
+    private String sign(UUID id) {
         try {
             Mac mac = Mac.getInstance(HMAC_ALGORITHM);
             SecretKeySpec keySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM);
             mac.init(keySpec);
-            byte[] hash = mac.doFinal(ticketId.toString().getBytes(StandardCharsets.UTF_8));
+            byte[] hash = mac.doFinal(id.toString().getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate HMAC signature", e);

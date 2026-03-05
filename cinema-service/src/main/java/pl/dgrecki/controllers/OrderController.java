@@ -1,6 +1,6 @@
 package pl.dgrecki.controllers;
 
-import static pl.dgrecki.constants.Endpoints.TICKET_DOWNLOAD_ENDPOINT;
+import static pl.dgrecki.constants.Endpoints.ORDER_TICKETS_DOWNLOAD_ENDPOINT;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -11,24 +11,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import pl.dgrecki.models.TicketFileDto;
 import pl.dgrecki.services.TicketDownloadService;
 
 @RestController
 @RequiredArgsConstructor
-public class TicketController {
+public class OrderController {
 
     private final TicketDownloadService ticketDownloadService;
 
-    @GetMapping(TICKET_DOWNLOAD_ENDPOINT)
-    public ResponseEntity<byte[]> downloadTicket(@PathVariable UUID ticketId, @RequestParam String signature) {
+    @GetMapping(ORDER_TICKETS_DOWNLOAD_ENDPOINT)
+    public ResponseEntity<byte[]> downloadOrderTickets(@PathVariable UUID orderId, @RequestParam String signature) {
 
-        TicketFileDto ticketFile = ticketDownloadService.getTicketPdf(ticketId, signature);
+        byte[] zipContent = ticketDownloadService.getTicketsZip(orderId, signature);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + ticketFile.fileName() + "\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .contentLength(ticketFile.content().length)
-                .body(ticketFile.content());
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"tickets_" + orderId + ".zip\"")
+                .contentType(MediaType.valueOf("application/zip"))
+                .contentLength(zipContent.length)
+                .body(zipContent);
     }
 }
