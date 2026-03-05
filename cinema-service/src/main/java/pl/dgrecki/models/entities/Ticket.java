@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 import lombok.*;
 
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -27,4 +27,7 @@ public class Ticket {
 
     @Column(nullable = false)
     private Instant createdAt;
+
+    @Column(name = "file_name")
+    private String fileName;
 }

@@ -5,10 +5,12 @@ import static pl.dgrecki.constants.ExceptionMessages.*;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.exceptions.TicketCreatingException;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.Reservation;
@@ -33,6 +35,12 @@ public class TicketService {
             log.warn("Cannot create tickets, there is no paid reservations in order: '{}'", order.getId());
         }
         reservations.forEach(this::createTicket);
+    }
+
+    public Ticket getTicketById(UUID ticketId) {
+        return ticketRepository
+                .findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(TICKET_NOT_FOUND_MSG, ticketId)));
     }
 
     private void createTicket(Reservation reservation) {

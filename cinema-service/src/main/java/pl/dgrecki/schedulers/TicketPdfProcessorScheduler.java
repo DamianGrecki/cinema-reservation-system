@@ -26,8 +26,7 @@ public class TicketPdfProcessorScheduler {
         List<TicketPdfJob> jobs = ticketPdfJobService.claimJobs(limit);
         for (TicketPdfJob job : jobs) {
             try {
-                ticketGeneratorService.createTicketPdf(job.getTicketId());
-                ticketPdfJobService.markGenerated(job);
+                ticketGeneratorService.createTicketPdf(job);
             } catch (Exception e) {
                 log.error("Failed to generate PDF for ticket {}", job.getTicketId(), e);
                 ticketPdfJobService.handleFailedAttempt(job, e.getMessage());

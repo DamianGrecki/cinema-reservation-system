@@ -1,8 +1,8 @@
 package pl.dgrecki.utils;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -17,14 +17,15 @@ public class PdfGenerator {
     private static File fontFile;
 
     @SneakyThrows
-    public static void generatePdf(String html, String outputPath) {
-        try (FileOutputStream os = new FileOutputStream(outputPath)) {
+    public static byte[] generatePdf(String html) {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             File fontFile = getFontFile();
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.withHtmlContent(html, null);
             builder.useFont(fontFile, "Roboto");
             builder.toStream(os);
             builder.run();
+            return os.toByteArray();
         } catch (Exception e) {
             throw new PdfGenerationException("PDF generation failed", e);
         }

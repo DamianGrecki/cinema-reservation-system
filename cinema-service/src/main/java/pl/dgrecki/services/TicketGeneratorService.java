@@ -16,6 +16,7 @@ import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.TicketPdfDto;
 import pl.dgrecki.models.entities.*;
 import pl.dgrecki.repositories.TicketRepository;
+import pl.dgrecki.services.storage.TicketFileStorage;
 
 @Slf4j
 @Service
@@ -25,27 +26,37 @@ public class TicketGeneratorService {
     private final SpringTemplateEngine templateEngine;
     private final TicketPdfMapper ticketPdfMapper;
     private final TicketTemplateService ticketTemplateService;
+    private final TicketFileStorage ticketFileStorage;
+    private final TicketPdfJobService ticketPdfJobService;
     private final Clock clock;
 
     public TicketGeneratorService(
             TicketRepository ticketRepository,
             TicketPdfMapper ticketPdfMapper,
             TicketTemplateService ticketTemplateService,
+            TicketFileStorage ticketFileStorage,
+            TicketPdfJobService ticketPdfJobService,
             Clock clock) {
         this.ticketRepository = ticketRepository;
         this.ticketPdfMapper = ticketPdfMapper;
         this.templateEngine = getTemplateEngine();
         this.ticketTemplateService = ticketTemplateService;
+        this.ticketFileStorage = ticketFileStorage;
+        this.ticketPdfJobService = ticketPdfJobService;
         this.clock = clock;
     }
 
     @Transactional
-    public void createTicketPdf(UUID ticketId) {
+    public void createTicketPdf(TicketPdfJob ticketPdfJob) {
+        UUID ticketId = ticketPdfJob.getTicketId();
         Ticket ticket = ticketRepository
                 .findDataForTicketPdf(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(TICKET_NOT_FOUND_MSG, ticketId)));
         String html = buildTicketHtml(ticket);
-        generatePdf(html, String.format("%s_ticket.pdf", ticketId));
+        byte[] pdfBytes = generatePdf(html);
+        String fileName = ticketFileStorage.store(ticketId, pdfBytes);
+        ticket.setFileName(fileName);
+        ticketPdfJobService.markGenerated(ticketPdfJob);
     }
 
     private String buildTicketHtml(Ticket ticket) {

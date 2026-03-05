@@ -16,7 +16,9 @@ public class ExceptionMessages {
     public static final String RESERVATION_NOT_FOUND_MSG = "Reservation %s not found.";
     public static final String RESERVATIONS_NOT_FOUND_MSG = "Reservations not found.";
     public static final String TICKET_NOT_FOUND_MSG = "Ticket %s not found.";
+    public static final String TICKET_PDF_NOT_GENERATED_MSG = "Ticket PDF is not yet generated.";
     public static final String TICKET_TEMPLATE_NOT_FOUND_MSG = "Cannot find active ticket template";
+    public static final String INVALID_TICKET_DOWNLOAD_LINK_MSG = "Invalid ticket download link";
     public static final String SEAT_DOES_NOT_BELONG_TO_HALL_MSG = "Seat does not belong to the screening's cinema hall";
     public static final String SHOW_HAS_ALREADY_STARTED_MSG = "Reservation failed the show has already started";
     public static final String BASKET_EXPIRED_MSG = "Basket has expired";
