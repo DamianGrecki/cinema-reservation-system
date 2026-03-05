@@ -1,5 +1,6 @@
 package pl.dgrecki.repositories;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,4 +27,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Optional<Ticket> findDataForTicketPdf(UUID id);
 
     Optional<Ticket> findByReservation(Reservation reservation);
+
+    List<Ticket> findByOrderId(UUID orderId);
 }

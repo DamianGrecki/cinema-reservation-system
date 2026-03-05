@@ -11,6 +11,12 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
+            <column name="order_id" type="UUID">
+                <constraints nullable="false"
+                             foreignKeyName="fk_tickets_order"
+                             references="orders(id)"/>
+            </column>
+
             <column name="reservation_id" type="UUID">
                 <constraints nullable="false"
                              foreignKeyName="fk_tickets_reservation"

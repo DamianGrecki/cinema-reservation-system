@@ -19,57 +19,57 @@ class TicketDownloadTokenServiceUnitTests {
     }
 
     @Test
-    void generateUrlShouldContainTicketIdAndSignatureTest() {
-        UUID ticketId = UUID.randomUUID();
+    void generateUrlShouldContainOrderIdAndSignatureTest() {
+        UUID orderId = UUID.randomUUID();
 
-        String url = tokenService.generateUrl(ticketId);
+        String url = tokenService.generateUrl(orderId);
 
-        assertTrue(url.startsWith("/api/ticket/" + ticketId + "/download?signature="));
+        assertTrue(url.startsWith("/api/orders/" + orderId + "/tickets/download?signature="));
     }
 
     @Test
     void isValidSignatureShouldReturnTrueForCorrectSignatureTest() {
-        UUID ticketId = UUID.randomUUID();
-        String url = tokenService.generateUrl(ticketId);
+        UUID orderId = UUID.randomUUID();
+        String url = tokenService.generateUrl(orderId);
         String signature = url.substring(url.indexOf("signature=") + "signature=".length());
 
-        assertTrue(tokenService.isValidSignature(ticketId, signature));
+        assertTrue(tokenService.isValidSignature(orderId, signature));
     }
 
     @Test
     void isValidSignatureShouldReturnFalseForWrongSignatureTest() {
-        UUID ticketId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
 
-        assertFalse(tokenService.isValidSignature(ticketId, "invalidSignature"));
+        assertFalse(tokenService.isValidSignature(orderId, "invalidSignature"));
     }
 
     @Test
-    void isValidSignatureShouldReturnFalseForDifferentTicketIdTest() {
-        UUID ticketId = UUID.randomUUID();
-        UUID anotherTicketId = UUID.randomUUID();
-        String url = tokenService.generateUrl(ticketId);
+    void isValidSignatureShouldReturnFalseForDifferentOrderIdTest() {
+        UUID orderId = UUID.randomUUID();
+        UUID anotherOrderId = UUID.randomUUID();
+        String url = tokenService.generateUrl(orderId);
         String signature = url.substring(url.indexOf("signature=") + "signature=".length());
 
-        assertFalse(tokenService.isValidSignature(anotherTicketId, signature));
+        assertFalse(tokenService.isValidSignature(anotherOrderId, signature));
     }
 
     @Test
-    void generateUrlShouldProduceDeterministicSignatureForSameTicketIdTest() {
-        UUID ticketId = UUID.randomUUID();
+    void generateUrlShouldProduceDeterministicSignatureForSameOrderIdTest() {
+        UUID orderId = UUID.randomUUID();
 
-        String url1 = tokenService.generateUrl(ticketId);
-        String url2 = tokenService.generateUrl(ticketId);
+        String url1 = tokenService.generateUrl(orderId);
+        String url2 = tokenService.generateUrl(orderId);
 
         assertEquals(url1, url2);
     }
 
     @Test
     void differentSecretsShouldProduceDifferentSignaturesTest() {
-        UUID ticketId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
         TicketDownloadTokenService otherService = new TicketDownloadTokenService("differentSecret");
 
-        String url1 = tokenService.generateUrl(ticketId);
-        String url2 = otherService.generateUrl(ticketId);
+        String url1 = tokenService.generateUrl(orderId);
+        String url2 = otherService.generateUrl(orderId);
 
         assertNotEquals(url1, url2);
     }
