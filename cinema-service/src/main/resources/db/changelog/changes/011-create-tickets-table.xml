@@ -24,6 +24,8 @@
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="now()">
                 <constraints nullable="false"/>
             </column>
+
+            <column name="file_name" type="VARCHAR(512)"/>
         </createTable>
 
         <addUniqueConstraint

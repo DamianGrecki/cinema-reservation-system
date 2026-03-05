@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 RESERVATIONS_CANCEL_ENDPOINT,
                                 RESERVATION_PRICING_TYPE_ENDPOINT,
                                 TICKET_ENDPOINT,
+                                TICKET_DOWNLOAD_ENDPOINT,
                                 PAYMENT_ENDPOINT,
                                 PAYMENT_PROVIDER_WEBHOOK)
                         .permitAll()

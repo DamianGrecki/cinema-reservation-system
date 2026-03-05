@@ -56,6 +56,12 @@ public class ExceptionsHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(TicketDownloadException.class)
+    public ResponseEntity<ErrorResponse> ticketDownloadError(TicketDownloadException ex) {
+        log.warn("Ticket download exception occurred", ex);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         log.warn("Data integrity violation occurred", ex);

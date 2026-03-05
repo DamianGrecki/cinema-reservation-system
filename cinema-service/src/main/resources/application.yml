@@ -55,6 +55,14 @@ scheduler:
     delay-ms: 10000
     max-attempts: 3
 
+ticket:
+  storage:
+    type: local
+    local:
+      directory: ./ticket-pdfs
+  download:
+    signing-secret: secureRandomKeyForTicketsPdfDownload
+
 payment-provider:
   attempts-limit: 3
   sandbox:
