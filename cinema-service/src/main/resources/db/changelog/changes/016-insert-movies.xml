@@ -31,6 +31,30 @@
             <column name="description" value="Batman faces the Joker, a criminal mastermind who wants to plunge Gotham City into chaos."/>
         </insert>
 
+        <insert tableName="movies">
+            <column name="id" value="55555555-5555-5555-5555-555555555555"/>
+            <column name="title" value="Pulp Fiction"/>
+            <column name="description" value="The lives of two mob hitmen, a boxer, and a pair of diner bandits intertwine in four tales of violence and redemption."/>
+        </insert>
+
+        <insert tableName="movies">
+            <column name="id" value="66666666-6666-6666-6666-666666666666"/>
+            <column name="title" value="The Shawshank Redemption"/>
+            <column name="description" value="A banker convicted of uxoricide forms a friendship over a quarter century with a hardened convict."/>
+        </insert>
+
+        <insert tableName="movies">
+            <column name="id" value="77777777-7777-7777-7777-777777777777"/>
+            <column name="title" value="Gladiator"/>
+            <column name="description" value="A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family."/>
+        </insert>
+
+        <insert tableName="movies">
+            <column name="id" value="88888888-8888-8888-8888-888888888888"/>
+            <column name="title" value="Blade Runner 2049"/>
+            <column name="description" value="A young blade runner discovers a long-buried secret that leads him to track down a former blade runner."/>
+        </insert>
+
     </changeSet>
 
 </databaseChangeLog>
