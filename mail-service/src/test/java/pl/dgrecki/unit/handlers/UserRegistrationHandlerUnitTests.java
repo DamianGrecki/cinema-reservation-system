@@ -18,6 +18,7 @@ import pl.dgrecki.models.UserRegistrationEventData;
 import pl.dgrecki.models.entities.InboxEvent;
 import pl.dgrecki.models.entities.MailTemplate;
 import pl.dgrecki.models.enums.EventType;
+import pl.dgrecki.models.enums.TemplateType;
 import pl.dgrecki.services.MailService;
 import pl.dgrecki.services.MailTemplateService;
 
@@ -66,7 +67,8 @@ class UserRegistrationHandlerUnitTests {
         when(objectMapper.convertValue(dataNode, UserRegistrationEventData.class))
                 .thenReturn(eventData);
 
-        when(mailTemplateService.getUserRegistrationMailTemplate()).thenReturn(template);
+        when(mailTemplateService.getMailTemplate(TemplateType.USER_REGISTRATION))
+                .thenReturn(template);
 
         handler.handle(inboxEvent);
 

@@ -15,13 +15,13 @@ import pl.dgrecki.models.events.TicketGeneratedEventData;
 public class EventService {
 
     private final OutboxService outboxService;
-    private final TicketDownloadUrlService ticketDownloadUrlService;
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public void createTicketGeneratedEvent(UUID orderId, String recipientEmail) {
-        String downloadUrl = ticketDownloadUrlService.generateUrl(orderId);
-        TicketGeneratedEventData data = new TicketGeneratedEventData(orderId, recipientEmail, downloadUrl);
+    public void createTicketGeneratedEvent(
+            UUID orderId, String recipientEmail, String recipientFirstName, String downloadUrl) {
+        TicketGeneratedEventData data =
+                new TicketGeneratedEventData(orderId, recipientEmail, recipientFirstName, downloadUrl);
         outboxService.createOutboxEvent(TICKET_GENERATED, toJson(data));
     }
 

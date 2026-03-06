@@ -17,7 +17,7 @@ public class EventDlqListener {
 
     private final InboxDlqService inboxDlqService;
 
-    @KafkaListener(topics = "${kafka.topics.user-registration-dlq}")
+    @KafkaListener(topics = {"${kafka.topics.user-registration-dlq}", "${kafka.topics.ticket-generated-dlq}"})
     public void handleDlqEvent(
             String rawMessage, Acknowledgment acknowledgment, ConsumerRecord<String, String> record) {
         String errorMessage = getErrorMessage(record);

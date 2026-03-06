@@ -18,11 +18,11 @@ public class MailTemplateService {
 
     private final MailTemplateRepository mailTemplateRepository;
 
-    public MailTemplate getUserRegistrationMailTemplate() {
+    public MailTemplate getMailTemplate(TemplateType templateType) {
         return mailTemplateRepository
-                .findByTemplateTypeAndIsActiveTrue(TemplateType.USER_REGISTRATION)
+                .findByTemplateTypeAndIsActiveTrue(templateType)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Not found active template type: %s", TemplateType.USER_REGISTRATION)));
+                        String.format("Not found active template type: %s", templateType)));
     }
 
     public void validateTemplateVariables(MailTemplate template, Map<String, Object> variables) {

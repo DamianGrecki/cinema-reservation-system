@@ -17,7 +17,7 @@ public class EventListener {
     private final InboxService inboxService;
     private final IncomingEventDeserializer incomingEventDeserializer;
 
-    @KafkaListener(topics = "${kafka.topics.user-registration}")
+    @KafkaListener(topics = {"${kafka.topics.user-registration}", "${kafka.topics.ticket-generated}"})
     public void handleIncomingEvent(String message, Acknowledgment acknowledgment) {
         IncomingEvent incomingEvent = incomingEventDeserializer.deserialize(message);
         inboxService.createInboxEvent(incomingEvent);

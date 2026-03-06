@@ -35,7 +35,7 @@ class MailTemplateServiceUnitTests {
         when(mailTemplateRepository.findByTemplateTypeAndIsActiveTrue(TemplateType.USER_REGISTRATION))
                 .thenReturn(Optional.of(template));
 
-        MailTemplate result = mailTemplateService.getUserRegistrationMailTemplate();
+        MailTemplate result = mailTemplateService.getMailTemplate(TemplateType.USER_REGISTRATION);
 
         assertEquals("user-registration", result.getTemplateName());
         assertEquals(Set.of("email", "name"), result.getTemplateKeys());
@@ -47,7 +47,8 @@ class MailTemplateServiceUnitTests {
                 .thenReturn(Optional.empty());
 
         ResourceNotFoundException ex = assertThrows(
-                ResourceNotFoundException.class, () -> mailTemplateService.getUserRegistrationMailTemplate());
+                ResourceNotFoundException.class,
+                () -> mailTemplateService.getMailTemplate(TemplateType.USER_REGISTRATION));
 
         assertEquals("Not found active template type: USER_REGISTRATION", ex.getMessage());
     }

@@ -39,13 +39,14 @@ public class SandboxPaymentService implements PaymentProviderService {
     public SuccessResponse createPayment(CreatePaymentRequest request) {
         UUID customerId = request.customerId();
         String guestEmail = request.guestEmail();
+        String guestFirstName = request.guestFirstName();
         UUID basketId = request.basketId();
 
-        validateCustomerData(customerId, guestEmail);
+        validateCustomerData(customerId, guestEmail, guestFirstName);
 
         validatePaymentsIfAlreadyExists(basketId);
 
-        Order order = orderService.prepareOrder(customerId, guestEmail, basketId, getProviderName());
+        Order order = orderService.prepareOrder(customerId, guestEmail, guestFirstName, basketId, getProviderName());
 
         SandboxPaymentResponse sandboxPaymentResponse = sendPaymentRequestToProvider(order);
         paymentAttemptService.createAttempt(
@@ -76,8 +77,8 @@ public class SandboxPaymentService implements PaymentProviderService {
         return response;
     }
 
-    private void validateCustomerData(UUID customerId, String guestEmail) {
-        if (Objects.isNull(customerId) && Objects.isNull(guestEmail)) {
+    private void validateCustomerData(UUID customerId, String guestEmail, String guestFirstName) {
+        if (Objects.isNull(customerId) && (Objects.isNull(guestEmail) && Objects.isNull(guestFirstName))) {
             throw new PaymentProcessException(CUSTOMER_DATA_REQUIRED_MSG);
         }
     }

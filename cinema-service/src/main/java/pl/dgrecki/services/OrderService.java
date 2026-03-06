@@ -34,34 +34,45 @@ public class OrderService {
     private final Clock clock;
 
     @Transactional
-    public Order prepareOrder(UUID customerId, String guestEmail, UUID basketId, PaymentProvider provider) {
+    public Order prepareOrder(
+            UUID customerId, String guestEmail, String guestFirstName, UUID basketId, PaymentProvider provider) {
         List<Reservation> reservations = claimReservationsForOrder(basketId);
         reservations.forEach(r -> r.setStatus(PAYMENT_PENDING));
 
         validateBasket(basketId);
 
-        return resolveOrder(reservations, customerId, guestEmail, provider);
+        return resolveOrder(reservations, customerId, guestEmail, guestFirstName, provider);
     }
 
     private Order resolveOrder(
-            List<Reservation> reservations, UUID customerId, String guestEmail, PaymentProvider provider) {
+            List<Reservation> reservations,
+            UUID customerId,
+            String guestEmail,
+            String guestFirstName,
+            PaymentProvider provider) {
         return reservations.stream()
                 .map(Reservation::getOrder)
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElseGet(() -> {
                     BigDecimal amount = priceService.calculateReservationsTotalPrice(reservations);
-                    Order newOrder = createOrder(customerId, guestEmail, amount, PLN, provider);
+                    Order newOrder = createOrder(customerId, guestEmail, guestFirstName, amount, PLN, provider);
                     reservations.forEach(r -> r.setOrder(newOrder));
                     return newOrder;
                 });
     }
 
     private Order createOrder(
-            UUID customerId, String guestEmail, BigDecimal price, Currency currency, PaymentProvider provider) {
+            UUID customerId,
+            String guestEmail,
+            String guestFirstName,
+            BigDecimal price,
+            Currency currency,
+            PaymentProvider provider) {
         Order order = Order.builder()
                 .customerId(customerId)
                 .guestEmail(guestEmail)
+                .guestFirstName(guestFirstName)
                 .price(price)
                 .currency(currency)
                 .provider(provider)

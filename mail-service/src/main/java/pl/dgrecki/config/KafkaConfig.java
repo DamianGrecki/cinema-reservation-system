@@ -2,6 +2,7 @@ package pl.dgrecki.config;
 
 import static pl.dgrecki.utils.ExceptionUtils.getRootCauseAsString;
 
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +23,17 @@ import pl.dgrecki.exceptions.DeserializationException;
 @EnableKafka
 public class KafkaConfig {
 
+    @Value("${kafka.topics.user-registration}")
+    private String userRegistrationTopic;
+
     @Value("${kafka.topics.user-registration-dlq}")
-    private String dlqTopic;
+    private String userRegistrationDlqTopic;
+
+    @Value("${kafka.topics.ticket-generated}")
+    private String ticketGeneratedTopic;
+
+    @Value("${kafka.topics.ticket-generated-dlq}")
+    private String ticketGeneratedDlqTopic;
 
     private static final int INTERVAL = 5000;
     private static final int ATTEMPTS = 3;
@@ -37,14 +47,27 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
 
-        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate, (record, ex) -> {
-            record.headers().add("x-error-message", getRootCauseAsString(ex).getBytes());
-            return new TopicPartition(dlqTopic, record.partition());
-        });
+        DeadLetterPublishingRecoverer recoverer = getDeadLetterPublishingRecoverer(kafkaTemplate);
         DefaultErrorHandler errorHandler = getDefaultErrorHandler(recoverer);
 
         factory.setCommonErrorHandler(errorHandler);
         return factory;
+    }
+
+    private DeadLetterPublishingRecoverer getDeadLetterPublishingRecoverer(
+            KafkaTemplate<String, String> kafkaTemplate) {
+        Map<String, String> dlqMapping = Map.of(
+                userRegistrationTopic, userRegistrationDlqTopic,
+                ticketGeneratedTopic, ticketGeneratedDlqTopic);
+
+        return new DeadLetterPublishingRecoverer(kafkaTemplate, (record, ex) -> {
+            String dlqTopic = dlqMapping.get(record.topic());
+            if (dlqTopic == null) {
+                throw new IllegalStateException("No DLQ mapping for topic: " + record.topic());
+            }
+            record.headers().add("x-error-message", getRootCauseAsString(ex).getBytes());
+            return new TopicPartition(dlqTopic, record.partition());
+        });
     }
 
     private DefaultErrorHandler getDefaultErrorHandler(DeadLetterPublishingRecoverer recoverer) {

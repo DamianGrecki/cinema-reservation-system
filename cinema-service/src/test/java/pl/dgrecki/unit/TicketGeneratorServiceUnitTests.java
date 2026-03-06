@@ -43,6 +43,9 @@ class TicketGeneratorServiceUnitTests {
     private TicketPdfJobService ticketPdfJobService;
 
     @Mock
+    private TicketDownloadUrlService ticketDownloadUrlService;
+
+    @Mock
     private Clock clock;
 
     @Mock
@@ -58,6 +61,7 @@ class TicketGeneratorServiceUnitTests {
                 ticketTemplateService,
                 ticketFileStorage,
                 ticketPdfJobService,
+                ticketDownloadUrlService,
                 eventService,
                 clock);
     }
@@ -97,15 +101,22 @@ class TicketGeneratorServiceUnitTests {
     void createTicketPdfShouldPublishEventWhenAllTicketsGeneratedTest() {
         UUID ticketId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        String guestEmail = "guest@example.com";
+        String email = "guest@example.com";
+        String firstName = "Jan";
+        String downloadUrl = "http://localhost:8080/api/orders/" + orderId + "/tickets/download?signature=abc";
 
         TicketPdfJob job = TicketPdfJob.builder().ticketId(ticketId).build();
-        Order order = Order.builder().id(orderId).guestEmail(guestEmail).build();
+        Order order = Order.builder()
+                .id(orderId)
+                .guestEmail(email)
+                .guestFirstName(firstName)
+                .build();
         Ticket ticket = Ticket.builder().id(ticketId).order(order).build();
 
         stubPdfGeneration(ticketId, ticket);
         when(ticketFileStorage.store(any(), any())).thenReturn("file.pdf");
         when(ticketPdfJobService.areAllTicketsGeneratedForOrder(orderId)).thenReturn(true);
+        when(ticketDownloadUrlService.generateUrl(orderId)).thenReturn(downloadUrl);
 
         try (MockedStatic<PdfGenerator> pdf = mockStatic(PdfGenerator.class);
                 MockedStatic<QrCodeGenerator> qr = mockStatic(QrCodeGenerator.class)) {
@@ -117,7 +128,7 @@ class TicketGeneratorServiceUnitTests {
             ticketGeneratorService.createTicketPdf(job);
         }
 
-        verify(eventService).createTicketGeneratedEvent(orderId, guestEmail);
+        verify(eventService).createTicketGeneratedEvent(orderId, email, firstName, downloadUrl);
     }
 
     @Test
@@ -144,7 +155,7 @@ class TicketGeneratorServiceUnitTests {
             ticketGeneratorService.createTicketPdf(job);
         }
 
-        verify(eventService, never()).createTicketGeneratedEvent(any(), any());
+        verify(eventService, never()).createTicketGeneratedEvent(any(), any(), any(), any());
     }
 
     @Test

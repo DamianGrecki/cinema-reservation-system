@@ -1,44 +1,51 @@
 package pl.dgrecki.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import pl.dgrecki.models.Attachment;
 import pl.dgrecki.models.MailData;
-import pl.dgrecki.models.UserRegistrationEventData;
+import pl.dgrecki.models.TicketGeneratedEventData;
 import pl.dgrecki.models.entities.InboxEvent;
 import pl.dgrecki.models.entities.MailTemplate;
 import pl.dgrecki.models.enums.EventType;
 import pl.dgrecki.models.enums.TemplateType;
+import pl.dgrecki.services.AttachmentsService;
 import pl.dgrecki.services.MailService;
 import pl.dgrecki.services.MailTemplateService;
 
 @Component
 @RequiredArgsConstructor
-public class UserRegistrationHandler implements InboxEventHandler {
+public class TicketGeneratedHandler implements InboxEventHandler {
 
     private final ObjectMapper objectMapper;
     private final MailTemplateService mailTemplateService;
     private final MailService mailService;
+    private final AttachmentsService attachmentsService;
 
     @Override
     public EventType getSupportedEventType() {
-        return EventType.USER_REGISTRATION;
+        return EventType.TICKET_GENERATED;
     }
 
     @Override
     public void handle(InboxEvent event) {
-        UserRegistrationEventData data = objectMapper.convertValue(event.getData(), UserRegistrationEventData.class);
-        MailTemplate mailTemplate = mailTemplateService.getMailTemplate(TemplateType.USER_REGISTRATION);
+        TicketGeneratedEventData data = objectMapper.convertValue(event.getData(), TicketGeneratedEventData.class);
+
+        List<Attachment> attachments = attachmentsService.downloadAttachments(URI.create(data.getDownloadUrl()));
+
+        MailTemplate mailTemplate = mailTemplateService.getMailTemplate(TemplateType.TICKET_GENERATED);
 
         MailData mailData = MailData.builder()
                 .to(data.getUserEmail())
                 .subject(mailTemplate.getSubject())
                 .templateName(mailTemplate.getTemplateName())
                 .templateHtml(mailTemplate.getTemplateHtml())
-                .variables(Map.of(
-                        "firstName", data.getUserFirstName(),
-                        "activationLink", data.getActivationLink()))
+                .attachments(attachments)
+                .variables(Map.of("firstName", data.getUserFirstName()))
                 .build();
         mailTemplateService.validateTemplateVariables(mailTemplate, mailData.getVariables());
         mailService.send(mailData);
