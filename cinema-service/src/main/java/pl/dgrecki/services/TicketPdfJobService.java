@@ -68,6 +68,10 @@ public class TicketPdfJobService {
         ticketPdfJobRepository.save(job);
     }
 
+    public boolean areAllTicketsGeneratedForOrder(UUID orderId) {
+        return ticketPdfJobRepository.countNotInStatusByOrderId(orderId, TicketPdfStatus.GENERATED) == 0;
+    }
+
     private void setJobsStatus(List<TicketPdfJob> jobs, TicketPdfStatus status) {
         if (!jobs.isEmpty()) {
             List<UUID> ids = jobs.stream().map(TicketPdfJob::getId).toList();

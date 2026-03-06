@@ -9,19 +9,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TicketDownloadTokenService {
+public class TicketDownloadUrlService {
 
     private static final String HMAC_ALGORITHM = "HmacSHA256";
 
     private final String secret;
+    private final String baseUrl;
 
-    public TicketDownloadTokenService(@Value("${ticket.download.signing-secret}") String secret) {
+    public TicketDownloadUrlService(
+            @Value("${ticket.download.signing-secret}") String secret,
+            @Value("${ticket.download.base-url}") String baseUrl) {
         this.secret = secret;
+        this.baseUrl = baseUrl;
     }
 
     public String generateUrl(UUID orderId) {
         String signature = sign(orderId);
-        return String.format("/api/orders/%s/tickets/download?signature=%s", orderId, signature);
+        return String.format("%s/api/orders/%s/tickets/download?signature=%s", baseUrl, orderId, signature);
     }
 
     public boolean isValidSignature(UUID orderId, String signature) {

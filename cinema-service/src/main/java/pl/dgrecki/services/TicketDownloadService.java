@@ -19,7 +19,7 @@ import pl.dgrecki.services.storage.TicketFileStorage;
 public class TicketDownloadService {
 
     private final TicketService ticketService;
-    private final TicketDownloadTokenService tokenService;
+    private final TicketDownloadUrlService ticketUrlService;
     private final TicketFileStorage ticketFileStorage;
 
     public byte[] getTicketsZip(UUID orderId, String signature) {
@@ -55,7 +55,7 @@ public class TicketDownloadService {
     }
 
     private void validateSignature(UUID orderId, String signature) {
-        if (!tokenService.isValidSignature(orderId, signature)) {
+        if (!ticketUrlService.isValidSignature(orderId, signature)) {
             throw new TicketDownloadException(INVALID_TICKET_DOWNLOAD_LINK_MSG);
         }
     }

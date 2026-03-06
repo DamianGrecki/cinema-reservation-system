@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.dgrecki.exceptions.TicketDownloadException;
 import pl.dgrecki.models.entities.Ticket;
 import pl.dgrecki.services.TicketDownloadService;
-import pl.dgrecki.services.TicketDownloadTokenService;
+import pl.dgrecki.services.TicketDownloadUrlService;
 import pl.dgrecki.services.TicketService;
 import pl.dgrecki.services.storage.TicketFileStorage;
 
@@ -28,7 +28,7 @@ class TicketDownloadServiceUnitTests {
     private TicketService ticketService;
 
     @Mock
-    private TicketDownloadTokenService tokenService;
+    private TicketDownloadUrlService tokenService;
 
     @Mock
     private TicketFileStorage ticketFileStorage;

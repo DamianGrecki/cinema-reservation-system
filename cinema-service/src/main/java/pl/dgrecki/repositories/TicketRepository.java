@@ -14,6 +14,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     @Query("""
     SELECT t
     FROM Ticket t
+    JOIN FETCH t.order o
     JOIN FETCH t.reservation r
     JOIN FETCH r.screening s
     JOIN FETCH s.movieVersion mv

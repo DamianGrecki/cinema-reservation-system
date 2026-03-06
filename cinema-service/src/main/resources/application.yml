@@ -23,6 +23,20 @@ spring:
     enabled: true
     change-log: db/changelog/db.changelog-master.xml
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all
+      retries: 3
+      compression-type: gzip
+    properties:
+      delivery.timeout.ms: 30000
+      request.timeout.ms: 10000
+      max.block.ms: 5000
+    topics:
+      ticket-generated: mail.ticket.generated
+    poll-interval-ms: 5000
+
 jwt:
   secret: superDlugiKluczMinimum32ZnakiTutaj
 
@@ -62,6 +76,7 @@ ticket:
       directory: ./ticket-pdfs
   download:
     signing-secret: secureRandomKeyForTicketsPdfDownload
+    base-url: http://localhost:8080
 
 payment-provider:
   attempts-limit: 3

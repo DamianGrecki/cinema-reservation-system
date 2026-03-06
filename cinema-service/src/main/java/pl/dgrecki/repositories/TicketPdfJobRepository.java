@@ -40,4 +40,11 @@ public interface TicketPdfJobRepository extends JpaRepository<TicketPdfJob, UUID
         AND j.status != :status
     """)
     int setJobsStatus(@Param("ids") List<UUID> ids, @Param("status") TicketPdfStatus status);
+
+    @Query("""
+        SELECT COUNT(j) FROM TicketPdfJob j
+        WHERE j.ticketId IN (SELECT t.id FROM Ticket t WHERE t.order.id = :orderId)
+        AND j.status != :status
+    """)
+    long countNotInStatusByOrderId(@Param("orderId") UUID orderId, @Param("status") TicketPdfStatus status);
 }
