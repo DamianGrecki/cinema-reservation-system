@@ -31,4 +31,5 @@
     <include file="/db/changelog/changes/024-insert-default-price-modifiers.xml"/>
     <include file="/db/changelog/changes/025-create-payment-attempts-table.xml"/>
     <include file="/db/changelog/changes/026-create-ticket-pdf-jobs-table.xml"/>
+    <include file="/db/changelog/changes/027-create-outbox-events-table.xml"/>
 </databaseChangeLog>

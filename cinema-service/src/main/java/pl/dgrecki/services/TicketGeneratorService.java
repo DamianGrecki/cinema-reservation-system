@@ -28,6 +28,7 @@ public class TicketGeneratorService {
     private final TicketTemplateService ticketTemplateService;
     private final TicketFileStorage ticketFileStorage;
     private final TicketPdfJobService ticketPdfJobService;
+    private final EventService eventService;
     private final Clock clock;
 
     public TicketGeneratorService(
@@ -36,6 +37,7 @@ public class TicketGeneratorService {
             TicketTemplateService ticketTemplateService,
             TicketFileStorage ticketFileStorage,
             TicketPdfJobService ticketPdfJobService,
+            EventService eventService,
             Clock clock) {
         this.ticketRepository = ticketRepository;
         this.ticketPdfMapper = ticketPdfMapper;
@@ -43,6 +45,7 @@ public class TicketGeneratorService {
         this.ticketTemplateService = ticketTemplateService;
         this.ticketFileStorage = ticketFileStorage;
         this.ticketPdfJobService = ticketPdfJobService;
+        this.eventService = eventService;
         this.clock = clock;
     }
 
@@ -57,6 +60,24 @@ public class TicketGeneratorService {
         String fileName = ticketFileStorage.store(ticketId, pdfBytes);
         ticket.setFileName(fileName);
         ticketPdfJobService.markGenerated(ticketPdfJob);
+        publishEventIfAllTicketsGenerated(ticket);
+    }
+
+    private void publishEventIfAllTicketsGenerated(Ticket ticket) {
+        UUID orderId = ticket.getOrder().getId();
+        if (ticketPdfJobService.areAllTicketsGeneratedForOrder(orderId)) {
+            String recipientEmail = resolveRecipientEmail(ticket.getOrder());
+            eventService.createTicketGeneratedEvent(orderId, recipientEmail);
+            log.info("All tickets generated for order {}, outbox event created", orderId);
+        }
+    }
+
+    private String resolveRecipientEmail(Order order) {
+        if (order.getGuestEmail() != null) {
+            return order.getGuestEmail();
+        }
+        // TODO: resolve email from customerId when user accounts are fully integrated
+        throw new IllegalStateException("No recipient email for order: " + order.getId());
     }
 
     private String buildTicketHtml(Ticket ticket) {
