@@ -84,7 +84,7 @@ class OrderServiceUnitTests {
         when(priceService.calculateReservationsTotalPrice(anyList())).thenReturn(amount);
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
-        Order result = orderService.prepareOrder(customerId, null, basketId, provider);
+        Order result = orderService.prepareOrder(customerId, null, null, basketId, provider);
 
         assertEquals(orderId, result.getId());
         assertEquals(PAYMENT_PENDING, reservation.getStatus());
@@ -110,7 +110,7 @@ class OrderServiceUnitTests {
 
         PaymentProcessException ex = assertThrows(
                 PaymentProcessException.class,
-                () -> orderService.prepareOrder(UUID.randomUUID(), null, basketId, PaymentProvider.SANDBOX));
+                () -> orderService.prepareOrder(UUID.randomUUID(), null, null, basketId, PaymentProvider.SANDBOX));
 
         assertEquals(RESERVATIONS_NOT_FOUND_MSG, ex.getMessage());
         verify(orderRepository, never()).save(any());
@@ -160,7 +160,7 @@ class OrderServiceUnitTests {
 
         PaymentProcessException ex = assertThrows(
                 PaymentProcessException.class,
-                () -> orderService.prepareOrder(UUID.randomUUID(), null, basketId, PaymentProvider.SANDBOX));
+                () -> orderService.prepareOrder(UUID.randomUUID(), null, null, basketId, PaymentProvider.SANDBOX));
 
         assertEquals(BASKET_EXPIRED_MSG, ex.getMessage());
         verify(orderRepository, never()).save(any());

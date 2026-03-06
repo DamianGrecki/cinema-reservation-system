@@ -65,7 +65,8 @@ public class PurchaseFlowSimulation extends BaseSimulation {
 
     ChainBuilder createPayment = exec(session -> {
                 String guestEmail = "guest_" + session.userId() + "_" + System.currentTimeMillis() + "@example.com";
-                return session.set("guestEmail", guestEmail);
+                String guestFirstName = "Guest_" + session.userId();
+                return session.set("guestEmail", guestEmail).set("guestFirstName", guestFirstName);
             })
             .exec(http("POST /api/payment")
                     .post("/api/payment")
@@ -74,7 +75,8 @@ public class PurchaseFlowSimulation extends BaseSimulation {
                     {
                         "basketId": "#{basketId}",
                         "provider": "SANDBOX",
-                        "guestEmail": "#{guestEmail}"
+                        "guestEmail": "#{guestEmail}",
+                        "guestFirstName": "#{guestFirstName}"
                     }
                     """))
                     .check(status().is(201)));

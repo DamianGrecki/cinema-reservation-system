@@ -24,6 +24,8 @@ public class Order {
 
     private String guestEmail;
 
+    private String guestFirstName;
+
     @Column(nullable = false)
     private BigDecimal price;
 

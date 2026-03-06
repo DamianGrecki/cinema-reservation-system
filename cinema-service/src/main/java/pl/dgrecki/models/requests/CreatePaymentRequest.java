@@ -13,4 +13,6 @@ public record CreatePaymentRequest(
 
         UUID customerId,
 
-        String guestEmail) {}
+        String guestEmail,
+
+        String guestFirstName) {}

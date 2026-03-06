@@ -37,6 +37,8 @@ spring:
 kafka:
   topics:
     user-registration: mail.registration.user
+    ticket-generated: ticket.generated
+    ticket-generated-dlq: ticket.generated.dlq
     user-registration-dlq: mail.registration.user.dlq
 
 management:

@@ -97,10 +97,15 @@ class TicketGeneratorServiceUnitTests {
     void createTicketPdfShouldPublishEventWhenAllTicketsGeneratedTest() {
         UUID ticketId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        String guestEmail = "guest@example.com";
+        String email = "guest@example.com";
+        String firstName = "Jan";
 
         TicketPdfJob job = TicketPdfJob.builder().ticketId(ticketId).build();
-        Order order = Order.builder().id(orderId).guestEmail(guestEmail).build();
+        Order order = Order.builder()
+                .id(orderId)
+                .guestEmail(email)
+                .guestFirstName(firstName)
+                .build();
         Ticket ticket = Ticket.builder().id(ticketId).order(order).build();
 
         stubPdfGeneration(ticketId, ticket);
@@ -117,7 +122,7 @@ class TicketGeneratorServiceUnitTests {
             ticketGeneratorService.createTicketPdf(job);
         }
 
-        verify(eventService).createTicketGeneratedEvent(orderId, guestEmail);
+        verify(eventService).createTicketGeneratedEvent(orderId, email, firstName);
     }
 
     @Test
@@ -144,7 +149,7 @@ class TicketGeneratorServiceUnitTests {
             ticketGeneratorService.createTicketPdf(job);
         }
 
-        verify(eventService, never()).createTicketGeneratedEvent(any(), any());
+        verify(eventService, never()).createTicketGeneratedEvent(any(), any(), any());
     }
 
     @Test

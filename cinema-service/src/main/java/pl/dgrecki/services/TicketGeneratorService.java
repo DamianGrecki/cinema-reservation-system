@@ -66,8 +66,10 @@ public class TicketGeneratorService {
     private void publishEventIfAllTicketsGenerated(Ticket ticket) {
         UUID orderId = ticket.getOrder().getId();
         if (ticketPdfJobService.areAllTicketsGeneratedForOrder(orderId)) {
-            String recipientEmail = resolveRecipientEmail(ticket.getOrder());
-            eventService.createTicketGeneratedEvent(orderId, recipientEmail);
+            Order order = ticket.getOrder();
+            String recipientEmail = resolveRecipientEmail(order);
+            String recipientFirstName = resolveRecipientFirstName(order);
+            eventService.createTicketGeneratedEvent(orderId, recipientEmail, recipientFirstName);
             log.info("All tickets generated for order {}, outbox event created", orderId);
         }
     }
@@ -78,6 +80,14 @@ public class TicketGeneratorService {
         }
         // TODO: resolve email from customerId when user accounts are fully integrated
         throw new IllegalStateException("No recipient email for order: " + order.getId());
+    }
+
+    private String resolveRecipientFirstName(Order order) {
+        if (order.getGuestFirstName() != null) {
+            return order.getGuestFirstName();
+        }
+        // TODO: resolve first name from customerId when user accounts are fully integrated
+        throw new IllegalStateException("No recipient first name for order: " + order.getId());
     }
 
     private String buildTicketHtml(Ticket ticket) {

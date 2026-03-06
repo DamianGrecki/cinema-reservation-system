@@ -65,7 +65,8 @@ class SandboxPaymentServiceUnitTests {
         UUID orderId = UUID.randomUUID();
         UUID transactionId = UUID.randomUUID();
 
-        CreatePaymentRequest request = new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null);
+        CreatePaymentRequest request =
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
 
         Order order = Order.builder()
                 .id(orderId)
@@ -77,7 +78,7 @@ class SandboxPaymentServiceUnitTests {
 
         SandboxPaymentResponse providerResponse = new SandboxPaymentResponse(transactionId, orderId, PENDING, null);
 
-        when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
+        when(orderService.prepareOrder(customerId, null, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
         when(responseSpec.body(SandboxPaymentResponse.class)).thenReturn(providerResponse);
 
@@ -91,7 +92,8 @@ class SandboxPaymentServiceUnitTests {
         UUID customerId = UUID.randomUUID();
         UUID basketId = UUID.randomUUID();
 
-        CreatePaymentRequest request = new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null);
+        CreatePaymentRequest request =
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
 
         Order existingOrder = Order.builder().id(UUID.randomUUID()).build();
 
@@ -104,19 +106,20 @@ class SandboxPaymentServiceUnitTests {
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(PAYMENT_ATTEMPTS_LIMIT_REACHED_MSG, ex.getMessage());
-        verify(orderService, never()).prepareOrder(any(), any(), any(), any());
+        verify(orderService, never()).prepareOrder(any(), any(), any(), any(), any());
         verify(paymentAttemptService, never()).createAttempt(any(), any(), any(), any());
     }
 
     @Test
     void createPaymentWhenCustomerDataNullShouldThrowTest() {
-        CreatePaymentRequest request = new CreatePaymentRequest(UUID.randomUUID(), PaymentProvider.SANDBOX, null, null);
+        CreatePaymentRequest request =
+                new CreatePaymentRequest(UUID.randomUUID(), PaymentProvider.SANDBOX, null, null, null);
 
         PaymentProcessException ex =
                 assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
 
         assertEquals(CUSTOMER_DATA_REQUIRED_MSG, ex.getMessage());
-        verify(orderService, never()).prepareOrder(any(), any(), any(), any());
+        verify(orderService, never()).prepareOrder(any(), any(), any(), any(), any());
         verify(paymentAttemptService, never()).createAttempt(any(), any(), any(), any());
     }
 
@@ -125,7 +128,8 @@ class SandboxPaymentServiceUnitTests {
         UUID customerId = UUID.randomUUID();
         UUID basketId = UUID.randomUUID();
 
-        CreatePaymentRequest request = new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null);
+        CreatePaymentRequest request =
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
 
         Order order = Order.builder()
                 .id(UUID.randomUUID())
@@ -135,7 +139,7 @@ class SandboxPaymentServiceUnitTests {
 
         RuntimeException networkError = new RuntimeException("Connection refused");
 
-        when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
+        when(orderService.prepareOrder(customerId, null, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
         when(responseSpec.body(SandboxPaymentResponse.class)).thenThrow(networkError);
 
@@ -151,7 +155,8 @@ class SandboxPaymentServiceUnitTests {
         UUID customerId = UUID.randomUUID();
         UUID basketId = UUID.randomUUID();
 
-        CreatePaymentRequest request = new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null);
+        CreatePaymentRequest request =
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
 
         Order order = Order.builder()
                 .id(UUID.randomUUID())
@@ -159,7 +164,7 @@ class SandboxPaymentServiceUnitTests {
                 .currency(Currency.PLN)
                 .build();
 
-        when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
+        when(orderService.prepareOrder(customerId, null, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
 
         PaymentProcessException ex =
@@ -176,7 +181,8 @@ class SandboxPaymentServiceUnitTests {
         UUID orderId = UUID.randomUUID();
         UUID transactionId = UUID.randomUUID();
 
-        CreatePaymentRequest request = new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null);
+        CreatePaymentRequest request =
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
 
         Order order = Order.builder()
                 .id(orderId)
@@ -186,7 +192,7 @@ class SandboxPaymentServiceUnitTests {
 
         SandboxPaymentResponse badStatusResponse = new SandboxPaymentResponse(transactionId, orderId, COMPLETED, null);
 
-        when(orderService.prepareOrder(customerId, null, basketId, PaymentProvider.SANDBOX))
+        when(orderService.prepareOrder(customerId, null, null, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
         when(responseSpec.body(SandboxPaymentResponse.class)).thenReturn(badStatusResponse);
 

@@ -34,7 +34,7 @@ spring:
       request.timeout.ms: 10000
       max.block.ms: 5000
     topics:
-      ticket-generated: mail.ticket.generated
+      ticket-generated: ticket.generated
     poll-interval-ms: 5000
 
 jwt:

@@ -19,9 +19,10 @@ public class EventService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public void createTicketGeneratedEvent(UUID orderId, String recipientEmail) {
+    public void createTicketGeneratedEvent(UUID orderId, String recipientEmail, String recipientFirstName) {
         String downloadUrl = ticketDownloadUrlService.generateUrl(orderId);
-        TicketGeneratedEventData data = new TicketGeneratedEventData(orderId, recipientEmail, downloadUrl);
+        TicketGeneratedEventData data =
+                new TicketGeneratedEventData(orderId, recipientEmail, recipientFirstName, downloadUrl);
         outboxService.createOutboxEvent(TICKET_GENERATED, toJson(data));
     }
 
