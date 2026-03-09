@@ -22,6 +22,17 @@ async def create_payment(request: Request, background_tasks: BackgroundTasks):
         "status": "PENDING",
     }
 
+@app.post("/api/refund")
+async def create_refund(request: Request):
+    data = await request.json()
+    refund_transaction_id = str(uuid.uuid4())
+
+    return {
+        "transactionId": refund_transaction_id,
+        "orderId": data.get("orderId"),
+        "status": "COMPLETED",
+    }
+
 async def send_webhook(order_id, transaction_id):
     # Payment processing delay
     await asyncio.sleep(10)

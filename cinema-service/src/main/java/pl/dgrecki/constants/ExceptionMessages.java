@@ -40,4 +40,8 @@ public class ExceptionMessages {
             "Payment failed, pending payment attempt already exists";
     public static final String PAYMENT_ATTEMPT_NOT_FOUND_MSG = "Payment attempt with transaction ID %s not found";
     public static final String DATA_INTEGRITY_CONFLICT_MSG = "Data integrity conflict";
+    public static final String REFUND_FAILED_MSG = "Refund failed for order %s";
+    public static final String REFUND_ALREADY_EXISTS_MSG = "Refund failed for order %s";
+    public static final String REFUND_NO_COMPLETED_PAYMENT_MSG = "No completed payment found for order %s";
+    public static final String ORDER_NOT_FOUND_MSG = "Order %s not found.";
 }

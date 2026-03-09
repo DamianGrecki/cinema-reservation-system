@@ -11,7 +11,8 @@ public enum ReservationStatus {
     PAYMENT_FAILED,
     PAID,
     EXPIRED,
-    CANCELED;
+    CANCELED,
+    REFUNDED;
 
     public boolean canTransitionTo(ReservationStatus target) {
         return allowedTransitions().contains(target);
@@ -32,7 +33,8 @@ public enum ReservationStatus {
             case CREATED -> Set.of(PAYMENT_PENDING, CANCELED, EXPIRED);
             case PAYMENT_PENDING -> Set.of(PAYMENT_ATTEMPT_FAILED, PAID, CANCELED, PAYMENT_FAILED);
             case PAYMENT_ATTEMPT_FAILED -> Set.of(PAYMENT_PENDING, PAYMENT_FAILED, EXPIRED);
-            case PAID, EXPIRED, CANCELED, PAYMENT_FAILED -> Set.of();
+            case PAID -> Set.of(REFUNDED);
+            case EXPIRED, CANCELED, PAYMENT_FAILED, REFUNDED -> Set.of();
         };
     }
 }

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.exceptions.TicketCreatingException;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.Reservation;
@@ -38,6 +39,12 @@ public class TicketService {
 
     public List<Ticket> getTicketsByOrderId(UUID orderId) {
         return ticketRepository.findByOrderId(orderId);
+    }
+
+    public Ticket getTicketById(UUID ticketId) {
+        return ticketRepository
+                .findById(ticketId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(TICKET_NOT_FOUND_MSG, ticketId)));
     }
 
     private void createTicket(Reservation reservation) {
