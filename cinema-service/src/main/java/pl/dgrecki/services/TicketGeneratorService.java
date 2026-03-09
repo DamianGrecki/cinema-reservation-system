@@ -16,6 +16,7 @@ import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.TicketPdfDto;
 import pl.dgrecki.models.entities.*;
 import pl.dgrecki.repositories.TicketRepository;
+import pl.dgrecki.services.storage.TicketDownloadUrlService;
 import pl.dgrecki.services.storage.TicketFileStorage;
 
 @Slf4j
