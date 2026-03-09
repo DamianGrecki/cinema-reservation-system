@@ -5,18 +5,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pl.dgrecki.services.TicketDownloadUrlService;
+import pl.dgrecki.services.storage.LocalTicketDownloadUrlService;
 
 class TicketDownloadUrlServiceUnitTests {
 
     private static final String BASE_URL = "http://localhost:8080";
     private static final String SECRET = "testSecretKeyForHmacSigning";
 
-    private TicketDownloadUrlService tokenService;
+    private LocalTicketDownloadUrlService tokenService;
 
     @BeforeEach
     void setUp() {
-        tokenService = new TicketDownloadUrlService(SECRET, BASE_URL);
+        tokenService = new LocalTicketDownloadUrlService(SECRET, BASE_URL);
     }
 
     @Test
@@ -67,7 +67,7 @@ class TicketDownloadUrlServiceUnitTests {
     @Test
     void differentSecretsShouldProduceDifferentSignaturesTest() {
         UUID orderId = UUID.randomUUID();
-        TicketDownloadUrlService otherService = new TicketDownloadUrlService("differentSecret", BASE_URL);
+        LocalTicketDownloadUrlService otherService = new LocalTicketDownloadUrlService("differentSecret", BASE_URL);
 
         String url1 = tokenService.generateUrl(orderId);
         String url2 = otherService.generateUrl(orderId);

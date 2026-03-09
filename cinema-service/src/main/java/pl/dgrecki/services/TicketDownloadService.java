@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.dgrecki.exceptions.TicketDownloadException;
 import pl.dgrecki.models.entities.Ticket;
+import pl.dgrecki.services.storage.TicketDownloadUrlService;
 import pl.dgrecki.services.storage.TicketFileStorage;
 
 @Service

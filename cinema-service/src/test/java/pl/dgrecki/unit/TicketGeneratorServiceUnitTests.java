@@ -20,6 +20,7 @@ import pl.dgrecki.models.TicketPdfDto;
 import pl.dgrecki.models.entities.*;
 import pl.dgrecki.repositories.TicketRepository;
 import pl.dgrecki.services.*;
+import pl.dgrecki.services.storage.TicketDownloadUrlService;
 import pl.dgrecki.services.storage.TicketFileStorage;
 import pl.dgrecki.utils.PdfGenerator;
 import pl.dgrecki.utils.QrCodeGenerator;
