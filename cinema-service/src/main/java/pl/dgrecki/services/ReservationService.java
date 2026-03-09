@@ -138,6 +138,15 @@ public class ReservationService {
     }
 
     @Transactional
+    public void setRefundedForReservationsByOrder(Order order) {
+        List<Reservation> reservations = reservationRepository.findByOrderAndStatusIn(
+                order, ReservationStatus.statusesThatCanTransitionTo(REFUNDED));
+        if (!reservations.isEmpty()) {
+            setReservationsStatus(reservations, REFUNDED);
+        }
+    }
+
+    @Transactional
     public List<Reservation> getPaidReservationsByOrder(Order order) {
         return reservationRepository.findByOrderAndStatusIn(order, Set.of(PAID));
     }

@@ -90,6 +90,12 @@ public class OrderService {
         return reservations;
     }
 
+    public Order getById(UUID orderId) {
+        return orderRepository
+                .findById(orderId)
+                .orElseThrow(() -> new PaymentProcessException(String.format(ORDER_NOT_FOUND_MSG, orderId)));
+    }
+
     public Optional<Order> findExistingOrderByBasketId(UUID basketId) {
         return orderRepository.findByBasketId(basketId);
     }

@@ -1,8 +1,10 @@
 package pl.dgrecki.services.payments;
 
 import static pl.dgrecki.constants.ExceptionMessages.PAYMENT_ATTEMPT_NOT_FOUND_MSG;
+import static pl.dgrecki.constants.ExceptionMessages.REFUND_NO_COMPLETED_PAYMENT_MSG;
 
 import java.time.Clock;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +60,13 @@ public class PaymentAttemptService {
         attempt.setStatus(status);
         attempt.setUpdatedAt(clock.instant());
         return attempt;
+    }
+
+    public PaymentAttempt findCompletedByOrderId(UUID orderId) {
+        return paymentAttemptRepository
+                .findByOrderIdAndStatus(orderId, PaymentStatus.COMPLETED)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(String.format(REFUND_NO_COMPLETED_PAYMENT_MSG, orderId)));
     }
 
     private int getAttemptCountByOrder(Order order) {

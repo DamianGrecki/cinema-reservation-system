@@ -68,6 +68,9 @@ scheduler:
     limit: 50
     delay-ms: 10000
     max-attempts: 3
+  ticket-refund:
+    delay-ms: 30000
+    max-attempts: 3
 
 ticket:
   storage:
