@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.dgrecki.exceptions.PaymentProcessException;
+import pl.dgrecki.exceptions.RefundFailedException;
 import pl.dgrecki.exceptions.TicketRefundingException;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.PaymentAttempt;
@@ -30,7 +31,6 @@ import pl.dgrecki.services.payments.PaymentAttemptService;
 import pl.dgrecki.services.payments.RefundProviderService;
 import pl.dgrecki.services.payments.RefundProviderService.RefundProviderResponse;
 import pl.dgrecki.services.payments.RefundService;
-import pl.dgrecki.services.payments.RefundWriter;
 
 @ExtendWith(MockitoExtension.class)
 class RefundServiceUnitTests {
@@ -51,9 +51,6 @@ class RefundServiceUnitTests {
     private RefundRepository refundRepository;
 
     @Mock
-    private RefundWriter refundWriter;
-
-    @Mock
     private RefundProviderService sandboxRefundProvider;
 
     @Mock
@@ -69,7 +66,6 @@ class RefundServiceUnitTests {
                 reservationService,
                 orderService,
                 refundRepository,
-                refundWriter,
                 List.of(sandboxRefundProvider),
                 clock,
                 MAX_REFUND_ATTEMPTS);
@@ -143,19 +139,27 @@ class RefundServiceUnitTests {
                 Order.builder().id(orderId).provider(PaymentProvider.SANDBOX).build();
         PaymentAttempt attempt = PaymentAttempt.builder().id(paymentAttemptId).build();
 
+        when(clock.instant()).thenReturn(FIXED_NOW);
         when(orderService.getById(orderId)).thenReturn(order);
         when(paymentAttemptService.findCompletedByOrderId(orderId)).thenReturn(attempt);
         when(refundRepository.existsByPaymentAttemptIdAndStatus(paymentAttemptId, RefundStatus.COMPLETED))
                 .thenReturn(false);
         when(sandboxRefundProvider.sendRefund(attempt, order)).thenReturn(null);
 
-        TicketRefundingException ex = assertThrows(
-                TicketRefundingException.class,
+        RefundFailedException ex = assertThrows(
+                RefundFailedException.class,
                 () -> refundService.refundOrder(orderId, RefundReason.TICKET_GENERATION_FAILED));
 
         assertEquals(String.format(REFUND_FAILED_MSG, orderId), ex.getMessage());
-        verify(refundWriter).saveFailedRefund(attempt, null, RefundReason.TICKET_GENERATION_FAILED);
-        verify(refundRepository, never()).save(any());
+
+        ArgumentCaptor<Refund> captor = ArgumentCaptor.forClass(Refund.class);
+        verify(refundRepository).save(captor.capture());
+        Refund savedRefund = captor.getValue();
+        assertEquals(RefundStatus.FAILED, savedRefund.getStatus());
+        assertEquals(RefundReason.TICKET_GENERATION_FAILED, savedRefund.getReason());
+        assertNull(savedRefund.getTransactionId());
+        assertEquals(FIXED_NOW, savedRefund.getCreatedAt());
+
         verify(reservationService, never()).setRefundedForReservationsByOrder(any());
     }
 
@@ -169,6 +173,7 @@ class RefundServiceUnitTests {
                 Order.builder().id(orderId).provider(PaymentProvider.SANDBOX).build();
         PaymentAttempt attempt = PaymentAttempt.builder().id(paymentAttemptId).build();
 
+        when(clock.instant()).thenReturn(FIXED_NOW);
         when(orderService.getById(orderId)).thenReturn(order);
         when(paymentAttemptService.findCompletedByOrderId(orderId)).thenReturn(attempt);
         when(refundRepository.existsByPaymentAttemptIdAndStatus(paymentAttemptId, RefundStatus.COMPLETED))
@@ -176,13 +181,20 @@ class RefundServiceUnitTests {
         when(sandboxRefundProvider.sendRefund(attempt, order))
                 .thenReturn(new RefundProviderResponse(refundTransactionId, RefundStatus.FAILED));
 
-        TicketRefundingException ex = assertThrows(
-                TicketRefundingException.class,
+        RefundFailedException ex = assertThrows(
+                RefundFailedException.class,
                 () -> refundService.refundOrder(orderId, RefundReason.TICKET_GENERATION_FAILED));
 
         assertEquals(String.format(REFUND_FAILED_MSG, orderId), ex.getMessage());
-        verify(refundWriter).saveFailedRefund(attempt, refundTransactionId, RefundReason.TICKET_GENERATION_FAILED);
-        verify(refundRepository, never()).save(any());
+
+        ArgumentCaptor<Refund> captor = ArgumentCaptor.forClass(Refund.class);
+        verify(refundRepository).save(captor.capture());
+        Refund savedRefund = captor.getValue();
+        assertEquals(RefundStatus.FAILED, savedRefund.getStatus());
+        assertEquals(RefundReason.TICKET_GENERATION_FAILED, savedRefund.getReason());
+        assertEquals(refundTransactionId, savedRefund.getTransactionId());
+        assertEquals(FIXED_NOW, savedRefund.getCreatedAt());
+
         verify(reservationService, never()).setRefundedForReservationsByOrder(any());
     }
 
