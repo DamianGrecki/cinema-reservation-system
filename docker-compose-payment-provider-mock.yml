@@ -8,3 +8,4 @@ services:
       - "1080:1080"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    restart: always
