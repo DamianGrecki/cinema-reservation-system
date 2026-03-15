@@ -1,7 +1,9 @@
 package pl.dgrecki.services;
 
 import static pl.dgrecki.constants.ExceptionMessages.BASKET_NOT_FOUND_MSG;
+import static pl.dgrecki.models.enums.ReservationStatus.getStatusesBlockingSeat;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -14,10 +16,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
+import pl.dgrecki.models.ReservationPrice;
 import pl.dgrecki.models.entities.Basket;
+import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.responses.BasketResponse;
+import pl.dgrecki.models.responses.basket.BasketPricingResponse;
+import pl.dgrecki.models.responses.basket.ReservationPricingResponse;
 import pl.dgrecki.repositories.BasketRepository;
 import pl.dgrecki.repositories.ReservationRepository;
+import pl.dgrecki.services.prices.PriceService;
 
 @Slf4j
 @Service
@@ -28,7 +35,23 @@ public class BasketService {
 
     private final BasketRepository basketRepository;
     private final ReservationRepository reservationRepository;
+    private final PriceService priceService;
     private final Clock clock;
+
+    public BasketPricingResponse getBasketPricing(UUID basketId) {
+        List<Reservation> reservations =
+                reservationRepository.findByBasketIdAndStatusIn(basketId, getStatusesBlockingSeat());
+        List<ReservationPrice> prices = priceService.calculatePricesPerReservation(reservations);
+
+        List<ReservationPricingResponse> reservationsPricing = prices.stream()
+                .map(rp -> new ReservationPricingResponse(
+                        rp.reservation().getId(), rp.reservation().getPricingType(), rp.price()))
+                .toList();
+
+        BigDecimal totalPrice = prices.stream().map(ReservationPrice::price).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new BasketPricingResponse(reservationsPricing, totalPrice);
+    }
 
     @Transactional
     public BasketResponse addBasket() {

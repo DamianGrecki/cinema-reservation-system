@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,11 +18,16 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
+import pl.dgrecki.models.ReservationPrice;
 import pl.dgrecki.models.entities.Basket;
+import pl.dgrecki.models.entities.Reservation;
+import pl.dgrecki.models.enums.PricingType;
 import pl.dgrecki.models.responses.BasketResponse;
+import pl.dgrecki.models.responses.basket.BasketPricingResponse;
 import pl.dgrecki.repositories.BasketRepository;
 import pl.dgrecki.repositories.ReservationRepository;
 import pl.dgrecki.services.BasketService;
+import pl.dgrecki.services.prices.PriceService;
 
 @ExtendWith(MockitoExtension.class)
 class BasketServiceUnitTests {
@@ -30,6 +37,9 @@ class BasketServiceUnitTests {
 
     @Mock
     private ReservationRepository reservationRepository;
+
+    @Mock
+    private PriceService priceService;
 
     @Mock
     private Clock clock;
@@ -144,6 +154,55 @@ class BasketServiceUnitTests {
         assertEquals(id, result.getFirst());
 
         verify(basketRepository, times(1)).findIdsByExpiresAtBefore(eq(FIXED_NOW), any(Pageable.class));
+    }
+
+    @Test
+    void getBasketPricingShouldReturnPricingPerReservationAndTotalTest() {
+        UUID basketId = UUID.randomUUID();
+        UUID reservationId1 = UUID.randomUUID();
+        UUID reservationId2 = UUID.randomUUID();
+
+        Reservation r1 = Reservation.builder()
+                .id(reservationId1)
+                .pricingType(PricingType.NORMAL)
+                .build();
+        Reservation r2 = Reservation.builder()
+                .id(reservationId2)
+                .pricingType(PricingType.REDUCED)
+                .build();
+        List<Reservation> reservations = List.of(r1, r2);
+
+        when(reservationRepository.findByBasketIdAndStatusIn(eq(basketId), any(Collection.class)))
+                .thenReturn(reservations);
+        when(priceService.calculatePricesPerReservation(reservations))
+                .thenReturn(List.of(
+                        new ReservationPrice(r1, new BigDecimal("25.00")),
+                        new ReservationPrice(r2, new BigDecimal("15.00"))));
+
+        BasketPricingResponse result = basketService.getBasketPricing(basketId);
+
+        assertEquals(2, result.reservations().size());
+        assertEquals(reservationId1, result.reservations().get(0).reservationId());
+        assertEquals(PricingType.NORMAL, result.reservations().get(0).pricingType());
+        assertEquals(new BigDecimal("25.00"), result.reservations().get(0).price());
+        assertEquals(reservationId2, result.reservations().get(1).reservationId());
+        assertEquals(PricingType.REDUCED, result.reservations().get(1).pricingType());
+        assertEquals(new BigDecimal("15.00"), result.reservations().get(1).price());
+        assertEquals(new BigDecimal("40.00"), result.totalPrice());
+    }
+
+    @Test
+    void getBasketPricingWhenNoReservationsShouldReturnEmptyWithZeroTotalTest() {
+        UUID basketId = UUID.randomUUID();
+
+        when(reservationRepository.findByBasketIdAndStatusIn(eq(basketId), any(Collection.class)))
+                .thenReturn(List.of());
+        when(priceService.calculatePricesPerReservation(List.of())).thenReturn(List.of());
+
+        BasketPricingResponse result = basketService.getBasketPricing(basketId);
+
+        assertTrue(result.reservations().isEmpty());
+        assertEquals(BigDecimal.ZERO, result.totalPrice());
     }
 
     @Test

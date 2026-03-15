@@ -36,6 +36,7 @@ public class SecurityConfig {
                                 SCREENINGS_ENDPOINT,
                                 SCREENINGS_SEATS_ENDPOINT,
                                 BASKET_ENDPOINT,
+                                BASKET_PRICING_ENDPOINT,
                                 RESERVATION_ENDPOINT,
                                 RESERVATIONS_CANCEL_ENDPOINT,
                                 RESERVATION_PRICING_TYPE_ENDPOINT,

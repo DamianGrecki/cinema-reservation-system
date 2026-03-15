@@ -5,11 +5,13 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.dgrecki.models.ReservationPrice;
 import pl.dgrecki.models.entities.MovieVersion;
 import pl.dgrecki.models.entities.PriceModifier;
 import pl.dgrecki.models.entities.Reservation;
@@ -60,8 +62,31 @@ class PriceServiceUnitTests {
     }
 
     @Test
-    void calculateSumOfAllMatchingModifiersTest() {
+    void calculatePricesPerReservationShouldReturnPricePerReservationTest() {
+        Reservation r1 = buildReservation(SeatType.STANDARD, MovieFormat.FORMAT_2D, PricingType.NORMAL);
+        r1.setId(UUID.randomUUID());
+        Reservation r2 = buildReservation(SeatType.VIP, MovieFormat.FORMAT_3D, PricingType.REDUCED);
+        r2.setId(UUID.randomUUID());
+
+        PriceModifier standardModifier =
+                buildModifier(PriceModifierType.SEAT, SeatType.STANDARD.name(), new BigDecimal("10.00"));
+        PriceModifier vipModifier = buildModifier(PriceModifierType.SEAT, SeatType.VIP.name(), new BigDecimal("20.00"));
+
+        when(priceModifierRepository.findAll()).thenReturn(List.of(standardModifier, vipModifier));
+
+        List<ReservationPrice> result = priceService.calculatePricesPerReservation(List.of(r1, r2));
+
+        assertEquals(2, result.size());
+        assertEquals(r1, result.get(0).reservation());
+        assertEquals(new BigDecimal("10.00"), result.get(0).price());
+        assertEquals(r2, result.get(1).reservation());
+        assertEquals(new BigDecimal("20.00"), result.get(1).price());
+    }
+
+    @Test
+    void calculatePricesPerReservationShouldSumAllMatchingModifiersTest() {
         Reservation reservation = buildReservation(SeatType.VIP, MovieFormat.FORMAT_3D, PricingType.REDUCED);
+        reservation.setId(UUID.randomUUID());
 
         PriceModifier seatModifier =
                 buildModifier(PriceModifierType.SEAT, SeatType.VIP.name(), new BigDecimal("20.00"));
@@ -72,22 +97,40 @@ class PriceServiceUnitTests {
 
         when(priceModifierRepository.findAll()).thenReturn(List.of(seatModifier, formatModifier, pricingModifier));
 
-        BigDecimal result = priceService.calculate(reservation);
+        List<ReservationPrice> result = priceService.calculatePricesPerReservation(List.of(reservation));
 
-        assertEquals(new BigDecimal("22.00"), result);
+        assertEquals(1, result.size());
+        assertEquals(new BigDecimal("22.00"), result.get(0).price());
     }
 
     @Test
-    void calculateWhenModifierTypeDoesNotMatchReservationShouldNotIncludeTest() {
+    void calculatePricesPerReservationWhenModifierDoesNotMatchShouldReturnZeroTest() {
         Reservation reservation = buildReservation(SeatType.STANDARD, MovieFormat.FORMAT_2D, PricingType.NORMAL);
+        reservation.setId(UUID.randomUUID());
 
         PriceModifier vipModifier = buildModifier(PriceModifierType.SEAT, SeatType.VIP.name(), new BigDecimal("20.00"));
 
         when(priceModifierRepository.findAll()).thenReturn(List.of(vipModifier));
 
-        BigDecimal result = priceService.calculate(reservation);
+        List<ReservationPrice> result = priceService.calculatePricesPerReservation(List.of(reservation));
 
-        assertEquals(BigDecimal.ZERO, result);
+        assertEquals(1, result.size());
+        assertEquals(BigDecimal.ZERO, result.get(0).price());
+    }
+
+    @Test
+    void calculatePricesPerReservationShouldQueryModifiersOnceTest() {
+        Reservation r1 = buildReservation(SeatType.STANDARD, MovieFormat.FORMAT_2D, PricingType.NORMAL);
+        Reservation r2 = buildReservation(SeatType.VIP, MovieFormat.FORMAT_3D, PricingType.REDUCED);
+
+        PriceModifier standardModifier =
+                buildModifier(PriceModifierType.SEAT, SeatType.STANDARD.name(), new BigDecimal("10.00"));
+
+        when(priceModifierRepository.findAll()).thenReturn(List.of(standardModifier));
+
+        priceService.calculatePricesPerReservation(List.of(r1, r2));
+
+        verify(priceModifierRepository, times(1)).findAll();
     }
 
     private Reservation buildReservation(SeatType seatType, MovieFormat movieFormat, PricingType pricingType) {

@@ -73,6 +73,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
     int deleteReservationsByIdAndStatus(@Param("ids") List<UUID> ids, @Param("status") ReservationStatus status);
 
     @Query("""
+    SELECT r
+    FROM Reservation r
+    WHERE r.basket.id = :basketId
+        AND r.status IN :statuses
+""")
+    List<Reservation> findByBasketIdAndStatusIn(
+            @Param("basketId") UUID basketId, @Param("statuses") Collection<ReservationStatus> statuses);
+
+    @Query("""
         SELECT b.id
         FROM Basket b
         LEFT JOIN Reservation r ON r.basket = b
