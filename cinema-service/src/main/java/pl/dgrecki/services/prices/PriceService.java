@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import pl.dgrecki.models.ReservationPrice;
 import pl.dgrecki.models.entities.PriceModifier;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.enums.PriceModifierType;
@@ -24,11 +25,20 @@ public class PriceService {
     }
 
     public BigDecimal calculateReservationsTotalPrice(List<Reservation> reservations) {
-        return reservations.stream().map(this::calculate).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return calculatePricesPerReservation(reservations).stream()
+                .map(ReservationPrice::price)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal calculate(Reservation reservation) {
-        return priceModifierRepository.findAll().stream()
+    public List<ReservationPrice> calculatePricesPerReservation(List<Reservation> reservations) {
+        List<PriceModifier> modifiers = priceModifierRepository.findAll();
+        return reservations.stream()
+                .map(r -> new ReservationPrice(r, calculate(r, modifiers)))
+                .toList();
+    }
+
+    private BigDecimal calculate(Reservation reservation, List<PriceModifier> modifiers) {
+        return modifiers.stream()
                 .filter(m -> strategies.get(m.getModifierType()).matches(m, reservation))
                 .map(PriceModifier::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

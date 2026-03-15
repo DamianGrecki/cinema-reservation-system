@@ -10,13 +10,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.exceptions.TicketCreatingException;
+import pl.dgrecki.models.ReservationPrice;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.Reservation;
 import pl.dgrecki.models.entities.Ticket;
 import pl.dgrecki.models.enums.ReservationStatus;
 import pl.dgrecki.repositories.TicketRepository;
+import pl.dgrecki.services.prices.PriceService;
 
 @Slf4j
 @Service
@@ -26,6 +27,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final TicketPdfJobService ticketPdfJobService;
     private final ReservationService reservationService;
+    private final PriceService priceService;
     private final Clock clock;
 
     @Transactional
@@ -33,27 +35,23 @@ public class TicketService {
         List<Reservation> reservations = reservationService.getPaidReservationsByOrder(order);
         if (reservations.isEmpty()) {
             log.warn("Cannot create tickets, there is no paid reservations in order: '{}'", order.getId());
+            return;
         }
-        reservations.forEach(this::createTicket);
+        List<ReservationPrice> prices = priceService.calculatePricesPerReservation(reservations);
+        prices.forEach(rp -> createTicket(rp.reservation(), rp.price()));
     }
 
     public List<Ticket> getTicketsByOrderId(UUID orderId) {
         return ticketRepository.findByOrderId(orderId);
     }
 
-    public Ticket getTicketById(UUID ticketId) {
-        return ticketRepository
-                .findById(ticketId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(TICKET_NOT_FOUND_MSG, ticketId)));
-    }
-
-    private void createTicket(Reservation reservation) {
+    private void createTicket(Reservation reservation, BigDecimal price) {
         validateTicketUniqueness(reservation);
 
         Ticket ticket = Ticket.builder()
                 .order(reservation.getOrder())
                 .reservation(reservation)
-                .price(new BigDecimal("20.00")) // TODO Add single ticket price
+                .price(price)
                 .createdAt(clock.instant())
                 .build();
 
