@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.PaymentProcessException;
+import pl.dgrecki.exceptions.RefundFailedException;
 import pl.dgrecki.exceptions.TicketRefundingException;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.entities.PaymentAttempt;
@@ -31,7 +32,6 @@ public class RefundService {
     private final ReservationService reservationService;
     private final OrderService orderService;
     private final RefundRepository refundRepository;
-    private final RefundWriter refundWriter;
     private final List<RefundProviderService> refundProviders;
     private final Clock clock;
     private final int maxRefundAttempts;
@@ -41,7 +41,6 @@ public class RefundService {
             ReservationService reservationService,
             OrderService orderService,
             RefundRepository refundRepository,
-            RefundWriter refundWriter,
             List<RefundProviderService> refundProviders,
             Clock clock,
             @Value("${scheduler.ticket-refund.max-attempts}") int maxRefundAttempts) {
@@ -49,7 +48,6 @@ public class RefundService {
         this.reservationService = reservationService;
         this.orderService = orderService;
         this.refundRepository = refundRepository;
-        this.refundWriter = refundWriter;
         this.refundProviders = refundProviders;
         this.clock = clock;
         this.maxRefundAttempts = maxRefundAttempts;
@@ -60,7 +58,7 @@ public class RefundService {
                 TicketPdfStatus.DEAD, RefundStatus.COMPLETED, RefundStatus.FAILED, maxRefundAttempts);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = RefundFailedException.class)
     public void refundOrder(UUID orderId, RefundReason reason) {
         Order order = orderService.getById(orderId);
         PaymentAttempt completedAttempt = paymentAttemptService.findCompletedByOrderId(orderId);
@@ -91,16 +89,16 @@ public class RefundService {
     private void validateResponseIsNotNull(
             RefundProviderResponse response, PaymentAttempt completedAttempt, UUID orderId, RefundReason reason) {
         if (Objects.isNull(response)) {
-            refundWriter.saveFailedRefund(completedAttempt, null, reason);
-            throw new TicketRefundingException(String.format(REFUND_FAILED_MSG, orderId));
+            saveRefund(completedAttempt, null, RefundStatus.FAILED, reason);
+            throw new RefundFailedException(String.format(REFUND_FAILED_MSG, orderId));
         }
     }
 
     private void validateRefundCompleted(
             RefundProviderResponse response, PaymentAttempt completedAttempt, UUID orderId, RefundReason reason) {
         if (response.status() != RefundStatus.COMPLETED) {
-            refundWriter.saveFailedRefund(completedAttempt, response.transactionId(), reason);
-            throw new TicketRefundingException(String.format(REFUND_FAILED_MSG, orderId));
+            saveRefund(completedAttempt, response.transactionId(), RefundStatus.FAILED, reason);
+            throw new RefundFailedException(String.format(REFUND_FAILED_MSG, orderId));
         }
     }
 
