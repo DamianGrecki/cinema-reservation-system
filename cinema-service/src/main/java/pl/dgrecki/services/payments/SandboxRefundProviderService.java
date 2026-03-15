@@ -34,9 +34,11 @@ public class SandboxRefundProviderService implements RefundProviderService {
                     .body(SandboxRefundResponse.class);
 
             if (response == null) {
+                log.warn("Null response from refund provider for order {}", order.getId());
                 return null;
             }
 
+            log.info("Refund provider responded with status {} for order {}", response.status(), order.getId());
             return new RefundProviderResponse(response.transactionId().toString(), response.status());
         } catch (Exception e) {
             log.error("Failed to send refund request for order {}", order.getId(), e);

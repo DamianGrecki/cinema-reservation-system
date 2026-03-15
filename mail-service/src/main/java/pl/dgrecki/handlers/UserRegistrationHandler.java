@@ -3,6 +3,7 @@ package pl.dgrecki.handlers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import pl.dgrecki.models.MailData;
 import pl.dgrecki.models.UserRegistrationEventData;
@@ -13,6 +14,7 @@ import pl.dgrecki.models.enums.TemplateType;
 import pl.dgrecki.services.MailService;
 import pl.dgrecki.services.MailTemplateService;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserRegistrationHandler implements InboxEventHandler {
@@ -29,6 +31,7 @@ public class UserRegistrationHandler implements InboxEventHandler {
     @Override
     public void handle(InboxEvent event) {
         UserRegistrationEventData data = objectMapper.convertValue(event.getData(), UserRegistrationEventData.class);
+        log.info("Processing user registration event {} for {}", event.getId(), data.getUserEmail());
         MailTemplate mailTemplate = mailTemplateService.getMailTemplate(TemplateType.USER_REGISTRATION);
 
         MailData mailData = MailData.builder()

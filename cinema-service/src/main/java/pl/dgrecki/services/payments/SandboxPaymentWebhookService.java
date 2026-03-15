@@ -25,16 +25,23 @@ public class SandboxPaymentWebhookService implements PaymentWebhook {
         PaymentAttempt attempt = paymentAttemptService.updateAttemptStatus(
                 response.transactionId().toString(), response.status());
         Order order = attempt.getOrder();
+        log.info(
+                "Processing payment webhook for transaction {} with status {}",
+                response.transactionId(),
+                response.status());
         switch (response.status()) {
             case COMPLETED -> {
                 reservationService.setPaidForReservationsByOrder(order);
                 ticketService.createTickets(order);
+                log.info("Payment completed for order {}", order.getId());
             }
             case FAILED, CANCELED -> {
                 reservationService.setPaymentAttemptFailedForReservationsByOrder(order);
                 if (paymentAttemptService.isAttemptsLimitReached(order)) {
                     reservationService.setPaymentFailedForReservationsByOrder(order);
+                    log.warn("Payment attempts limit reached for order {}", order.getId());
                 }
+                log.info("Payment {} for order {}", response.status(), order.getId());
             }
             case PENDING -> log.warn("Payment {} still in PENDING status", response.transactionId());
         }

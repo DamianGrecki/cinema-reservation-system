@@ -5,12 +5,14 @@ import static pl.dgrecki.constants.ExceptionMessages.PAYMENT_ATTEMPT_ALREADY_EXI
 import static pl.dgrecki.models.enums.PaymentStatus.FAILED;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.PaymentProcessException;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.services.ReservationService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentFailureService {
@@ -20,8 +22,10 @@ public class PaymentFailureService {
 
     @Transactional
     public void failPaymentAttempt(Order order, String transactionId, String errorMessage) {
+        log.info("Recording failed payment attempt for order {} (transactionId: {})", order.getId(), transactionId);
         paymentAttemptService.createAttempt(order, transactionId, FAILED, errorMessage);
         if (paymentAttemptService.isAttemptsLimitReached(order)) {
+            log.warn("Payment attempts limit reached for order {}", order.getId());
             reservationService.setPaymentFailedForReservationsByOrder(order);
             return;
         }

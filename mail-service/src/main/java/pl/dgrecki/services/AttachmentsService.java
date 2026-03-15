@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import pl.dgrecki.models.Attachment;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AttachmentsService {
@@ -19,9 +21,11 @@ public class AttachmentsService {
     private final RestClient restClient;
 
     public List<Attachment> downloadAttachments(URI url) {
+        log.info("Downloading attachments from {}", url);
         byte[] zipBytes = restClient.get().uri(url).retrieve().body(byte[].class);
-
-        return unzip(zipBytes);
+        List<Attachment> attachments = unzip(zipBytes);
+        log.info("Downloaded {} attachments", attachments.size());
+        return attachments;
     }
 
     private List<Attachment> unzip(byte[] zipBytes) {
