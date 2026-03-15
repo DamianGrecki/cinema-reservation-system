@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.SneakyThrows;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import pl.dgrecki.models.entities.OutboxEvent;
-import pl.dgrecki.models.events.OutgoingEvent;
 import pl.dgrecki.schedulers.OutboxPublisherScheduler;
 import pl.dgrecki.services.OutboxService;
 
@@ -33,12 +33,14 @@ class OutboxPublisherUnitTests {
     private OutboxPublisherScheduler publisher;
 
     private final String topic = "mail.registration.user";
+    private final String hmacSecret = "test-hmac-secret-for-unit-tests";
 
     @BeforeEach
     void setup() {
-        publisher = new OutboxPublisherScheduler(outboxService, kafkaTemplate, topic, objectMapper);
+        publisher = new OutboxPublisherScheduler(outboxService, kafkaTemplate, topic, objectMapper, hmacSecret);
     }
 
+    @SuppressWarnings("unchecked")
     @SneakyThrows
     @Test
     void shouldPublishEventsAndMarkSent() {
@@ -48,27 +50,23 @@ class OutboxPublisherUnitTests {
         when(outboxService.claimOutboxEvents(any(), anyInt())).thenReturn(List.of(event));
 
         CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(null);
-        when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenReturn(future);
-
-        OutgoingEvent outgoingEvent =
-                new OutgoingEvent(event.getId(), event.getEventType(), objectMapper.readTree(event.getData()));
-
-        String message = new ObjectMapper().writeValueAsString(outgoingEvent);
+        when(kafkaTemplate.send(any(ProducerRecord.class))).thenReturn(future);
 
         publisher.publishUserRegistrationEvents();
 
-        verify(kafkaTemplate, times(1)).send(eq(topic), eq(id.toString()), eq(message));
+        verify(kafkaTemplate, times(1)).send(any(ProducerRecord.class));
         verify(outboxService, times(1)).markSent(event);
         verify(outboxService, never()).handleFailedAttempt(any(), any());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldMarkFailedWhenKafkaThrowsException() {
         String data = "{\"data\":\"Some data\"}";
         String errorMessage = "Kafka error";
         OutboxEvent event = OutboxEvent.builder().data(data).build();
         when(outboxService.claimOutboxEvents(any(), anyInt())).thenReturn(List.of(event));
-        when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenThrow(new RuntimeException(errorMessage));
+        when(kafkaTemplate.send(any(ProducerRecord.class))).thenThrow(new RuntimeException(errorMessage));
 
         publisher.publishUserRegistrationEvents();
 

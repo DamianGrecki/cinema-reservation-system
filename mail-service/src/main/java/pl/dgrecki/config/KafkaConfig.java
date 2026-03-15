@@ -17,6 +17,7 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
 import pl.dgrecki.exceptions.DeserializationException;
+import pl.dgrecki.exceptions.HmacVerificationException;
 
 @Slf4j
 @Configuration
@@ -73,7 +74,7 @@ public class KafkaConfig {
     private DefaultErrorHandler getDefaultErrorHandler(DeadLetterPublishingRecoverer recoverer) {
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer, new FixedBackOff(INTERVAL, ATTEMPTS));
 
-        errorHandler.addNotRetryableExceptions(DeserializationException.class);
+        errorHandler.addNotRetryableExceptions(DeserializationException.class, HmacVerificationException.class);
 
         errorHandler.setRetryListeners((record, ex, deliveryAttempt) -> {
             log.error(
