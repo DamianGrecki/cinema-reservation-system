@@ -5,7 +5,7 @@
         <Property name="LOG_PATH">${spring:app.log-path}</Property>
 
         <Property name="LOG_PATTERN">
-            %d{yyyy-MM-dd HH:mm:ss} %-5level [%t] %c{36} - %msg%n
+            %d{yyyy-MM-dd HH:mm:ss} %-5level [%t] [traceId=%X{traceId} spanId=%X{spanId}] %c{36} - %msg%n
         </Property>
     </Properties>
 
