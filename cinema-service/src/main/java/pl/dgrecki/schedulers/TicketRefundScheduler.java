@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import pl.dgrecki.models.enums.RefundReason;
@@ -17,6 +18,7 @@ public class TicketRefundScheduler {
     private final RefundService refundService;
 
     @Scheduled(fixedDelayString = "${scheduler.ticket-refund.delay-ms}")
+    @SchedulerLock(name = "processRefunds", lockAtLeastFor = "5s", lockAtMostFor = "5m")
     public void processRefunds() {
         List<UUID> orderIds = refundService.findOrderIdsReadyToRefund();
         for (UUID orderId : orderIds) {
