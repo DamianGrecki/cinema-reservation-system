@@ -17,6 +17,7 @@ public class InboxDlqService {
 
     @Transactional
     public void createInboxDlqEvent(String topic, int partition, String rawMessage, String errorMessage) {
+        log.warn("Saving DLQ event from topic {} partition {}: {}", topic, partition, errorMessage);
         InboxEventDlq event = InboxEventDlq.builder()
                 .topic(topic)
                 .partition(partition)

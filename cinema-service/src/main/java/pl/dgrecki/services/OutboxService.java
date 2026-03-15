@@ -46,6 +46,12 @@ public class OutboxService {
 
         if (attempts < event.getMaxAttempts()) {
             event.setStatus(EventStatus.FAILED);
+            log.error(
+                    "Outbox event {} failed (attempt {}/{}): {}",
+                    event.getId(),
+                    attempts,
+                    event.getMaxAttempts(),
+                    error);
         } else {
             event.setStatus(EventStatus.DEAD);
             log.warn("Event {} exceeded max attempts ({})", event.getId(), event.getMaxAttempts());

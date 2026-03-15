@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import pl.dgrecki.models.Attachment;
 import pl.dgrecki.models.MailData;
@@ -17,6 +18,7 @@ import pl.dgrecki.services.AttachmentsService;
 import pl.dgrecki.services.MailService;
 import pl.dgrecki.services.MailTemplateService;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TicketGeneratedHandler implements InboxEventHandler {
@@ -34,6 +36,7 @@ public class TicketGeneratedHandler implements InboxEventHandler {
     @Override
     public void handle(InboxEvent event) {
         TicketGeneratedEventData data = objectMapper.convertValue(event.getData(), TicketGeneratedEventData.class);
+        log.info("Processing ticket generated event {} for order {}", event.getId(), data.getOrderId());
 
         List<Attachment> attachments = attachmentsService.downloadAttachments(URI.create(data.getDownloadUrl()));
 
