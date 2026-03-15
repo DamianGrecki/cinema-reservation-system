@@ -19,6 +19,7 @@ spring:
       session-timeout-ms: 15000
       heartbeat-interval-ms: 3000
       isolation-level: read_committed
+    hmac-secret: kafka-shared-hmac-secret-min-32-chars # It will eventually be moved to .env
 
   jpa:
     hibernate:

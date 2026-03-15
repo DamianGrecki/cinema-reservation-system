@@ -30,6 +30,7 @@ spring:
     topics:
       user-registration: mail.registration.user
     poll-interval-ms: 5000
+    hmac-secret: kafka-shared-hmac-secret-min-32-chars # It will eventually be moved to .env
 
   jpa:
     hibernate:
