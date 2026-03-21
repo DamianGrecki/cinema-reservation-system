@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="030-add-reservations-indexes" author="Damian G">
+        <comment>
+            Performance indexes for reservations table.
+            Covers seat map query (LEFT JOIN by screening + seat + status),
+            existence check, basket-based lookups, and order-based lookups.
+        </comment>
+
+        <createIndex tableName="reservations" indexName="idx_reservations_screening_seat_status">
+            <column name="screening_id"/>
+            <column name="seat_id"/>
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="reservations" indexName="idx_reservations_basket_status">
+            <column name="basket_id"/>
+            <column name="status"/>
+        </createIndex>
+
+        <sql>
+            CREATE INDEX idx_reservations_order_status
+                ON reservations(order_id, status)
+                WHERE order_id IS NOT NULL;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

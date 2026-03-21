@@ -34,4 +34,5 @@
     <include file="/db/changelog/changes/027-create-outbox-events-table.xml"/>
     <include file="/db/changelog/changes/028-create-refunds-table.xml"/>
     <include file="/db/changelog/changes/029-create-shedlock-table.xml"/>
+    <include file="/db/changelog/changes/030-add-reservations-indexes.xml"/>
 </databaseChangeLog>

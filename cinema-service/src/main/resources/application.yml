@@ -13,11 +13,14 @@ spring:
     url: jdbc:postgresql://localhost:1010/cinema_db
     username: cinema_user
     password: 123 # It will eventually be moved to .env
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
 
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false
 
   liquibase:
     enabled: true
