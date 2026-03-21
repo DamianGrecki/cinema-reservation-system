@@ -58,7 +58,7 @@ class ScreeningServiceUnitTests {
                 .endTime(end)
                 .build();
 
-        when(screeningRepository.findAll()).thenReturn(List.of(screening));
+        when(screeningRepository.findAllWithDetails()).thenReturn(List.of(screening));
 
         ScreeningListResponse response = screeningService.getScreeningsList();
 
@@ -76,19 +76,19 @@ class ScreeningServiceUnitTests {
         assertEquals(start, screeningResponse.getStartTime());
         assertEquals(end, screeningResponse.getEndTime());
 
-        verify(screeningRepository, times(1)).findAll();
+        verify(screeningRepository, times(1)).findAllWithDetails();
     }
 
     @Test
     void getScreeningsListWhenEmptyShouldReturnEmptyListTest() {
-        when(screeningRepository.findAll()).thenReturn(List.of());
+        when(screeningRepository.findAllWithDetails()).thenReturn(List.of());
 
         ScreeningListResponse response = screeningService.getScreeningsList();
 
         assertNotNull(response);
         assertTrue(response.getScreenings().isEmpty());
 
-        verify(screeningRepository, times(1)).findAll();
+        verify(screeningRepository, times(1)).findAllWithDetails();
     }
 
     @Test

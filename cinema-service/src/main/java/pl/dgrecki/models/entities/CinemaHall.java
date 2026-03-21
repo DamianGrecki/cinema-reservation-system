@@ -26,7 +26,7 @@ public class CinemaHall {
     @JoinColumn(name = "cinema_id", nullable = false, foreignKey = @ForeignKey(name = "fk_cinema_halls_cinema"))
     private Cinema cinema;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "cinema_hall_supported_formats", joinColumns = @JoinColumn(name = "cinema_hall_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "movie_format", nullable = false)
