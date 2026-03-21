@@ -21,7 +21,7 @@ public class ScreeningService {
     private final ScreeningRepository screeningRepository;
 
     public ScreeningListResponse getScreeningsList() {
-        List<Screening> screenings = screeningRepository.findAll();
+        List<Screening> screenings = screeningRepository.findAllWithDetails();
         List<ScreeningResponse> screeningResponses = screenings.stream()
                 .map(screening -> {
                     MovieVersion movieVersion = screening.getMovieVersion();
