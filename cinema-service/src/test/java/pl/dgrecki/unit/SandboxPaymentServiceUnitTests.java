@@ -9,6 +9,7 @@ import static pl.dgrecki.models.enums.PaymentStatus.*;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,13 +17,18 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.client.RestClient;
+import pl.dgrecki.config.AuthenticatedUser;
 import pl.dgrecki.exceptions.PaymentProcessException;
+import pl.dgrecki.models.entities.Customer;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.enums.Currency;
 import pl.dgrecki.models.enums.PaymentProvider;
 import pl.dgrecki.models.external.SandboxPaymentResponse;
 import pl.dgrecki.models.requests.CreatePaymentRequest;
+import pl.dgrecki.services.CustomerService;
 import pl.dgrecki.services.OrderService;
 import pl.dgrecki.services.payments.PaymentAttemptService;
 import pl.dgrecki.services.payments.PaymentFailureService;
@@ -49,6 +55,9 @@ class SandboxPaymentServiceUnitTests {
     @Mock
     private RestClient.ResponseSpec responseSpec;
 
+    @Mock
+    private CustomerService customerService;
+
     @InjectMocks
     private SandboxPaymentService sandboxPaymentService;
 
@@ -58,15 +67,25 @@ class SandboxPaymentServiceUnitTests {
         lenient().when(requestBodyUriSpec.retrieve()).thenReturn(responseSpec);
     }
 
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
-    void createPaymentTest() {
+    void createPaymentForAuthenticatedUserTest() {
         UUID customerId = UUID.randomUUID();
         UUID basketId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
         UUID transactionId = UUID.randomUUID();
+        Long userId = 1L;
 
-        CreatePaymentRequest request =
-                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
+        setAuthenticatedUser(userId, "user@example.com");
+
+        CreatePaymentRequest request = new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, null, null);
+
+        Customer customer = Customer.builder().id(customerId).userId(userId).build();
+        when(customerService.getOrFetchCustomer(userId)).thenReturn(customer);
 
         Order order = Order.builder()
                 .id(orderId)
@@ -84,16 +103,72 @@ class SandboxPaymentServiceUnitTests {
 
         sandboxPaymentService.createPayment(request);
 
+        verify(customerService).getOrFetchCustomer(userId);
         verify(paymentAttemptService).createAttempt(order, transactionId.toString(), PENDING, null);
     }
 
     @Test
-    void createPaymentWhenAttemptsLimitReachedShouldThrowTest() {
-        UUID customerId = UUID.randomUUID();
+    void createPaymentForGuestUserTest() {
         UUID basketId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        UUID transactionId = UUID.randomUUID();
+        String guestEmail = "guest@example.com";
+        String guestFirstName = "Jan";
 
         CreatePaymentRequest request =
-                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, guestEmail, guestFirstName);
+
+        Order order = Order.builder()
+                .id(orderId)
+                .guestEmail(guestEmail)
+                .guestFirstName(guestFirstName)
+                .price(new BigDecimal("25.00"))
+                .currency(Currency.PLN)
+                .provider(PaymentProvider.SANDBOX)
+                .build();
+
+        SandboxPaymentResponse providerResponse = new SandboxPaymentResponse(transactionId, orderId, PENDING, null);
+
+        when(orderService.prepareOrder(null, guestEmail, guestFirstName, basketId, PaymentProvider.SANDBOX))
+                .thenReturn(order);
+        when(responseSpec.body(SandboxPaymentResponse.class)).thenReturn(providerResponse);
+
+        sandboxPaymentService.createPayment(request);
+
+        verify(customerService, never()).getOrFetchCustomer(any());
+        verify(paymentAttemptService).createAttempt(order, transactionId.toString(), PENDING, null);
+    }
+
+    @Test
+    void createPaymentWhenGuestDataNullShouldThrowTest() {
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.randomUUID(), PaymentProvider.SANDBOX, null, null);
+
+        PaymentProcessException ex =
+                assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
+
+        assertEquals(CUSTOMER_DATA_REQUIRED_MSG, ex.getMessage());
+        verify(orderService, never()).prepareOrder(any(), any(), any(), any(), any());
+        verify(paymentAttemptService, never()).createAttempt(any(), any(), any(), any());
+    }
+
+    @Test
+    void createPaymentWhenGuestDataBlankShouldThrowTest() {
+        CreatePaymentRequest request = new CreatePaymentRequest(UUID.randomUUID(), PaymentProvider.SANDBOX, "  ", "");
+
+        PaymentProcessException ex =
+                assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
+
+        assertEquals(CUSTOMER_DATA_REQUIRED_MSG, ex.getMessage());
+    }
+
+    @Test
+    void createPaymentWhenAttemptsLimitReachedShouldThrowTest() {
+        UUID basketId = UUID.randomUUID();
+        String guestEmail = "guest@example.com";
+        String guestFirstName = "Jan";
+
+        CreatePaymentRequest request =
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, guestEmail, guestFirstName);
 
         Order existingOrder = Order.builder().id(UUID.randomUUID()).build();
 
@@ -111,25 +186,13 @@ class SandboxPaymentServiceUnitTests {
     }
 
     @Test
-    void createPaymentWhenCustomerDataNullShouldThrowTest() {
-        CreatePaymentRequest request =
-                new CreatePaymentRequest(UUID.randomUUID(), PaymentProvider.SANDBOX, null, null, null);
-
-        PaymentProcessException ex =
-                assertThrows(PaymentProcessException.class, () -> sandboxPaymentService.createPayment(request));
-
-        assertEquals(CUSTOMER_DATA_REQUIRED_MSG, ex.getMessage());
-        verify(orderService, never()).prepareOrder(any(), any(), any(), any(), any());
-        verify(paymentAttemptService, never()).createAttempt(any(), any(), any(), any());
-    }
-
-    @Test
     void createPaymentWhenHttpCallFailsShouldSaveFailedAttemptAndThrowTest() {
-        UUID customerId = UUID.randomUUID();
         UUID basketId = UUID.randomUUID();
+        String guestEmail = "guest@example.com";
+        String guestFirstName = "Jan";
 
         CreatePaymentRequest request =
-                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, guestEmail, guestFirstName);
 
         Order order = Order.builder()
                 .id(UUID.randomUUID())
@@ -139,7 +202,7 @@ class SandboxPaymentServiceUnitTests {
 
         RuntimeException networkError = new RuntimeException("Connection refused");
 
-        when(orderService.prepareOrder(customerId, null, null, basketId, PaymentProvider.SANDBOX))
+        when(orderService.prepareOrder(null, guestEmail, guestFirstName, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
         when(responseSpec.body(SandboxPaymentResponse.class)).thenThrow(networkError);
 
@@ -152,11 +215,12 @@ class SandboxPaymentServiceUnitTests {
 
     @Test
     void createPaymentWhenResponseIsNullShouldSaveFailedAttemptAndThrowTest() {
-        UUID customerId = UUID.randomUUID();
         UUID basketId = UUID.randomUUID();
+        String guestEmail = "guest@example.com";
+        String guestFirstName = "Jan";
 
         CreatePaymentRequest request =
-                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, guestEmail, guestFirstName);
 
         Order order = Order.builder()
                 .id(UUID.randomUUID())
@@ -164,7 +228,7 @@ class SandboxPaymentServiceUnitTests {
                 .currency(Currency.PLN)
                 .build();
 
-        when(orderService.prepareOrder(customerId, null, null, basketId, PaymentProvider.SANDBOX))
+        when(orderService.prepareOrder(null, guestEmail, guestFirstName, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
 
         PaymentProcessException ex =
@@ -176,13 +240,14 @@ class SandboxPaymentServiceUnitTests {
 
     @Test
     void createPaymentWhenResponseStatusNotPendingShouldSaveFailedAttemptAndThrowTest() {
-        UUID customerId = UUID.randomUUID();
         UUID basketId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
         UUID transactionId = UUID.randomUUID();
+        String guestEmail = "guest@example.com";
+        String guestFirstName = "Jan";
 
         CreatePaymentRequest request =
-                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, customerId, null, null);
+                new CreatePaymentRequest(basketId, PaymentProvider.SANDBOX, guestEmail, guestFirstName);
 
         Order order = Order.builder()
                 .id(orderId)
@@ -192,7 +257,7 @@ class SandboxPaymentServiceUnitTests {
 
         SandboxPaymentResponse badStatusResponse = new SandboxPaymentResponse(transactionId, orderId, COMPLETED, null);
 
-        when(orderService.prepareOrder(customerId, null, null, basketId, PaymentProvider.SANDBOX))
+        when(orderService.prepareOrder(null, guestEmail, guestFirstName, basketId, PaymentProvider.SANDBOX))
                 .thenReturn(order);
         when(responseSpec.body(SandboxPaymentResponse.class)).thenReturn(badStatusResponse);
 
@@ -201,5 +266,12 @@ class SandboxPaymentServiceUnitTests {
 
         assertEquals(PROVIDER_BAD_PAYMENT_STATUS_MSG, ex.getMessage());
         verify(paymentFailureService).failPaymentAttempt(eq(order), eq(transactionId.toString()), anyString());
+    }
+
+    private void setAuthenticatedUser(Long userId, String email) {
+        AuthenticatedUser authenticatedUser = new AuthenticatedUser(userId, email);
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(authenticatedUser, null, null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

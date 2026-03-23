@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import pl.dgrecki.models.entities.User;
+import pl.dgrecki.models.enums.UserStatus;
 import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.repositories.UserRepository;
@@ -46,7 +47,7 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
         String password = "Password123!";
         String firstName = "John";
         String lastName = "Doe";
-        registerUser(email, password, firstName, lastName);
+        registerAndActivateUser(email, password, firstName, lastName);
         LoginRequest request = new LoginRequest(email, password);
 
         mockMvc.perform(post(LOGIN_ENDPOINT)
@@ -54,6 +55,24 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwtToken", notNullValue()));
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldReturn400WhenUserIsNotActivatedTest() {
+        String email = "test@example.com";
+        String password = "Password123!";
+        String firstName = "John";
+        String lastName = "Doe";
+        registerUser(email, password, firstName, lastName);
+        LoginRequest request = new LoginRequest(email, password);
+
+        mockMvc.perform(post(LOGIN_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success", is(false)))
+                .andExpect(jsonPath("$.message", is("User account is not activated")));
     }
 
     @SneakyThrows
@@ -98,5 +117,12 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
     private void registerUser(String email, String password, String firstName, String lastName) {
         UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
         userService.registerCustomer(request);
+    }
+
+    private void registerAndActivateUser(String email, String password, String firstName, String lastName) {
+        registerUser(email, password, firstName, lastName);
+        User user = userRepository.findByEmail(email).orElseThrow();
+        user.setStatus(UserStatus.ACTIVE);
+        userRepository.save(user);
     }
 }

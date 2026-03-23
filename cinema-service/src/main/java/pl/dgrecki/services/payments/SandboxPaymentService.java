@@ -8,16 +8,21 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import pl.dgrecki.config.AuthenticatedUser;
 import pl.dgrecki.constants.SandboxPaymentProviderEndpoints;
 import pl.dgrecki.exceptions.PaymentProcessException;
+import pl.dgrecki.models.entities.Customer;
 import pl.dgrecki.models.entities.Order;
 import pl.dgrecki.models.enums.*;
 import pl.dgrecki.models.external.SandboxPaymentRequest;
 import pl.dgrecki.models.external.SandboxPaymentResponse;
 import pl.dgrecki.models.requests.CreatePaymentRequest;
 import pl.dgrecki.models.responses.SuccessResponse;
+import pl.dgrecki.services.CustomerService;
 import pl.dgrecki.services.OrderService;
 
 @Slf4j
@@ -29,6 +34,7 @@ public class SandboxPaymentService implements PaymentProviderService {
     private final PaymentAttemptService paymentAttemptService;
     private final PaymentFailureService paymentFailureService;
     private final RestClient sandboxPaymentProviderRestClient;
+    private final CustomerService customerService;
 
     @Override
     public PaymentProvider getProviderName() {
@@ -37,16 +43,14 @@ public class SandboxPaymentService implements PaymentProviderService {
 
     @Override
     public SuccessResponse createPayment(CreatePaymentRequest request) {
-        UUID customerId = request.customerId();
-        String guestEmail = request.guestEmail();
-        String guestFirstName = request.guestFirstName();
         UUID basketId = request.basketId();
 
-        validateCustomerData(customerId, guestEmail, guestFirstName);
-
+        UUID customerId = resolveCustomerId();
+        validateGuestDataIfNotAuthenticated(customerId, request.guestEmail(), request.guestFirstName());
         validatePaymentsIfAlreadyExists(basketId);
 
-        Order order = orderService.prepareOrder(customerId, guestEmail, guestFirstName, basketId, getProviderName());
+        Order order = orderService.prepareOrder(
+                customerId, request.guestEmail(), request.guestFirstName(), basketId, getProviderName());
 
         SandboxPaymentResponse sandboxPaymentResponse = sendPaymentRequestToProvider(order);
         paymentAttemptService.createAttempt(
@@ -77,10 +81,30 @@ public class SandboxPaymentService implements PaymentProviderService {
         return response;
     }
 
-    private void validateCustomerData(UUID customerId, String guestEmail, String guestFirstName) {
-        if (Objects.isNull(customerId) && (Objects.isNull(guestEmail) && Objects.isNull(guestFirstName))) {
+    private UUID resolveCustomerId() {
+        AuthenticatedUser authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser == null) {
+            return null;
+        }
+        Customer customer = customerService.getOrFetchCustomer(authenticatedUser.getUserId());
+        return customer.getId();
+    }
+
+    private void validateGuestDataIfNotAuthenticated(UUID customerId, String guestEmail, String guestFirstName) {
+        if (customerId != null) {
+            return;
+        }
+        if (guestEmail == null || guestEmail.isBlank() || guestFirstName == null || guestFirstName.isBlank()) {
             throw new PaymentProcessException(CUSTOMER_DATA_REQUIRED_MSG);
         }
+    }
+
+    private AuthenticatedUser getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof AuthenticatedUser user) {
+            return user;
+        }
+        return null;
     }
 
     private void validatePaymentsIfAlreadyExists(UUID basketId) {

@@ -85,6 +85,9 @@ ticket:
     signing-secret: secureRandomKeyForTicketsPdfDownload
     base-url: http://localhost:8080
 
+auth-service:
+  url: http://localhost:8081
+
 payment-provider:
   attempts-limit: 3
   sandbox:

@@ -1,6 +1,6 @@
 package pl.dgrecki.services.user;
 
-import static pl.dgrecki.constants.ExceptionMessages.ROLE_NOT_FOUND_MSG;
+import static pl.dgrecki.constants.ExceptionMessages.*;
 import static pl.dgrecki.constants.ValidationErrorMessages.EMAIL_ADDRESS_ALREADY_EXISTS_MSG;
 import static pl.dgrecki.models.enums.UserStatus.PENDING_ACTIVATION;
 
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
+import pl.dgrecki.exceptions.ValidationException;
 import pl.dgrecki.models.entities.Role;
 import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.enums.RoleType;
@@ -22,6 +23,7 @@ import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.models.responses.UserRegisterResponse;
+import pl.dgrecki.models.responses.UserResponse;
 import pl.dgrecki.repositories.RoleRepository;
 import pl.dgrecki.repositories.UserRepository;
 import pl.dgrecki.services.EventService;
@@ -56,8 +58,22 @@ public class UserService {
     public JwtTokenResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        String token = jwtService.generateToken(authentication);
+        User user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MSG));
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new ValidationException(USER_NOT_ACTIVATED_MSG);
+        }
+        String token = jwtService.generateToken(authentication, user.getId());
         return new JwtTokenResponse(token);
+    }
+
+    public UserResponse getActiveUser(Long id) {
+        User user = userRepository
+                .findById(id)
+                .filter(u -> u.getStatus() == UserStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException(USER_NOT_FOUND_MSG));
+        return new UserResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName());
     }
 
     public void setUserStatus(UserStatus userStatus, User user) {

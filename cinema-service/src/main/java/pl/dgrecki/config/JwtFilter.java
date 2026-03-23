@@ -67,8 +67,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private Authentication buildAuthentication(Claims claims) {
         String email = claims.getSubject();
+        Long userId = claims.get("userId", Long.class);
         List<SimpleGrantedAuthority> authorities = extractAuthorities(claims);
-        return new UsernamePasswordAuthenticationToken(email, null, authorities);
+        return new UsernamePasswordAuthenticationToken(new AuthenticatedUser(userId, email), null, authorities);
     }
 
     private List<SimpleGrantedAuthority> extractAuthorities(Claims claims) {
