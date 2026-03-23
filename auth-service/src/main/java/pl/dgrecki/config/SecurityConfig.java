@@ -31,11 +31,14 @@ public class SecurityConfig {
     public SecurityFilterChain apiChain(HttpSecurity http) {
         http.securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        auth -> auth.requestMatchers(LOGIN_ENDPOINT, REGISTER_CUSTOMER_ENDPOINT, USER_ACTIVATE_ENDPOINT)
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                                LOGIN_ENDPOINT,
+                                REGISTER_CUSTOMER_ENDPOINT,
+                                USER_ACTIVATE_ENDPOINT,
+                                INTERNAL_USER_ENDPOINT)
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
                 .authenticationProvider(daoAuthenticationProvider());
         return http.build();
     }

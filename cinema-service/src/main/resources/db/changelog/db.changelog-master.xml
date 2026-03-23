@@ -35,4 +35,5 @@
     <include file="/db/changelog/changes/028-create-refunds-table.xml"/>
     <include file="/db/changelog/changes/029-create-shedlock-table.xml"/>
     <include file="/db/changelog/changes/030-add-reservations-indexes.xml"/>
+    <include file="/db/changelog/changes/031-create-customers-table.xml"/>
 </databaseChangeLog>

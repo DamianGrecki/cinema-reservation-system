@@ -2,6 +2,7 @@ package pl.dgrecki.unit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static pl.dgrecki.services.JwtService.ROLES;
+import static pl.dgrecki.services.JwtService.USER_ID;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -27,13 +28,14 @@ class JwtServiceUnitTests {
         ReflectionTestUtils.setField(jwtService, "secret", secret);
 
         String email = "test@example.com";
+        Long userId = 1L;
 
         List<GrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority(RoleType.CUSTOMER.name()),
                 new SimpleGrantedAuthority(RoleType.ADMIN.name()));
         Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
 
-        String token = jwtService.generateToken(authentication);
+        String token = jwtService.generateToken(authentication, userId);
 
         assertNotNull(token);
         assertFalse(token.isEmpty());
@@ -45,6 +47,7 @@ class JwtServiceUnitTests {
                 .getBody();
 
         assertEquals(email, claims.getSubject());
+        assertEquals(userId, claims.get(USER_ID, Long.class));
 
         List<String> roles = (List<String>) claims.get(ROLES);
         assertNotNull(roles);

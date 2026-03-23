@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
     public static final String ROLES = "roles";
+    public static final String USER_ID = "userId";
     private static final Duration TOKEN_EXPIRED_TIME = Duration.ofHours(1);
 
     @Value("${jwt.secret}")
@@ -26,7 +27,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(Authentication authentication) {
+    public String generateToken(Authentication authentication, Long userId) {
         List<String> roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
@@ -34,6 +35,7 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(ROLES, roles)
+                .claim(USER_ID, userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_EXPIRED_TIME.toMillis()))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

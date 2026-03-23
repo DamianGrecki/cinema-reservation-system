@@ -31,6 +31,7 @@ public class TicketGeneratorService {
     private final TicketPdfJobService ticketPdfJobService;
     private final TicketDownloadUrlService ticketDownloadUrlService;
     private final EventService eventService;
+    private final CustomerService customerService;
     private final Clock clock;
 
     public TicketGeneratorService(
@@ -41,6 +42,7 @@ public class TicketGeneratorService {
             TicketPdfJobService ticketPdfJobService,
             TicketDownloadUrlService ticketDownloadUrlService,
             EventService eventService,
+            CustomerService customerService,
             Clock clock) {
         this.ticketRepository = ticketRepository;
         this.ticketPdfMapper = ticketPdfMapper;
@@ -50,6 +52,7 @@ public class TicketGeneratorService {
         this.ticketPdfJobService = ticketPdfJobService;
         this.ticketDownloadUrlService = ticketDownloadUrlService;
         this.eventService = eventService;
+        this.customerService = customerService;
         this.clock = clock;
     }
 
@@ -80,18 +83,22 @@ public class TicketGeneratorService {
     }
 
     private String resolveRecipientEmail(Order order) {
+        if (order.getCustomerId() != null) {
+            return customerService.getById(order.getCustomerId()).getEmail();
+        }
         if (order.getGuestEmail() != null) {
             return order.getGuestEmail();
         }
-        // TODO: resolve email from customerId when user accounts are fully integrated
         throw new IllegalStateException("No recipient email for order: " + order.getId());
     }
 
     private String resolveRecipientFirstName(Order order) {
+        if (order.getCustomerId() != null) {
+            return customerService.getById(order.getCustomerId()).getFirstName();
+        }
         if (order.getGuestFirstName() != null) {
             return order.getGuestFirstName();
         }
-        // TODO: resolve first name from customerId when user accounts are fully integrated
         throw new IllegalStateException("No recipient first name for order: " + order.getId());
     }
 

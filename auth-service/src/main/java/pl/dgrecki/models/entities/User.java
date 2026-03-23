@@ -2,6 +2,7 @@ package pl.dgrecki.models.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,6 +50,6 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.status = status;
-        this.roles = roles;
+        this.roles = new HashSet<>(roles);
     }
 }

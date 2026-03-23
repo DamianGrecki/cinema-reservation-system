@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.TicketPdfDto;
 import pl.dgrecki.models.entities.*;
+import pl.dgrecki.models.entities.Customer;
 import pl.dgrecki.repositories.TicketRepository;
 import pl.dgrecki.services.*;
 import pl.dgrecki.services.storage.TicketDownloadUrlService;
@@ -52,6 +53,9 @@ class TicketGeneratorServiceUnitTests {
     @Mock
     private EventService eventService;
 
+    @Mock
+    private CustomerService customerService;
+
     private TicketGeneratorService ticketGeneratorService;
 
     @BeforeEach
@@ -64,6 +68,7 @@ class TicketGeneratorServiceUnitTests {
                 ticketPdfJobService,
                 ticketDownloadUrlService,
                 eventService,
+                customerService,
                 clock);
     }
 
@@ -157,6 +162,44 @@ class TicketGeneratorServiceUnitTests {
         }
 
         verify(eventService, never()).createTicketGeneratedEvent(any(), any(), any(), any());
+    }
+
+    @Test
+    void createTicketPdfShouldPublishEventWithCustomerDataWhenAuthenticatedTest() {
+        UUID ticketId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        UUID customerId = UUID.randomUUID();
+        String email = "customer@example.com";
+        String firstName = "Anna";
+        String downloadUrl = "http://localhost:8080/api/orders/" + orderId + "/tickets/download?signature=abc";
+
+        TicketPdfJob job = TicketPdfJob.builder().ticketId(ticketId).build();
+        Order order = Order.builder().id(orderId).customerId(customerId).build();
+        Ticket ticket = Ticket.builder().id(ticketId).order(order).build();
+        Customer customer = Customer.builder()
+                .id(customerId)
+                .email(email)
+                .firstName(firstName)
+                .build();
+
+        stubPdfGeneration(ticketId, ticket);
+        when(ticketFileStorage.store(any(), any())).thenReturn("file.pdf");
+        when(ticketPdfJobService.areAllTicketsGeneratedForOrder(orderId)).thenReturn(true);
+        when(ticketDownloadUrlService.generateUrl(orderId)).thenReturn(downloadUrl);
+        when(customerService.getById(customerId)).thenReturn(customer);
+
+        try (MockedStatic<PdfGenerator> pdf = mockStatic(PdfGenerator.class);
+                MockedStatic<QrCodeGenerator> qr = mockStatic(QrCodeGenerator.class)) {
+
+            qr.when(() -> QrCodeGenerator.generateBase64QrCode(any(), anyInt(), anyInt()))
+                    .thenReturn("qr");
+            pdf.when(() -> PdfGenerator.generatePdf(any())).thenReturn("pdf".getBytes());
+
+            ticketGeneratorService.createTicketPdf(job);
+        }
+
+        verify(customerService, times(2)).getById(customerId);
+        verify(eventService).createTicketGeneratedEvent(orderId, email, firstName, downloadUrl);
     }
 
     @Test

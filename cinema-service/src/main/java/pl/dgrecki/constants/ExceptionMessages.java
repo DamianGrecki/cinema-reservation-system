@@ -30,6 +30,7 @@ public class ExceptionMessages {
             "Reservations %s cannot transition to status %s";
     public static final String PRICING_TYPE_IS_REQUIRED_MSG = "pricingType is required";
     public static final String CUSTOMER_DATA_REQUIRED_MSG = "customerId or guestEmail required";
+    public static final String INVALID_EMAIL_MSG = "Invalid email address";
     public static final String PROVIDER_IS_REQUIRED_MSG = "Provider required";
     public static final String PROVIDER_IS_UNKNOWN_MSG = "Unknown provider";
     public static final String PROVIDER_CANNOT_CREATE_PAYMENT_MSG = "Provider cannot create payment";
