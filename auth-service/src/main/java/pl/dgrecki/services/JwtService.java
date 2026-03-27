@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import pl.dgrecki.models.entities.User;
 
 @Service
 public class JwtService {
@@ -32,8 +33,19 @@ public class JwtService {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
+        return buildToken(authentication.getName(), roles, userId);
+    }
+
+    public String generateTokenForUser(User user) {
+        List<String> roles =
+                user.getRoles().stream().map(role -> role.getRoleType().name()).toList();
+
+        return buildToken(user.getEmail(), roles, user.getId());
+    }
+
+    private String buildToken(String subject, List<String> roles, Long userId) {
         return Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(subject)
                 .claim(ROLES, roles)
                 .claim(USER_ID, userId)
                 .setIssuedAt(new Date())

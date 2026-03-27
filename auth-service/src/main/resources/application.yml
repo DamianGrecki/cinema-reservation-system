@@ -43,6 +43,7 @@ spring:
 
 jwt:
   secret: superDlugiKluczMinimum32ZnakiTutaj
+  refresh-token-expiration: 7d
 
 management:
   endpoints:
