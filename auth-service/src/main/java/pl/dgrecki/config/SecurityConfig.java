@@ -35,7 +35,9 @@ public class SecurityConfig {
                                 LOGIN_ENDPOINT,
                                 REGISTER_CUSTOMER_ENDPOINT,
                                 USER_ACTIVATE_ENDPOINT,
-                                INTERNAL_USER_ENDPOINT)
+                                INTERNAL_USER_ENDPOINT,
+                                REFRESH_TOKEN_ENDPOINT,
+                                LOGOUT_ENDPOINT)
                         .permitAll()
                         .anyRequest()
                         .authenticated())

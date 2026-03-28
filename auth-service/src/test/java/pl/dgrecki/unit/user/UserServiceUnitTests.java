@@ -8,6 +8,7 @@ import static pl.dgrecki.models.enums.UserStatus.PENDING_ACTIVATION;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,19 +25,21 @@ import org.springframework.test.util.ReflectionTestUtils;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.exceptions.ValidationException;
+import pl.dgrecki.models.LoginResult;
+import pl.dgrecki.models.entities.RefreshToken;
 import pl.dgrecki.models.entities.Role;
 import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.enums.RoleType;
 import pl.dgrecki.models.enums.UserStatus;
 import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
-import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.models.responses.UserRegisterResponse;
 import pl.dgrecki.models.responses.UserResponse;
 import pl.dgrecki.repositories.RoleRepository;
 import pl.dgrecki.repositories.UserRepository;
 import pl.dgrecki.services.EventService;
 import pl.dgrecki.services.JwtService;
+import pl.dgrecki.services.RefreshTokenService;
 import pl.dgrecki.services.user.UserService;
 import pl.dgrecki.services.user.activation.UserActivationLinkFacade;
 import pl.dgrecki.validators.RequestDataValidator;
@@ -66,6 +69,9 @@ class UserServiceUnitTests {
     private JwtService jwtService;
 
     @Mock
+    private RefreshTokenService refreshTokenService;
+
+    @Mock
     private Authentication auth;
 
     private PasswordEncoder passwordEncoder;
@@ -82,6 +88,7 @@ class UserServiceUnitTests {
                 passwordEncoder,
                 authenticationManager,
                 jwtService,
+                refreshTokenService,
                 userRegisterDataValidator);
     }
 
@@ -89,25 +96,32 @@ class UserServiceUnitTests {
     void loginUserSuccessfullyTest() {
         String email = "test@example.com";
         String password = "password123!";
-        String token = "mocked-jwt-token";
+        String accessToken = "mocked-jwt-token";
         Long userId = 1L;
+        UUID refreshTokenUuid = UUID.randomUUID();
 
         LoginRequest request = new LoginRequest(email, password);
 
         User user = new User(email, password, "John", "Doe", ACTIVE, Set.of());
         ReflectionTestUtils.setField(user, "id", userId);
 
+        RefreshToken refreshToken =
+                RefreshToken.builder().token(refreshTokenUuid).user(user).build();
+
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(auth);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(auth, userId)).thenReturn(token);
+        when(jwtService.generateToken(auth, userId)).thenReturn(accessToken);
+        when(refreshTokenService.createRefreshToken(user)).thenReturn(refreshToken);
 
-        JwtTokenResponse response = userService.login(request);
+        LoginResult result = userService.login(request);
 
-        assertEquals(token, response.getJwtToken());
+        assertEquals(accessToken, result.getAccessToken());
+        assertEquals(refreshTokenUuid.toString(), result.getRefreshToken());
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtService).generateToken(auth, userId);
+        verify(refreshTokenService).createRefreshToken(user);
     }
 
     @Test
@@ -128,6 +142,7 @@ class UserServiceUnitTests {
 
         assertEquals(USER_NOT_ACTIVATED_MSG, ex.getMessage());
         verify(jwtService, never()).generateToken(any(), any());
+        verify(refreshTokenService, never()).createRefreshToken(any());
     }
 
     @Test

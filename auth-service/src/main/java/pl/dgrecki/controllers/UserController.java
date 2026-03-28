@@ -2,13 +2,16 @@ package pl.dgrecki.controllers;
 
 import static pl.dgrecki.constants.Endpoints.LOGIN_ENDPOINT;
 import static pl.dgrecki.constants.Endpoints.REGISTER_CUSTOMER_ENDPOINT;
+import static pl.dgrecki.controllers.RefreshTokenCookieHelper.addRefreshTokenCookie;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import pl.dgrecki.models.LoginResult;
 import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.models.responses.JwtTokenResponse;
@@ -27,7 +30,9 @@ class UserController {
     }
 
     @PostMapping(LOGIN_ENDPOINT)
-    public ResponseEntity<JwtTokenResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.login(request));
+    public ResponseEntity<JwtTokenResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        LoginResult result = userService.login(request);
+        addRefreshTokenCookie(response, result.getRefreshToken());
+        return ResponseEntity.ok(new JwtTokenResponse(result.getAccessToken()));
     }
 }

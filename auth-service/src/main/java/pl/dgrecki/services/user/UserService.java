@@ -15,19 +15,21 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ResourceAlreadyExistsException;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.exceptions.ValidationException;
+import pl.dgrecki.models.LoginResult;
+import pl.dgrecki.models.entities.RefreshToken;
 import pl.dgrecki.models.entities.Role;
 import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.enums.RoleType;
 import pl.dgrecki.models.enums.UserStatus;
 import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
-import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.models.responses.UserRegisterResponse;
 import pl.dgrecki.models.responses.UserResponse;
 import pl.dgrecki.repositories.RoleRepository;
 import pl.dgrecki.repositories.UserRepository;
 import pl.dgrecki.services.EventService;
 import pl.dgrecki.services.JwtService;
+import pl.dgrecki.services.RefreshTokenService;
 import pl.dgrecki.services.user.activation.UserActivationLinkFacade;
 import pl.dgrecki.validators.RequestDataValidator;
 
@@ -42,6 +44,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final RequestDataValidator<UserRegisterRequest> userRegisterValidator;
 
     @Transactional
@@ -55,7 +58,7 @@ public class UserService {
         return new UserRegisterResponse(true, savedUser.getEmail());
     }
 
-    public JwtTokenResponse login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository
@@ -64,8 +67,9 @@ public class UserService {
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new ValidationException(USER_NOT_ACTIVATED_MSG);
         }
-        String token = jwtService.generateToken(authentication, user.getId());
-        return new JwtTokenResponse(token);
+        String accessToken = jwtService.generateToken(authentication, user.getId());
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        return new LoginResult(accessToken, refreshToken.getToken().toString());
     }
 
     public UserResponse getActiveUser(Long id) {

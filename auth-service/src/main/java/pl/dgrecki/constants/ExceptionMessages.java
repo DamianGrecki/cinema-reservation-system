@@ -13,4 +13,7 @@ public class ExceptionMessages {
     public static final String TOKEN_EXPIRED_MSG = "Token has expired";
     public static final String TOKEN_IS_USED_MSG = "Token has already been used";
     public static final String EVENT_DATA_SERIALIZE_FAILED_MSG = "Failed to serialize Event Data";
+    public static final String REFRESH_TOKEN_NOT_FOUND_MSG = "Refresh token not found";
+    public static final String REFRESH_TOKEN_EXPIRED_MSG = "Refresh token has expired";
+    public static final String REFRESH_TOKEN_REVOKED_MSG = "Refresh token has been revoked";
 }
