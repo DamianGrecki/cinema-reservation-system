@@ -93,5 +93,5 @@ auth-service:
 payment-provider:
   attempts-limit: 3
   sandbox:
-    host: http://localhost:1080
+    url: http://localhost:1080
 

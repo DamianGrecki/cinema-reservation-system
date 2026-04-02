@@ -1,0 +1,193 @@
+version: '3.8'
+
+services:
+
+  # ---- Databases ----
+
+  cinema-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${CINEMA_DB_USER}
+      POSTGRES_PASSWORD: ${CINEMA_DB_PASSWORD}
+      POSTGRES_DB: ${CINEMA_DB_NAME}
+    ports:
+      - "1010:5432"
+    volumes:
+      - cinema-db-data:/var/lib/postgresql/data
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  auth-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_DB: ${AUTH_DB_NAME}
+    ports:
+      - "1011:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  mail-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${MAIL_DB_USER}
+      POSTGRES_PASSWORD: ${MAIL_DB_PASSWORD}
+      POSTGRES_DB: ${MAIL_DB_NAME}
+    ports:
+      - "1012:5432"
+    volumes:
+      - mail-db-data:/var/lib/postgresql/data
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  # ---- Infrastructure ----
+
+  kafka:
+    image: apache/kafka:4.1.1
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 1
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  mailpit:
+    image: axllent/mailpit:v1.29
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  payment-mock:
+    image: cinema/payment-provider-mock
+    ports:
+      - "1080:1080"
+    environment:
+      CINEMA_SERVICE_URL: http://cinema-service:8080
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  # ---- Monitoring ----
+
+  prometheus:
+    image: prom/prometheus:v3.8.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  grafana:
+    image: grafana/grafana:12.3
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    volumes:
+      - ../monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ../monitoring/grafana/provisioning/dashboards/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ../monitoring/grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  # ---- Application Services ----
+
+  auth-service:
+    image: cinema/auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/${AUTH_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  cinema-service:
+    image: cinema/cinema-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://cinema-db:5432/${CINEMA_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${CINEMA_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${CINEMA_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      AUTH_SERVICE_URL: http://auth-service:8081
+      PAYMENT_PROVIDER_SANDBOX_URL: http://payment-mock:1080
+      TICKET_DOWNLOAD_BASE_URL: http://cinema-service:8080
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+  mail-service:
+    image: cinema/mail-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://mail-db:5432/${MAIL_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${MAIL_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MAIL_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_MAIL_HOST: mailpit
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+
+volumes:
+  cinema-db-data:
+  auth-db-data:
+  mail-db-data:
+
+networks:
+  cinema-network:
+    driver: overlay

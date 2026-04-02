@@ -8,11 +8,11 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class RestClientConfig {
 
-    @Value("${payment-provider.sandbox.host}")
-    private String sandboxPaymentProviderHost;
+    @Value("${payment-provider.sandbox.url}")
+    private String sandboxPaymentProviderUrl;
 
     @Bean
     public RestClient sandboxPaymentProviderRestClient() {
-        return RestClient.builder().baseUrl(sandboxPaymentProviderHost).build();
+        return RestClient.builder().baseUrl(sandboxPaymentProviderUrl).build();
     }
 }
