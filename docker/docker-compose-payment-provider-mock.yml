@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  payment-mock:
+    build: ../mocks/payment/provider
+    container_name: payment-provider-mock-server
+    ports:
+      - "1080:1080"
+    environment:
+      CINEMA_SERVICE_URL: ${CINEMA_SERVICE_URL:-http://host.docker.internal:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - cinema-network
+    restart: always
+
+networks:
+  cinema-network:
+    external: true

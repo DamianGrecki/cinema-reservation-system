@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  cinema-db:
+    container_name: cinema-db
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${CINEMA_DB_USER}
+      POSTGRES_PASSWORD: ${CINEMA_DB_PASSWORD}
+      POSTGRES_DB: ${CINEMA_DB_NAME}
+    ports:
+      - "1010:5432"
+    networks:
+      - cinema-network
+    restart: always
+
+  auth-db:
+    container_name: auth-db
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_DB: ${AUTH_DB_NAME}
+    ports:
+      - "1011:5432"
+    networks:
+      - cinema-network
+    restart: always
+
+  mail-db:
+    container_name: mail-db
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${MAIL_DB_USER}
+      POSTGRES_PASSWORD: ${MAIL_DB_PASSWORD}
+      POSTGRES_DB: ${MAIL_DB_NAME}
+    ports:
+      - "1012:5432"
+    networks:
+      - cinema-network
+    restart: always
+
+networks:
+  cinema-network:
+    external: true

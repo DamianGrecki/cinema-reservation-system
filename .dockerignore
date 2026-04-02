@@ -1,0 +1,12 @@
+target/
+**/target/
+.idea/
+.git/
+*.iml
+*.iws
+*.ipr
+.env
+logs/
+**/logs/
+ticket-pdfs/
+**/ticket-pdfs/

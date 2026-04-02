@@ -1,9 +1,12 @@
+import os
 import uuid
 import httpx
 import asyncio
 from fastapi import FastAPI, BackgroundTasks, Request
 
 app = FastAPI()
+
+CINEMA_SERVICE_URL = os.getenv("CINEMA_SERVICE_URL", "http://host.docker.internal:8080")
 
 @app.post("/api/payment")
 async def create_payment(request: Request, background_tasks: BackgroundTasks):
@@ -37,7 +40,7 @@ async def send_webhook(order_id, transaction_id):
     # Payment processing delay
     await asyncio.sleep(10)
 
-    webhook_url = "http://host.docker.internal:8080/api/webhook/payment"
+    webhook_url = f"{CINEMA_SERVICE_URL}/api/webhook/payment"
     payload = {
         "transactionId": transaction_id,
         "orderId": order_id,

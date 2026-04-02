@@ -1,0 +1,28 @@
+FROM eclipse-temurin:25-jdk AS build
+
+WORKDIR /app
+
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY common-lib/pom.xml common-lib/pom.xml
+COPY auth-service/pom.xml auth-service/pom.xml
+COPY cinema-service/pom.xml cinema-service/pom.xml
+COPY mail-service/pom.xml mail-service/pom.xml
+
+RUN ./mvnw dependency:go-offline -pl cinema-service -am -q 2>/dev/null || true
+
+COPY common-lib/src common-lib/src
+COPY cinema-service/src cinema-service/src
+
+RUN ./mvnw package -pl cinema-service -am -DskipTests -q
+
+FROM eclipse-temurin:25-jre
+
+WORKDIR /app
+
+COPY --from=build /app/cinema-service/target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

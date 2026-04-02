@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  cinema-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.cinema-service
+    container_name: cinema-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://cinema-db:5432/${CINEMA_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${CINEMA_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${CINEMA_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      AUTH_SERVICE_URL: http://auth-service:8081
+      PAYMENT_PROVIDER_SANDBOX_URL: http://payment-provider-mock-server:1080
+      TICKET_DOWNLOAD_BASE_URL: http://cinema-service:8080
+    networks:
+      - cinema-network
+
+networks:
+  cinema-network:
+    external: true
