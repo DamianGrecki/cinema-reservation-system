@@ -7,6 +7,5 @@ target/
 *.ipr
 .env
 logs/
-**/logs/
 ticket-pdfs/
 **/ticket-pdfs/
