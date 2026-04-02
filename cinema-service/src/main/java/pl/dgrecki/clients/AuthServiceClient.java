@@ -10,10 +10,15 @@ import pl.dgrecki.exceptions.ResourceNotFoundException;
 @Component
 public class AuthServiceClient {
 
-    private final RestClient restClient;
+    private static final String SERVICE_TOKEN_HEADER = "X-Service-Token";
 
-    public AuthServiceClient(@Value("${auth-service.url}") String authServiceUrl) {
+    private final RestClient restClient;
+    private final ServiceTokenClient serviceTokenClient;
+
+    public AuthServiceClient(
+            @Value("${auth-service.url}") String authServiceUrl, ServiceTokenClient serviceTokenClient) {
         this.restClient = RestClient.builder().baseUrl(authServiceUrl).build();
+        this.serviceTokenClient = serviceTokenClient;
     }
 
     public AuthUserResponse getUser(Long userId) {
@@ -21,6 +26,7 @@ public class AuthServiceClient {
         AuthUserResponse response = restClient
                 .get()
                 .uri("/api/internal/users/{id}", userId)
+                .header(SERVICE_TOKEN_HEADER, serviceTokenClient.getToken())
                 .retrieve()
                 .body(AuthUserResponse.class);
 

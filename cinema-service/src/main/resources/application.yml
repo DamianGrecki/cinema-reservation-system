@@ -87,6 +87,8 @@ ticket:
 
 auth-service:
   url: http://localhost:8081
+  name: cinema-service
+  client-secret: cinema-service-secret # It will eventually be moved to .env
 
 payment-provider:
   attempts-limit: 3

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="010-insert-cinema-service" author="Damian G">
+        <insert tableName="service_credentials">
+            <column name="name" value="cinema-service"/>
+            <column name="client_secret" value="$2a$12$MN8KCL1n2VjCZlkotIibP.7B7XB8MtN/hb8u6qhuDgqsy8Mwrs2fa"/>
+            <column name="active" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="service_roles">
+            <column name="service_id" valueComputed="(SELECT id FROM service_credentials WHERE name = 'cinema-service')"/>
+            <column name="role_type" value="READ_USERS"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
