@@ -12,4 +12,7 @@
     <include file="db/changelog/changes/005-create-outbox-events-table.xml"/>
     <include file="db/changelog/changes/006-create-activation-tokens-table.xml"/>
     <include file="db/changelog/changes/007-create-refresh-tokens-table.xml"/>
+    <include file="db/changelog/changes/008-create-services-table.xml"/>
+    <include file="db/changelog/changes/009-create-service-roles-table.xml"/>
+    <include file="db/changelog/changes/010-insert-cinema-service.xml"/>
 </databaseChangeLog>
