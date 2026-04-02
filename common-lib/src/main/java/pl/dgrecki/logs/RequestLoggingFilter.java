@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.InetAddress;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -25,6 +26,12 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private static final String MASKED_VALUE = "*****";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String instanceId = resolveInstanceId();
+
+    @SneakyThrows
+    private static String resolveInstanceId() {
+        return InetAddress.getLocalHost().getHostName();
+    }
 
     @SneakyThrows
     @Override
@@ -56,7 +63,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     }
 
     private void logRequestEndpoint(HttpServletRequest request) {
-        log.info("Incoming request: {} {}", request.getMethod(), request.getRequestURI());
+        log.info("[{}] Incoming request: {} {}", instanceId, request.getMethod(), request.getRequestURI());
     }
 
     @SneakyThrows
@@ -78,7 +85,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private void logResponse(HttpServletRequest request, HttpServletResponse response, String responseBody, long time) {
         log.info(
-                "Response: {} {} -> status={} ({} ms)",
+                "[{}] Response: {} {} -> status={} ({} ms)",
+                instanceId,
                 request.getMethod(),
                 request.getRequestURI(),
                 response.getStatus(),

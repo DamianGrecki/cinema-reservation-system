@@ -164,6 +164,7 @@ services:
     networks:
       - cinema-network
     deploy:
+      replicas: 1
       restart_policy:
         condition: any
 
