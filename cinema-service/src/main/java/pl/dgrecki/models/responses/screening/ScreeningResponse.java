@@ -13,6 +13,7 @@ public class ScreeningResponse {
     private UUID id;
     private String cinemaHallName;
     private String movieTitle;
+    private String moviePosterUrl;
     private String movieFormat;
     private PresentationType presentationType;
     private AudioLanguage audioLanguage;

@@ -25,10 +25,12 @@ public class Movie {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private String posterFileName;
+
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<MovieVersion> versions = new ArrayList<>();
 
-    @Column(name = "created_at", nullable = false)
+    @Column(nullable = false)
     private Instant createdAt;
 }

@@ -85,6 +85,12 @@ ticket:
     signing-secret: secureRandomKeyForTicketsPdfDownload
     base-url: http://localhost:8080
 
+poster:
+  storage:
+    type: local
+    local:
+      directory: ./posters
+
 auth-service:
   url: http://localhost:8081
   name: cinema-service
