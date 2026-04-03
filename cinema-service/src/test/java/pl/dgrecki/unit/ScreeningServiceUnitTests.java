@@ -20,6 +20,7 @@ import pl.dgrecki.models.entities.*;
 import pl.dgrecki.models.responses.screening.ScreeningListResponse;
 import pl.dgrecki.models.responses.screening.ScreeningResponse;
 import pl.dgrecki.repositories.ScreeningRepository;
+import pl.dgrecki.services.MovieService;
 import pl.dgrecki.services.ScreeningService;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +28,9 @@ class ScreeningServiceUnitTests {
 
     @Mock
     private ScreeningRepository screeningRepository;
+
+    @Mock
+    private MovieService movieService;
 
     @InjectMocks
     private ScreeningService screeningService;

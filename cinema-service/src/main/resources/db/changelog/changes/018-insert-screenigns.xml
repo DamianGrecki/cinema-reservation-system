@@ -7,164 +7,182 @@
 
     <changeSet id="018-insert-screenings" author="Damian G">
 
+        <!-- Day 0 (today): 2x Inception, 2x Matrix, 1x Dark Knight -->
+
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="1"/>
             <column name="movie_version_id" value="aaaa1111-1111-1111-1111-aaaaaaaa1111"/>
-            <column name="start_time" valueComputed="now() + interval '7 days' + interval '10 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '7 days' + interval '12 hours'"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '12 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '14 hours'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="bbbb2222-2222-2222-2222-bbbbbbbb2222"/>
-            <column name="start_time" valueComputed="now() + interval '7 days' + interval '10 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '7 days' + interval '12 hours 30 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="1"/>
-            <column name="movie_version_id" value="eeee1111-1111-1111-1111-eeeeeeee1111"/>
-            <column name="start_time" valueComputed="now() + interval '7 days' + interval '14 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '7 days' + interval '16 hours 30 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="dddd1111-1111-1111-1111-dddddddd1111"/>
-            <column name="start_time" valueComputed="now() + interval '7 days' + interval '14 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '7 days' + interval '16 hours 30 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="1"/>
             <column name="movie_version_id" value="bbbb1111-1111-1111-1111-bbbbbbbb1111"/>
-            <column name="start_time" valueComputed="now() + interval '8 days' + interval '11 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '8 days' + interval '13 hours 20 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="cccc1111-1111-1111-1111-cccccccc1111"/>
-            <column name="start_time" valueComputed="now() + interval '8 days' + interval '11 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '8 days' + interval '13 hours 50 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="1"/>
-            <column name="movie_version_id" value="ffff1111-1111-1111-1111-ffffffffffff"/>
-            <column name="start_time" valueComputed="now() + interval '8 days' + interval '16 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '8 days' + interval '18 hours 20 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="aaaa3333-3333-3333-3333-aaaaaaaa3333"/>
-            <column name="start_time" valueComputed="now() + interval '8 days' + interval '16 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '8 days' + interval '18 hours'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="1"/>
-            <column name="movie_version_id" value="aabb1111-1111-1111-1111-aabbccdd1111"/>
-            <column name="start_time" valueComputed="now() + interval '9 days' + interval '12 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '9 days' + interval '14 hours 30 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="bbcc1111-1111-1111-1111-bbccddee1111"/>
-            <column name="start_time" valueComputed="now() + interval '9 days' + interval '12 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '9 days' + interval '14 hours 45 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="1"/>
-            <column name="movie_version_id" value="eeee2222-2222-2222-2222-eeeeeeee2222"/>
-            <column name="start_time" valueComputed="now() + interval '9 days' + interval '17 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '9 days' + interval '19 hours 30 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="dddd2222-2222-2222-2222-dddddddd2222"/>
-            <column name="start_time" valueComputed="now() + interval '9 days' + interval '17 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '9 days' + interval '19 hours 30 minutes'"/>
-        </insert>
-
-        <insert tableName="screenings">
-            <column name="id" valueComputed="gen_random_uuid()"/>
-            <column name="cinema_hall_id" value="1"/>
-            <column name="movie_version_id" value="cccc2222-2222-2222-2222-cccccccc2222"/>
-            <column name="start_time" valueComputed="now() + interval '10 days' + interval '10 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '10 days' + interval '12 hours 50 minutes'"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '12 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '14 hours 20 minutes'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="2"/>
             <column name="movie_version_id" value="aaaa2222-2222-2222-2222-aaaaaaaa2222"/>
-            <column name="start_time" valueComputed="now() + interval '10 days' + interval '10 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '10 days' + interval '12 hours'"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '16 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '18 hours'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="bbbb2222-2222-2222-2222-bbbbbbbb2222"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '16 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '18 hours 20 minutes'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="dddd1111-1111-1111-1111-dddddddd1111"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '20 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '22 hours'"/>
+        </insert>
+
+        <!-- Day 1: Interstellar, Pulp Fiction, Shawshank, Blade Runner -->
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="cccc1111-1111-1111-1111-cccccccc1111"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '13 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '15 hours 40 minutes'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="2"/>
+            <column name="movie_version_id" value="eeee1111-1111-1111-1111-eeeeeeee1111"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '13 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '15 hours 20 minutes'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="ffff1111-1111-1111-1111-ffffffffffff"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '18 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '20 hours 20 minutes'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="2"/>
+            <column name="movie_version_id" value="bbcc1111-1111-1111-1111-bbccddee1111"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '18 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '1 days' + interval '20 hours 40 minutes'"/>
+        </insert>
+
+        <!-- Day 2: Gladiator, Inception 3D, Matrix, Dark Knight -->
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="aabb1111-1111-1111-1111-aabbccdd1111"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '14 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '16 hours 20 minutes'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="2"/>
+            <column name="movie_version_id" value="aaaa3333-3333-3333-3333-aaaaaaaa3333"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '14 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '16 hours'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="bbbb1111-1111-1111-1111-bbbbbbbb1111"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '19 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '21 hours 20 minutes'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="2"/>
+            <column name="movie_version_id" value="dddd2222-2222-2222-2222-dddddddd2222"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '19 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '2 days' + interval '21 hours'"/>
+        </insert>
+
+        <!-- Day 3: Pulp Fiction, Interstellar 3D, Gladiator, Blade Runner -->
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="1"/>
+            <column name="movie_version_id" value="eeee2222-2222-2222-2222-eeeeeeee2222"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '12 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '14 hours 20 minutes'"/>
+        </insert>
+
+        <insert tableName="screenings">
+            <column name="id" valueComputed="gen_random_uuid()"/>
+            <column name="cinema_hall_id" value="2"/>
+            <column name="movie_version_id" value="cccc2222-2222-2222-2222-cccccccc2222"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '12 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '14 hours 40 minutes'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="1"/>
             <column name="movie_version_id" value="aabb2222-2222-2222-2222-aabbccdd2222"/>
-            <column name="start_time" valueComputed="now() + interval '10 days' + interval '15 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '10 days' + interval '17 hours 30 minutes'"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '17 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '19 hours 20 minutes'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="2"/>
             <column name="movie_version_id" value="bbcc2222-2222-2222-2222-bbccddee2222"/>
-            <column name="start_time" valueComputed="now() + interval '10 days' + interval '15 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '10 days' + interval '17 hours'"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '17 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '3 days' + interval '19 hours'"/>
         </insert>
+
+        <!-- Day 4: Inception, Matrix, Shawshank, Dark Knight -->
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="1"/>
             <column name="movie_version_id" value="aaaa1111-1111-1111-1111-aaaaaaaa1111"/>
-            <column name="start_time" valueComputed="now() + interval '11 days' + interval '13 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '11 days' + interval '15 hours'"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '15 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '17 hours'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="2"/>
             <column name="movie_version_id" value="bbbb1111-1111-1111-1111-bbbbbbbb1111"/>
-            <column name="start_time" valueComputed="now() + interval '11 days' + interval '13 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '11 days' + interval '15 hours 20 minutes'"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '15 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '17 hours 20 minutes'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="1"/>
-            <column name="movie_version_id" value="eeee1111-1111-1111-1111-eeeeeeee1111"/>
-            <column name="start_time" valueComputed="now() + interval '11 days' + interval '18 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '11 days' + interval '20 hours 30 minutes'"/>
+            <column name="movie_version_id" value="ffff1111-1111-1111-1111-ffffffffffff"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '19 hours'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '21 hours 20 minutes'"/>
         </insert>
 
         <insert tableName="screenings">
             <column name="id" valueComputed="gen_random_uuid()"/>
             <column name="cinema_hall_id" value="2"/>
-            <column name="movie_version_id" value="cccc1111-1111-1111-1111-cccccccc1111"/>
-            <column name="start_time" valueComputed="now() + interval '11 days' + interval '18 hours'"/>
-            <column name="end_time" valueComputed="now() + interval '11 days' + interval '20 hours 50 minutes'"/>
+            <column name="movie_version_id" value="dddd1111-1111-1111-1111-dddddddd1111"/>
+            <column name="start_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '19 hours 40 minutes'"/>
+            <column name="end_time" valueComputed="CURRENT_DATE + interval '4 days' + interval '21 hours 40 minutes'"/>
         </insert>
 
     </changeSet>

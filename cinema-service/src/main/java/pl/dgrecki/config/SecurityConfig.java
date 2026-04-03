@@ -33,6 +33,7 @@ public class SecurityConfig {
                         ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint).accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(
                                 MOVIES_ENDPOINT,
+                                MOVIE_POSTER_DOWNLOAD_ENDPOINT,
                                 SCREENINGS_ENDPOINT,
                                 SCREENINGS_SEATS_ENDPOINT,
                                 BASKET_ENDPOINT,

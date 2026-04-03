@@ -8,6 +8,8 @@ public class Endpoints {
     public static final String API = "/api";
 
     public static final String MOVIES_ENDPOINT = API + "/movies";
+    public static final String MOVIE_POSTER_UPLOAD_ENDPOINT = MOVIES_ENDPOINT + "/{movieId}/poster";
+    public static final String MOVIE_POSTER_DOWNLOAD_ENDPOINT = MOVIES_ENDPOINT + "/{movieId}/poster";
     public static final String SCREENINGS_ENDPOINT = API + "/screenings";
     public static final String SCREENINGS_SEATS_ENDPOINT = SCREENINGS_ENDPOINT + "/{screeningId}/seats";
     public static final String BASKET_ENDPOINT = API + "/basket";

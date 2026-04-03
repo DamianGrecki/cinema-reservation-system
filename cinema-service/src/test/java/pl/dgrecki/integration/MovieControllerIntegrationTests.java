@@ -34,8 +34,8 @@ class MovieControllerIntegrationTests extends BaseIntegrationTest {
     @SneakyThrows
     @Test
     void shouldReturnMoviesListTest() {
-        MovieResponse movie1 = new MovieResponse(UUID.randomUUID(), "Movie 1", "Desc 1");
-        MovieResponse movie2 = new MovieResponse(UUID.randomUUID(), "Movie 2", "Desc 2");
+        MovieResponse movie1 = new MovieResponse(UUID.randomUUID(), "Movie 1", "Desc 1", null);
+        MovieResponse movie2 = new MovieResponse(UUID.randomUUID(), "Movie 2", "Desc 2", null);
         MovieListResponse movieListResponse = new MovieListResponse(List.of(movie1, movie2));
 
         when(movieService.getMoviesList()).thenReturn(movieListResponse);

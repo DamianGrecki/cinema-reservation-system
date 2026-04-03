@@ -45,4 +45,6 @@ public class ExceptionMessages {
     public static final String REFUND_ALREADY_EXISTS_MSG = "Refund failed for order %s";
     public static final String REFUND_NO_COMPLETED_PAYMENT_MSG = "No completed payment found for order %s";
     public static final String ORDER_NOT_FOUND_MSG = "Order %s not found.";
+    public static final String MOVIE_NOT_FOUND_MSG = "Movie %s not found.";
+    public static final String POSTER_NOT_FOUND_MSG = "Poster not found for movie: %s";
 }

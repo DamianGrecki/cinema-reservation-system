@@ -16,6 +16,7 @@ import pl.dgrecki.models.responses.movie.MovieListResponse;
 import pl.dgrecki.models.responses.movie.MovieResponse;
 import pl.dgrecki.repositories.MovieRepository;
 import pl.dgrecki.services.MovieService;
+import pl.dgrecki.services.storage.PosterFileStorage;
 
 @ExtendWith(MockitoExtension.class)
 class MovieServiceUnitTests {
@@ -23,13 +24,16 @@ class MovieServiceUnitTests {
     @Mock
     private MovieRepository movieRepository;
 
+    @Mock
+    private PosterFileStorage posterFileStorage;
+
     @InjectMocks
     private MovieService movieService;
 
     @Test
     void getMoviesListTest() {
-        Movie movie1 = new Movie(UUID.randomUUID(), "Movie 1", "Description 1", List.of(), Instant.now());
-        Movie movie2 = new Movie(UUID.randomUUID(), "Movie 2", "Description 2", List.of(), Instant.now());
+        Movie movie1 = new Movie(UUID.randomUUID(), "Movie 1", "Description 1", null, List.of(), Instant.now());
+        Movie movie2 = new Movie(UUID.randomUUID(), "Movie 2", "Description 2", null, List.of(), Instant.now());
 
         when(movieRepository.findAll()).thenReturn(List.of(movie1, movie2));
 
