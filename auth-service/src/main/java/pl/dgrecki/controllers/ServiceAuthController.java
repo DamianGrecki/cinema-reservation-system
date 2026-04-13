@@ -19,7 +19,6 @@ class ServiceAuthController {
 
     @PostMapping(INTERNAL_TOKEN_ENDPOINT)
     ResponseEntity<JwtTokenResponse> authenticate(@RequestBody ServiceAuthRequest request) {
-        String token = serviceAuthService.authenticate(request.getName(), request.getClientSecret());
-        return ResponseEntity.ok(new JwtTokenResponse(token));
+        return ResponseEntity.ok(serviceAuthService.authenticate(request.getName(), request.getClientSecret()));
     }
 }

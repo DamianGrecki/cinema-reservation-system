@@ -6,6 +6,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.dgrecki.models.entities.ServiceCredential;
+import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.repositories.ServiceCredentialRepository;
 
 @Slf4j
@@ -17,7 +18,7 @@ public class ServiceAuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public String authenticate(String name, String clientSecret) {
+    public JwtTokenResponse authenticate(String name, String clientSecret) {
         ServiceCredential service = serviceCredentialRepository
                 .findByName(name)
                 .filter(ServiceCredential::isActive)

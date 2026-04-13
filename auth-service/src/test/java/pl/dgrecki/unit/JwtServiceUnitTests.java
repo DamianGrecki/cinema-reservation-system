@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Date;
@@ -23,6 +24,7 @@ import pl.dgrecki.models.entities.ServiceCredential;
 import pl.dgrecki.models.entities.ServiceRole;
 import pl.dgrecki.models.enums.RoleType;
 import pl.dgrecki.models.enums.ServiceRoleType;
+import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.services.JwtService;
 
 class JwtServiceUnitTests {
@@ -72,12 +74,14 @@ class JwtServiceUnitTests {
         ReflectionTestUtils.setField(service, "name", "cinema-service");
         ReflectionTestUtils.setField(service, "roles", Set.of(role));
 
-        String token = jwtService.generateServiceToken(service);
+        JwtTokenResponse response = jwtService.generateServiceToken(service);
 
-        assertNotNull(token);
-        assertFalse(token.isEmpty());
+        assertNotNull(response);
+        assertNotNull(response.getJwtToken());
+        assertFalse(response.getJwtToken().isEmpty());
+        assertEquals(clock.instant().plus(Duration.ofMinutes(5)), response.getExpiresAt());
 
-        Claims claims = parseClaims(token);
+        Claims claims = parseClaims(response.getJwtToken());
 
         assertEquals("cinema-service", claims.getSubject());
         assertEquals(TOKEN_TYPE_SERVICE, claims.get(TYPE, String.class));
