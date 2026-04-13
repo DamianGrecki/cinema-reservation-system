@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 MOVIES_ENDPOINT,
                                 MOVIE_POSTER_DOWNLOAD_ENDPOINT,
                                 SCREENINGS_ENDPOINT,
+                                SCREENING_ENDPOINT,
                                 SCREENINGS_SEATS_ENDPOINT,
                                 BASKET_ENDPOINT,
                                 BASKET_PRICING_ENDPOINT,

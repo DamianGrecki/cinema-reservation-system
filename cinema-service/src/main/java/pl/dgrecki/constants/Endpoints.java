@@ -11,6 +11,7 @@ public class Endpoints {
     public static final String MOVIE_POSTER_UPLOAD_ENDPOINT = MOVIES_ENDPOINT + "/{movieId}/poster";
     public static final String MOVIE_POSTER_DOWNLOAD_ENDPOINT = MOVIES_ENDPOINT + "/{movieId}/poster";
     public static final String SCREENINGS_ENDPOINT = API + "/screenings";
+    public static final String SCREENING_ENDPOINT = SCREENINGS_ENDPOINT + "/{screeningId}";
     public static final String SCREENINGS_SEATS_ENDPOINT = SCREENINGS_ENDPOINT + "/{screeningId}/seats";
     public static final String BASKET_ENDPOINT = API + "/basket";
     public static final String BASKET_PRICING_ENDPOINT = BASKET_ENDPOINT + "/{basketId}/pricing";
