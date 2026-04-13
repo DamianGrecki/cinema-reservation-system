@@ -6,7 +6,10 @@ import static pl.dgrecki.models.enums.AudioLanguage.ENGLISH;
 import static pl.dgrecki.models.enums.MovieFormat.FORMAT_2D;
 import static pl.dgrecki.models.enums.PresentationType.ORIGINAL_WITH_SUBTITLES;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,18 +29,26 @@ import pl.dgrecki.services.ScreeningService;
 @ExtendWith(MockitoExtension.class)
 class ScreeningServiceUnitTests {
 
+    private static final ZoneId ZONE_ID = ZoneId.of("Europe/Warsaw");
+
     @Mock
     private ScreeningRepository screeningRepository;
 
     @Mock
     private MovieService movieService;
 
+    @Mock
+    private Clock clock;
+
     @InjectMocks
     private ScreeningService screeningService;
 
     @Test
-    void getScreeningsListShouldReturnMappedResponsesTest() {
+    void getScreeningsListByDateShouldReturnFilteredResponsesTest() {
         UUID screeningId = UUID.randomUUID();
+        LocalDate date = LocalDate.of(2026, 1, 1);
+        Instant startOfDay = date.atStartOfDay(ZONE_ID).toInstant();
+        Instant endOfDay = date.plusDays(1).atStartOfDay(ZONE_ID).toInstant();
 
         Movie movie = new Movie();
         movie.setTitle("Interstellar");
@@ -62,9 +73,10 @@ class ScreeningServiceUnitTests {
                 .endTime(end)
                 .build();
 
-        when(screeningRepository.findAllWithDetails()).thenReturn(List.of(screening));
+        when(clock.getZone()).thenReturn(ZONE_ID);
+        when(screeningRepository.findAllByDateWithDetails(startOfDay, endOfDay)).thenReturn(List.of(screening));
 
-        ScreeningListResponse response = screeningService.getScreeningsList();
+        ScreeningListResponse response = screeningService.getScreeningsListByDate(date);
 
         assertNotNull(response);
         assertEquals(1, response.getScreenings().size());
@@ -72,27 +84,78 @@ class ScreeningServiceUnitTests {
         ScreeningResponse screeningResponse = response.getScreenings().getFirst();
 
         assertEquals(screeningId, screeningResponse.getId());
-        assertEquals("Hall 1", screeningResponse.getCinemaHallName());
         assertEquals("Interstellar", screeningResponse.getMovieTitle());
-        assertEquals(FORMAT_2D.toString(), screeningResponse.getMovieFormat());
-        assertEquals(ORIGINAL_WITH_SUBTITLES, screeningResponse.getPresentationType());
-        assertEquals(ENGLISH, screeningResponse.getAudioLanguage());
         assertEquals(start, screeningResponse.getStartTime());
-        assertEquals(end, screeningResponse.getEndTime());
 
-        verify(screeningRepository, times(1)).findAllWithDetails();
+        verify(screeningRepository, times(1)).findAllByDateWithDetails(startOfDay, endOfDay);
     }
 
     @Test
-    void getScreeningsListWhenEmptyShouldReturnEmptyListTest() {
-        when(screeningRepository.findAllWithDetails()).thenReturn(List.of());
+    void getScreeningsListByDateWhenEmptyShouldReturnEmptyListTest() {
+        LocalDate date = LocalDate.of(2026, 1, 1);
+        Instant startOfDay = date.atStartOfDay(ZONE_ID).toInstant();
+        Instant endOfDay = date.plusDays(1).atStartOfDay(ZONE_ID).toInstant();
 
-        ScreeningListResponse response = screeningService.getScreeningsList();
+        when(clock.getZone()).thenReturn(ZONE_ID);
+        when(screeningRepository.findAllByDateWithDetails(startOfDay, endOfDay)).thenReturn(List.of());
+
+        ScreeningListResponse response = screeningService.getScreeningsListByDate(date);
 
         assertNotNull(response);
         assertTrue(response.getScreenings().isEmpty());
 
-        verify(screeningRepository, times(1)).findAllWithDetails();
+        verify(screeningRepository, times(1)).findAllByDateWithDetails(startOfDay, endOfDay);
+    }
+
+    @Test
+    void getScreeningResponseByIdWhenExistsShouldReturnMappedResponseTest() {
+        UUID id = UUID.randomUUID();
+
+        Movie movie = new Movie();
+        movie.setTitle("Interstellar");
+
+        MovieVersion movieVersion = new MovieVersion();
+        movieVersion.setMovie(movie);
+        movieVersion.setMovieFormat(FORMAT_2D);
+        movieVersion.setPresentationType(ORIGINAL_WITH_SUBTITLES);
+        movieVersion.setAudioLanguage(ENGLISH);
+
+        CinemaHall hall = new CinemaHall();
+        hall.setName("Hall 1");
+
+        Instant start = Instant.parse("2026-01-01T18:00:00Z");
+        Instant end = Instant.parse("2026-01-01T20:30:00Z");
+
+        Screening screening = Screening.builder()
+                .id(id)
+                .movieVersion(movieVersion)
+                .cinemaHall(hall)
+                .startTime(start)
+                .endTime(end)
+                .build();
+
+        when(screeningRepository.findByIdWithDetails(id)).thenReturn(Optional.of(screening));
+
+        ScreeningResponse response = screeningService.getScreeningResponseById(id);
+
+        assertEquals(id, response.getId());
+        assertEquals("Hall 1", response.getCinemaHallName());
+        assertEquals("Interstellar", response.getMovieTitle());
+        assertEquals(start, response.getStartTime());
+        assertEquals(end, response.getEndTime());
+
+        verify(screeningRepository, times(1)).findByIdWithDetails(id);
+    }
+
+    @Test
+    void getScreeningResponseByIdWhenNotExistsShouldThrowExceptionTest() {
+        UUID id = UUID.randomUUID();
+
+        when(screeningRepository.findByIdWithDetails(id)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> screeningService.getScreeningResponseById(id));
+
+        verify(screeningRepository, times(1)).findByIdWithDetails(id);
     }
 
     @Test
