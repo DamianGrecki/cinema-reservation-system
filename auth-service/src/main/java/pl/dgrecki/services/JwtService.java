@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import pl.dgrecki.models.entities.ServiceCredential;
 import pl.dgrecki.models.entities.User;
+import pl.dgrecki.models.responses.JwtTokenResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -52,22 +54,24 @@ public class JwtService {
         return buildToken(user.getEmail(), roles, user.getId());
     }
 
-    public String generateServiceToken(ServiceCredential service) {
+    public JwtTokenResponse generateServiceToken(ServiceCredential service) {
         List<String> roles = service.getRoles().stream()
                 .map(role -> role.getRoleType().name())
                 .toList();
 
-        Date now = Date.from(clock.instant());
-        Date expiry = Date.from(clock.instant().plus(SERVICE_TOKEN_EXPIRED_TIME));
+        Instant now = clock.instant();
+        Instant expiry = now.plus(SERVICE_TOKEN_EXPIRED_TIME);
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(service.getName())
                 .claim(TYPE, TOKEN_TYPE_SERVICE)
                 .claim(ROLES, roles)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(expiry))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+
+        return new JwtTokenResponse(token, expiry);
     }
 
     private String buildToken(String subject, List<String> roles, Long userId) {

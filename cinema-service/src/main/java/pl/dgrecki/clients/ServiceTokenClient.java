@@ -68,7 +68,7 @@ public class ServiceTokenClient {
                 .body(ServiceTokenResponse.class);
 
         cachedToken = response.getJwtToken();
-        tokenExpiresAt = clock.instant().plus(Duration.ofMinutes(5)).minus(REFRESH_MARGIN);
+        tokenExpiresAt = response.getExpiresAt().minus(REFRESH_MARGIN);
         log.info("Service token refreshed, valid until {}", tokenExpiresAt);
     }
 }

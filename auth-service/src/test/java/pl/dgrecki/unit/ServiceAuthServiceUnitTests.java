@@ -3,6 +3,7 @@ package pl.dgrecki.unit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import pl.dgrecki.models.entities.ServiceCredential;
 import pl.dgrecki.models.entities.ServiceRole;
 import pl.dgrecki.models.enums.ServiceRoleType;
+import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.repositories.ServiceCredentialRepository;
 import pl.dgrecki.services.JwtService;
 import pl.dgrecki.services.ServiceAuthService;
@@ -38,14 +40,17 @@ class ServiceAuthServiceUnitTests {
     @Test
     void shouldAuthenticateServiceWithValidCredentialsTest() {
         ServiceCredential service = createServiceCredential("cinema-service", "hashed-secret", true);
+        JwtTokenResponse expectedResponse =
+                new JwtTokenResponse("service-jwt-token", Instant.parse("2026-03-23T12:05:00Z"));
 
         when(serviceCredentialRepository.findByName("cinema-service")).thenReturn(Optional.of(service));
         when(passwordEncoder.matches("raw-secret", "hashed-secret")).thenReturn(true);
-        when(jwtService.generateServiceToken(service)).thenReturn("service-jwt-token");
+        when(jwtService.generateServiceToken(service)).thenReturn(expectedResponse);
 
-        String token = serviceAuthService.authenticate("cinema-service", "raw-secret");
+        JwtTokenResponse response = serviceAuthService.authenticate("cinema-service", "raw-secret");
 
-        assertEquals("service-jwt-token", token);
+        assertEquals("service-jwt-token", response.getJwtToken());
+        assertNotNull(response.getExpiresAt());
         verify(jwtService).generateServiceToken(service);
     }
 
