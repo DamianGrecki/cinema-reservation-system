@@ -93,8 +93,11 @@ jobs:
             docker pull $IMAGE_PREFIX/mail-service:$IMAGE_TAG
             docker pull $IMAGE_PREFIX/payment-provider-mock:$IMAGE_TAG
 
-            cd ~/cinema
-            docker stack deploy -c docker/docker-stack.yml cinema --with-registry-auth
+            cd ~/cinema/docker
+            set -a
+            source .env
+            set +a
+            docker stack deploy -c docker-stack.yml cinema --with-registry-auth
 
             docker service update --image $IMAGE_PREFIX/auth-service:$IMAGE_TAG cinema_auth-service
             docker service update --image $IMAGE_PREFIX/cinema-service:$IMAGE_TAG cinema_cinema-service
