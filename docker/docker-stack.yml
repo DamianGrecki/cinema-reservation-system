@@ -192,3 +192,4 @@ volumes:
 networks:
   cinema-network:
     driver: overlay
+    attachable: true
