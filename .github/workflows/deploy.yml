@@ -1,0 +1,102 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/cinema
+
+jobs:
+
+  test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+      - name: Check code formatting
+        run: ./mvnw spotless:check -q
+      - name: Build and run tests
+        run: ./mvnw clean verify -q
+
+  build-images:
+    name: Build ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - service: auth-service
+            dockerfile: docker/Dockerfile.auth-service
+          - service: cinema-service
+            dockerfile: docker/Dockerfile.cinema-service
+          - service: mail-service
+            dockerfile: docker/Dockerfile.mail-service
+          - service: payment-provider-mock
+            dockerfile: mocks/payment/provider/Dockerfile
+            context: mocks/payment/provider
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context || '.' }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:latest
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build-images
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: docker/docker-stack.yml,monitoring/
+          target: ~/cinema
+
+      - name: Deploy stack
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            IMAGE_TAG=${{ github.sha }}
+            IMAGE_PREFIX=${{ env.IMAGE_PREFIX }}
+
+            docker pull $IMAGE_PREFIX/auth-service:$IMAGE_TAG
+            docker pull $IMAGE_PREFIX/cinema-service:$IMAGE_TAG
+            docker pull $IMAGE_PREFIX/mail-service:$IMAGE_TAG
+            docker pull $IMAGE_PREFIX/payment-provider-mock:$IMAGE_TAG
+
+            cd ~/cinema
+            docker stack deploy -c docker/docker-stack.yml cinema --with-registry-auth
+
+            docker service update --image $IMAGE_PREFIX/auth-service:$IMAGE_TAG cinema_auth-service
+            docker service update --image $IMAGE_PREFIX/cinema-service:$IMAGE_TAG cinema_cinema-service
+            docker service update --image $IMAGE_PREFIX/mail-service:$IMAGE_TAG cinema_mail-service
+            docker service update --image $IMAGE_PREFIX/payment-provider-mock:$IMAGE_TAG cinema_payment-mock
