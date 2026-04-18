@@ -67,6 +67,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare prometheus config
+        run: |
+          sed -i "s/password: '.*'/password: '${{ secrets.PROMETHEUS_PASSWORD }}'/" monitoring/prometheus/prometheus.yml
+          sed -i "s/username: '.*'/username: '${{ secrets.PROMETHEUS_USER }}'/" monitoring/prometheus/prometheus.yml
+
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -94,12 +99,24 @@ jobs:
             docker pull $IMAGE_PREFIX/payment-provider-mock:$IMAGE_TAG
 
             cd ~/cinema/docker
-            set -a
-            source .env
-            set +a
 
-            sed -i "s/password: '123'/password: '$PROMETHEUS_PASSWORD'/" ~/cinema/monitoring/prometheus/prometheus.yml
-            sed -i "s/username: 'prometheus'/username: '$PROMETHEUS_USER'/" ~/cinema/monitoring/prometheus/prometheus.yml
+            export CINEMA_DB_USER='${{ secrets.CINEMA_DB_USER }}'
+            export CINEMA_DB_PASSWORD='${{ secrets.CINEMA_DB_PASSWORD }}'
+            export CINEMA_DB_NAME='${{ secrets.CINEMA_DB_NAME }}'
+            export AUTH_DB_USER='${{ secrets.AUTH_DB_USER }}'
+            export AUTH_DB_PASSWORD='${{ secrets.AUTH_DB_PASSWORD }}'
+            export AUTH_DB_NAME='${{ secrets.AUTH_DB_NAME }}'
+            export MAIL_DB_USER='${{ secrets.MAIL_DB_USER }}'
+            export MAIL_DB_PASSWORD='${{ secrets.MAIL_DB_PASSWORD }}'
+            export MAIL_DB_NAME='${{ secrets.MAIL_DB_NAME }}'
+            export GRAFANA_USER='${{ secrets.GRAFANA_USER }}'
+            export GRAFANA_PASSWORD='${{ secrets.GRAFANA_PASSWORD }}'
+            export PROMETHEUS_USER='${{ secrets.PROMETHEUS_USER }}'
+            export PROMETHEUS_PASSWORD='${{ secrets.PROMETHEUS_PASSWORD }}'
+            export JWT_SECRET='${{ secrets.JWT_SECRET }}'
+            export KAFKA_HMAC_SECRET='${{ secrets.KAFKA_HMAC_SECRET }}'
+            export TICKET_SIGNING_SECRET='${{ secrets.TICKET_SIGNING_SECRET }}'
+            export AUTH_CLIENT_SECRET='${{ secrets.AUTH_CLIENT_SECRET }}'
 
             docker stack deploy -c docker-stack.yml cinema --with-registry-auth
 
@@ -107,3 +124,4 @@ jobs:
             docker service update --image $IMAGE_PREFIX/cinema-service:$IMAGE_TAG cinema_cinema-service
             docker service update --image $IMAGE_PREFIX/mail-service:$IMAGE_TAG cinema_mail-service
             docker service update --image $IMAGE_PREFIX/payment-provider-mock:$IMAGE_TAG cinema_payment-mock
+            docker service update --force cinema_prometheus
