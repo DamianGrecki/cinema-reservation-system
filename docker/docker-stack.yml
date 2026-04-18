@@ -143,6 +143,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      PROMETHEUS_USERNAME: ${PROMETHEUS_USER}
+      PROMETHEUS_PASSWORD: ${PROMETHEUS_PASSWORD}
     networks:
       - cinema-network
     deploy:
@@ -161,6 +163,8 @@ services:
       AUTH_SERVICE_URL: http://auth-service:8081
       PAYMENT_PROVIDER_SANDBOX_URL: http://payment-mock:1080
       TICKET_DOWNLOAD_BASE_URL: http://cinema-service:8080
+      PROMETHEUS_USERNAME: ${PROMETHEUS_USER}
+      PROMETHEUS_PASSWORD: ${PROMETHEUS_PASSWORD}
     networks:
       - cinema-network
     deploy:
@@ -178,6 +182,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MAIL_DB_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_MAIL_HOST: mailpit
+      PROMETHEUS_USERNAME: ${PROMETHEUS_USER}
+      PROMETHEUS_PASSWORD: ${PROMETHEUS_PASSWORD}
     networks:
       - cinema-network
     deploy:

@@ -6,7 +6,7 @@ scrape_configs:
       username: 'prometheus'
       password: '123'
     static_configs:
-      - targets: ['host.docker.internal:8081']
+      - targets: ['auth-service:8081']
         labels:
           application: 'Auth Service'
 
@@ -17,7 +17,7 @@ scrape_configs:
       username: 'prometheus'
       password: '123'
     static_configs:
-      - targets: [ 'host.docker.internal:8080' ]
+      - targets: ['cinema-service:8080']
         labels:
           application: 'Cinema Service'
 
@@ -28,6 +28,6 @@ scrape_configs:
       username: 'prometheus'
       password: '123'
     static_configs:
-      - targets: [ 'host.docker.internal:8082' ]
+      - targets: ['mail-service:8082']
         labels:
           application: 'Mail Service'

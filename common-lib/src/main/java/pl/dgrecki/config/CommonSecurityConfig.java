@@ -2,6 +2,7 @@ package pl.dgrecki.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -23,6 +24,12 @@ import org.springframework.security.web.SecurityFilterChain;
 public class CommonSecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${prometheus.username:prometheus}")
+    private String prometheusUsername;
+
+    @Value("${prometheus.password:123}")
+    private String prometheusPassword;
 
     private static final String PROMETHEUS_ROLE = "PROMETHEUS";
 
@@ -58,8 +65,8 @@ public class CommonSecurityConfig {
     @Bean
     public UserDetailsService prometheusUserDetailsService() {
         UserDetails prometheus = User.builder()
-                .username("prometheus") // It will eventually be moved to .env
-                .password(passwordEncoder.encode("123")) // It will eventually be moved to .env
+                .username(prometheusUsername)
+                .password(passwordEncoder.encode(prometheusPassword))
                 .roles(PROMETHEUS_ROLE)
                 .build();
         return new InMemoryUserDetailsManager(prometheus);

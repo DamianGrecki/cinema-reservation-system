@@ -97,6 +97,10 @@ jobs:
             set -a
             source .env
             set +a
+
+            sed -i "s/password: '123'/password: '$PROMETHEUS_PASSWORD'/" ~/cinema/monitoring/prometheus/prometheus.yml
+            sed -i "s/username: 'prometheus'/username: '$PROMETHEUS_USER'/" ~/cinema/monitoring/prometheus/prometheus.yml
+
             docker stack deploy -c docker-stack.yml cinema --with-registry-auth
 
             docker service update --image $IMAGE_PREFIX/auth-service:$IMAGE_TAG cinema_auth-service
