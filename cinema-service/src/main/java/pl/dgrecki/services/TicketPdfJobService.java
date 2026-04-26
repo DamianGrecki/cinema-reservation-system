@@ -68,6 +68,7 @@ public class TicketPdfJobService {
         ticketPdfJobRepository.save(job);
     }
 
+    @Transactional(readOnly = true)
     public boolean areAllTicketsGeneratedForOrder(UUID orderId) {
         return ticketPdfJobRepository.countNotInStatusByOrderId(orderId, TicketPdfStatus.GENERATED) == 0;
     }

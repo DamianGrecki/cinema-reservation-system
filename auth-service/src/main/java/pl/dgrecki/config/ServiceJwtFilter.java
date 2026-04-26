@@ -50,7 +50,8 @@ public class ServiceJwtFilter extends OncePerRequestFilter {
                 Authentication auth = buildAuthentication(claims);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (JwtException e) {
-                log.warn("Invalid service JWT: {}", e.getMessage());
+                log.warn("Invalid service JWT received");
+                log.debug("Invalid service JWT received", e);
                 SecurityContextHolder.clearContext();
             }
         });

@@ -62,6 +62,7 @@ public class MovieService {
         }
     }
 
+    @Transactional(readOnly = true)
     public byte[] getPosterImage(UUID movieId) {
         Movie movie = movieRepository
                 .findById(movieId)
@@ -74,6 +75,7 @@ public class MovieService {
         return posterFileStorage.load(movie.getPosterFileName());
     }
 
+    @Transactional(readOnly = true)
     public String getPosterFileName(UUID movieId) {
         Movie movie = movieRepository
                 .findById(movieId)

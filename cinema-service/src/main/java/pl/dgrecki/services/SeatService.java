@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.SeatStatusDto;
 import pl.dgrecki.models.entities.Seat;
@@ -21,6 +22,7 @@ public class SeatService {
 
     private final SeatRepository seatRepository;
 
+    @Transactional(readOnly = true)
     public Seat getById(UUID id) {
         Optional<Seat> seatOptional = seatRepository.findById(id);
         if (seatOptional.isEmpty()) {
@@ -29,6 +31,7 @@ public class SeatService {
         return seatOptional.get();
     }
 
+    @Transactional(readOnly = true)
     public List<RowSeatsMapResponse> getRowsSeatsMapByScreeningId(UUID screeningId) {
         List<RowWithSeatAndStatus> seats =
                 seatRepository.findSeatsWithRowAndStatuses(screeningId, ReservationStatus.getStatusesBlockingSeat());

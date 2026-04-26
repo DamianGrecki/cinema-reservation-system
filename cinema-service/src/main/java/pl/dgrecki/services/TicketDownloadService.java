@@ -10,6 +10,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.TicketDownloadException;
 import pl.dgrecki.models.entities.Ticket;
 import pl.dgrecki.services.storage.TicketDownloadUrlService;
@@ -23,6 +24,7 @@ public class TicketDownloadService {
     private final TicketDownloadUrlService ticketUrlService;
     private final TicketFileStorage ticketFileStorage;
 
+    @Transactional(readOnly = true)
     public byte[] getTicketsZip(UUID orderId, String signature) {
         validateSignature(orderId, signature);
 

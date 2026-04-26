@@ -72,6 +72,7 @@ public class UserService {
         return new LoginResult(accessToken, refreshToken.getToken().toString());
     }
 
+    @Transactional(readOnly = true)
     public UserResponse getActiveUser(Long id) {
         User user = userRepository
                 .findById(id)

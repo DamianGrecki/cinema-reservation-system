@@ -41,6 +41,7 @@ public class TicketService {
         prices.forEach(rp -> createTicket(rp.reservation(), rp.price()));
     }
 
+    @Transactional(readOnly = true)
     public List<Ticket> getTicketsByOrderId(UUID orderId) {
         return ticketRepository.findByOrderId(orderId);
     }

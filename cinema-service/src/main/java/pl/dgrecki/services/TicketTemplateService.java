@@ -14,7 +14,7 @@ public class TicketTemplateService {
 
     private final TicketTemplateRepository ticketTemplateRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public TicketTemplate getActiveTemplate() {
         return ticketTemplateRepository
                 .findTicketTemplateByIsActive(true)

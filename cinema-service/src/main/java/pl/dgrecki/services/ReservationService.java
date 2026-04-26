@@ -146,7 +146,7 @@ public class ReservationService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Reservation> getPaidReservationsByOrder(Order order) {
         return reservationRepository.findByOrderAndStatusIn(order, Set.of(PAID));
     }
@@ -168,6 +168,7 @@ public class ReservationService {
         reservations.forEach(r -> r.setStatus(targetStatus));
     }
 
+    @Transactional(readOnly = true)
     public Reservation getReservationById(UUID id) {
         Optional<Reservation> reservationOptional = reservationRepository.findById(id);
         if (reservationOptional.isEmpty()) {
