@@ -21,6 +21,7 @@ public class CustomerService {
     private final AuthServiceClient authServiceClient;
     private final Clock clock;
 
+    @Transactional(readOnly = true)
     public Customer getById(UUID customerId) {
         return customerRepository
                 .findById(customerId)

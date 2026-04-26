@@ -43,10 +43,12 @@ public class PaymentAttemptService {
         paymentAttemptRepository.save(attempt);
     }
 
+    @Transactional(readOnly = true)
     public boolean isAttemptsLimitReached(Order order) {
         return getAttemptCountByOrder(order) >= attemptsLimit;
     }
 
+    @Transactional(readOnly = true)
     public boolean hasPendingPaymentAttempt(Order order) {
         return paymentAttemptRepository.existsByOrderAndStatus(order, PaymentStatus.PENDING);
     }
@@ -62,6 +64,7 @@ public class PaymentAttemptService {
         return attempt;
     }
 
+    @Transactional(readOnly = true)
     public PaymentAttempt findCompletedByOrderId(UUID orderId) {
         return paymentAttemptRepository
                 .findByOrderIdAndStatus(orderId, PaymentStatus.COMPLETED)

@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,6 @@ public class OutboxService {
 
     private final OutboxEventRepository outboxRepository;
 
-    @SneakyThrows
     @Transactional
     public void createOutboxEvent(EventType eventType, String data) {
         OutboxEvent event = OutboxEvent.builder()
@@ -34,6 +32,7 @@ public class OutboxService {
         outboxRepository.save(event);
     }
 
+    @Transactional
     public void markSent(OutboxEvent event) {
         event.setStatus(EventStatus.SENT);
         event.setAttempts(event.getAttempts() + 1);
@@ -41,6 +40,7 @@ public class OutboxService {
         outboxRepository.save(event);
     }
 
+    @Transactional
     public void handleFailedAttempt(OutboxEvent event, String error) {
         int attempts = event.getAttempts() + 1;
         event.setAttempts(attempts);

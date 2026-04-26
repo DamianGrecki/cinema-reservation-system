@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.exceptions.ResourceNotFoundException;
 import pl.dgrecki.models.entities.Movie;
 import pl.dgrecki.models.entities.MovieVersion;
@@ -26,6 +27,7 @@ public class ScreeningService {
     private final MovieService movieService;
     private final Clock clock;
 
+    @Transactional(readOnly = true)
     public ScreeningListResponse getScreeningsListByDate(LocalDate date) {
         Instant startOfDay = date.atStartOfDay(clock.getZone()).toInstant();
         Instant endOfDay = date.plusDays(1).atStartOfDay(clock.getZone()).toInstant();
@@ -52,6 +54,7 @@ public class ScreeningService {
                 screening.getEndTime());
     }
 
+    @Transactional(readOnly = true)
     public ScreeningResponse getScreeningResponseById(UUID id) {
         Screening screening = screeningRepository
                 .findByIdWithDetails(id)
@@ -59,6 +62,7 @@ public class ScreeningService {
         return mapToResponse(screening);
     }
 
+    @Transactional(readOnly = true)
     public Screening getById(UUID id) {
         Optional<Screening> screeningOptional = screeningRepository.findById(id);
         if (screeningOptional.isEmpty()) {

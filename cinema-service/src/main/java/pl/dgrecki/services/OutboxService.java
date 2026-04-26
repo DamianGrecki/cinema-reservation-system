@@ -32,6 +32,7 @@ public class OutboxService {
         outboxRepository.save(event);
     }
 
+    @Transactional
     public void markSent(OutboxEvent event) {
         event.setStatus(EventStatus.SENT);
         event.setAttempts(event.getAttempts() + 1);
@@ -39,6 +40,7 @@ public class OutboxService {
         outboxRepository.save(event);
     }
 
+    @Transactional
     public void handleFailedAttempt(OutboxEvent event, String error) {
         int attempts = event.getAttempts() + 1;
         event.setAttempts(attempts);

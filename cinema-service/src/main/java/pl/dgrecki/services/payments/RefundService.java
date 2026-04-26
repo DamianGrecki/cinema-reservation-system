@@ -53,6 +53,7 @@ public class RefundService {
         this.maxRefundAttempts = maxRefundAttempts;
     }
 
+    @Transactional(readOnly = true)
     public List<UUID> findOrderIdsReadyToRefund() {
         return refundRepository.findOrderIdsReadyToRefund(
                 TicketPdfStatus.DEAD, RefundStatus.COMPLETED, RefundStatus.FAILED, maxRefundAttempts);

@@ -38,6 +38,7 @@ public class BasketService {
     private final PriceService priceService;
     private final Clock clock;
 
+    @Transactional(readOnly = true)
     public BasketPricingResponse getBasketPricing(UUID basketId) {
         List<Reservation> reservations =
                 reservationRepository.findByBasketIdAndStatusIn(basketId, getStatusesBlockingSeat());
@@ -76,7 +77,7 @@ public class BasketService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Basket getById(UUID id) {
         Optional<Basket> basketOptional = basketRepository.findById(id);
         if (basketOptional.isEmpty()) {
@@ -85,12 +86,12 @@ public class BasketService {
         return basketOptional.get();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UUID> getExpiredBasketsIds(int limit) {
         return getBasketsIdsOlderThanExpiredAt(clock.instant(), limit);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UUID> getExpiredBasketsIdsOlderThan(Duration expiredDuration, int limit) {
         Instant expireOlderThanDate = clock.instant().minus(expiredDuration);
         return getBasketsIdsOlderThanExpiredAt(expireOlderThanDate, limit);

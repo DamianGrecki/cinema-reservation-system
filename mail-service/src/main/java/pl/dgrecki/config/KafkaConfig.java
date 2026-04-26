@@ -2,6 +2,7 @@ package pl.dgrecki.config;
 
 import static pl.dgrecki.utils.ExceptionUtils.getRootCauseAsString;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
@@ -66,7 +67,7 @@ public class KafkaConfig {
             if (dlqTopic == null) {
                 throw new IllegalStateException("No DLQ mapping for topic: " + record.topic());
             }
-            record.headers().add("x-error-message", getRootCauseAsString(ex).getBytes());
+            record.headers().add("x-error-message", getRootCauseAsString(ex).getBytes(StandardCharsets.UTF_8));
             return new TopicPartition(dlqTopic, record.partition());
         });
     }

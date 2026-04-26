@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.dgrecki.models.ReservationPrice;
 import pl.dgrecki.models.entities.PriceModifier;
 import pl.dgrecki.models.entities.Reservation;
@@ -24,12 +25,14 @@ public class PriceService {
                 strategyList.stream().collect(Collectors.toMap(PriceModifierStrategy::supports, Function.identity()));
     }
 
+    @Transactional(readOnly = true)
     public BigDecimal calculateReservationsTotalPrice(List<Reservation> reservations) {
         return calculatePricesPerReservation(reservations).stream()
                 .map(ReservationPrice::price)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationPrice> calculatePricesPerReservation(List<Reservation> reservations) {
         List<PriceModifier> modifiers = priceModifierRepository.findAll();
         return reservations.stream()
