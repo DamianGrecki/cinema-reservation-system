@@ -100,4 +100,5 @@ payment-provider:
   attempts-limit: 3
   sandbox:
     url: http://localhost:1080
+    hmac-secret: sandbox-webhook-hmac-secret-min-32-chars # It will eventually be moved to .env
 

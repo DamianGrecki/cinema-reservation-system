@@ -67,4 +67,10 @@ public class ExceptionsHandler {
         log.warn("Data integrity violation occurred", ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(DATA_INTEGRITY_CONFLICT_MSG));
     }
+
+    @ExceptionHandler(WebhookAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleWebhookAuthenticationError(WebhookAuthenticationException ex) {
+        log.warn("Webhook authentication failed: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ex.getMessage()));
+    }
 }

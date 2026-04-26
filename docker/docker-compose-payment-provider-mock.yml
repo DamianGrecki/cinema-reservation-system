@@ -8,6 +8,7 @@ services:
       - "1080:1080"
     environment:
       CINEMA_SERVICE_URL: ${CINEMA_SERVICE_URL:-http://host.docker.internal:8080}
+      HMAC_SECRET: ${PAYMENT_WEBHOOK_HMAC_SECRET:-sandbox-webhook-hmac-secret-min-32-chars}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
