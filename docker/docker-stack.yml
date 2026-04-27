@@ -121,10 +121,24 @@ services:
 
   # ---- Application Services ----
 
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
+    networks:
+      - cinema-network
+    deploy:
+      restart_policy:
+        condition: any
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
   auth-service:
     image: cinema/auth-service
-    ports:
-      - "8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/${AUTH_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
@@ -142,8 +156,6 @@ services:
 
   cinema-service:
     image: cinema/cinema-service
-    ports:
-      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://cinema-db:5432/${CINEMA_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${CINEMA_DB_USER}
@@ -167,8 +179,6 @@ services:
 
   mail-service:
     image: cinema/mail-service
-    ports:
-      - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://mail-db:5432/${MAIL_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${MAIL_DB_USER}
