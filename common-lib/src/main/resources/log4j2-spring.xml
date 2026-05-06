@@ -11,8 +11,8 @@
 
     <Appenders>
         <RollingFile name="REQUEST_FILE"
-                     fileName="${LOG_PATH}/requests.log"
-                     filePattern="${LOG_PATH}/requests.%d{yyyy-MM-dd}.gz">
+                     fileName="${LOG_PATH}/requests-${hostName}.log"
+                     filePattern="${LOG_PATH}/requests-${hostName}.%d{yyyy-MM-dd}.gz">
 
             <PatternLayout pattern="${LOG_PATTERN}"/>
 

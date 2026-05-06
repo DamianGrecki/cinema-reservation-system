@@ -63,7 +63,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_NUM_PARTITIONS: 6
     networks:
       - cinema-network
     deploy:
@@ -81,12 +81,17 @@ services:
         condition: any
 
   payment-mock:
-    image: cinema/payment-provider-mock
+    image: ${IMAGE_PREFIX}/payment-provider-mock:${IMAGE_TAG:-latest}
     environment:
       CINEMA_SERVICE_URL: http://cinema-service:8080
     networks:
       - cinema-network
     deploy:
+      replicas: ${PAYMENT_MOCK_REPLICAS:-1}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
       restart_policy:
         condition: any
 
@@ -138,7 +143,7 @@ services:
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   auth-service:
-    image: cinema/auth-service
+    image: ${IMAGE_PREFIX}/auth-service:${IMAGE_TAG:-latest}
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/${AUTH_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
@@ -148,14 +153,21 @@ services:
       PROMETHEUS_PASSWORD: ${PROMETHEUS_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       SPRING_KAFKA_HMAC_SECRET: ${KAFKA_HMAC_SECRET}
+    volumes:
+      - ${LOG_BASE}/auth-service:/app/logs
     networks:
       - cinema-network
     deploy:
+      replicas: ${AUTH_SERVICE_REPLICAS:-1}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
       restart_policy:
         condition: any
 
   cinema-service:
-    image: cinema/cinema-service
+    image: ${IMAGE_PREFIX}/cinema-service:${IMAGE_TAG:-latest}
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://cinema-db:5432/${CINEMA_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${CINEMA_DB_USER}
@@ -170,15 +182,21 @@ services:
       SPRING_KAFKA_HMAC_SECRET: ${KAFKA_HMAC_SECRET}
       TICKET_DOWNLOAD_SIGNING_SECRET: ${TICKET_SIGNING_SECRET}
       AUTH_SERVICE_CLIENT_SECRET: ${AUTH_CLIENT_SECRET}
+    volumes:
+      - ${LOG_BASE}/cinema-service:/app/logs
     networks:
       - cinema-network
     deploy:
-      replicas: 1
+      replicas: ${CINEMA_SERVICE_REPLICAS:-1}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
       restart_policy:
         condition: any
 
   mail-service:
-    image: cinema/mail-service
+    image: ${IMAGE_PREFIX}/mail-service:${IMAGE_TAG:-latest}
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://mail-db:5432/${MAIL_DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${MAIL_DB_USER}
@@ -188,9 +206,16 @@ services:
       PROMETHEUS_USERNAME: ${PROMETHEUS_USER}
       PROMETHEUS_PASSWORD: ${PROMETHEUS_PASSWORD}
       SPRING_KAFKA_HMAC_SECRET: ${KAFKA_HMAC_SECRET}
+    volumes:
+      - ${LOG_BASE}/mail-service:/app/logs
     networks:
       - cinema-network
     deploy:
+      replicas: ${MAIL_SERVICE_REPLICAS:-1}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
       restart_policy:
         condition: any
 
