@@ -30,4 +30,21 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Optional<Ticket> findByReservation(Reservation reservation);
 
     List<Ticket> findByOrderId(UUID orderId);
+
+    @Query("""
+    SELECT t
+    FROM Ticket t
+    JOIN FETCH t.order o
+    JOIN FETCH t.reservation r
+    JOIN FETCH r.screening s
+    JOIN FETCH s.movieVersion mv
+    JOIN FETCH mv.movie
+    JOIN FETCH s.cinemaHall ch
+    JOIN FETCH ch.cinema
+    JOIN FETCH r.seat st
+    JOIN FETCH st.hallRow
+    WHERE o.customerId = :customerId
+    ORDER BY o.createdAt DESC, t.createdAt ASC
+    """)
+    List<Ticket> findHistoryByCustomerId(UUID customerId);
 }
