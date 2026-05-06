@@ -28,6 +28,9 @@ public class IncomingEventDeserializer {
     }
 
     private void validate(IncomingEvent event) throws DeserializationException {
+        if (event == null) {
+            throw new DeserializationException(NULL_INCOMING_EVENT_MSG);
+        }
         if (event.getEventId() == null) {
             throw new DeserializationException(MISSING_REQUIRED_FIELD_EVENT_ID_MSG);
         }

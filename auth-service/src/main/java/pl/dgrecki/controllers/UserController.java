@@ -16,22 +16,24 @@ import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.models.responses.JwtTokenResponse;
 import pl.dgrecki.models.responses.UserRegisterResponse;
-import pl.dgrecki.services.user.UserService;
+import pl.dgrecki.services.user.LoginService;
+import pl.dgrecki.services.user.UserRegistrationService;
 
 @RestController
 @AllArgsConstructor
 class UserController {
 
-    private final UserService userService;
+    private final UserRegistrationService userRegistrationService;
+    private final LoginService loginService;
 
     @PostMapping(REGISTER_CUSTOMER_ENDPOINT)
     ResponseEntity<UserRegisterResponse> registerCustomer(@RequestBody UserRegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerCustomer(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userRegistrationService.registerCustomer(request));
     }
 
     @PostMapping(LOGIN_ENDPOINT)
     public ResponseEntity<JwtTokenResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
-        LoginResult result = userService.login(request);
+        LoginResult result = loginService.login(request);
         addRefreshTokenCookie(response, result.getRefreshToken());
         return ResponseEntity.ok(new JwtTokenResponse(result.getAccessToken()));
     }

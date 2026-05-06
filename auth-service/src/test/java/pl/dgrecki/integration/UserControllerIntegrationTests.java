@@ -22,7 +22,7 @@ import pl.dgrecki.models.enums.UserStatus;
 import pl.dgrecki.models.requests.LoginRequest;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.repositories.UserRepository;
-import pl.dgrecki.services.user.UserService;
+import pl.dgrecki.services.user.UserRegistrationService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,7 +35,7 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    UserService userService;
+    UserRegistrationService userRegistrationService;
 
     @Autowired
     UserRepository userRepository;
@@ -116,7 +116,7 @@ class UserControllerIntegrationTests extends BaseIntegrationTest {
 
     private void registerUser(String email, String password, String firstName, String lastName) {
         UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
-        userService.registerCustomer(request);
+        userRegistrationService.registerCustomer(request);
     }
 
     private void registerAndActivateUser(String email, String password, String firstName, String lastName) {
