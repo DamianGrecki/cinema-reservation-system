@@ -20,5 +20,6 @@ public class Endpoints {
     public static final String RESERVATION_PRICING_TYPE_ENDPOINT = RESERVATION_ENDPOINT + "/{id}/pricing-type";
     public static final String TICKET_ENDPOINT = API + "/ticket";
     public static final String ORDER_TICKETS_DOWNLOAD_ENDPOINT = API + "/orders/{orderId}/tickets/download";
+    public static final String ORDERS_HISTORY_ENDPOINT = API + "/orders/history";
     public static final String PAYMENT_ENDPOINT = API + "/payment";
 }

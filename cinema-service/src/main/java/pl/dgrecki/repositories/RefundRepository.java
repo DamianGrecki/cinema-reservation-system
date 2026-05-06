@@ -1,6 +1,8 @@
 package pl.dgrecki.repositories;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +16,14 @@ import pl.dgrecki.models.enums.TicketPdfStatus;
 public interface RefundRepository extends JpaRepository<Refund, UUID> {
 
     boolean existsByPaymentAttemptIdAndStatus(UUID paymentAttemptId, RefundStatus status);
+
+    @Query("""
+        SELECT DISTINCT r.paymentAttempt.order.id FROM Refund r
+        WHERE r.paymentAttempt.order.id IN :orderIds
+            AND r.status = :status
+    """)
+    Set<UUID> findOrderIdsWithRefundStatus(
+            @Param("orderIds") Collection<UUID> orderIds, @Param("status") RefundStatus status);
 
     @Query("""
         SELECT DISTINCT t.order.id FROM TicketPdfJob j
