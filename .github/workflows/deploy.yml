@@ -2,6 +2,23 @@ name: Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      auth_service_replicas:
+        description: 'auth-service replicas'
+        default: '1'
+        type: string
+      cinema_service_replicas:
+        description: 'cinema-service replicas'
+        default: '2'
+        type: string
+      mail_service_replicas:
+        description: 'mail-service replicas'
+        default: '1'
+        type: string
+      payment_mock_replicas:
+        description: 'payment-mock replicas'
+        default: '1'
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -93,8 +110,11 @@ jobs:
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            IMAGE_TAG=${{ github.sha }}
-            IMAGE_PREFIX=${{ env.IMAGE_PREFIX }}
+            export LOG_BASE="$HOME/cinema/logs"
+            mkdir -p "$LOG_BASE/auth-service" "$LOG_BASE/cinema-service" "$LOG_BASE/mail-service"
+
+            export IMAGE_TAG='${{ github.sha }}'
+            export IMAGE_PREFIX='${{ env.IMAGE_PREFIX }}'
 
             docker pull $IMAGE_PREFIX/auth-service:$IMAGE_TAG
             docker pull $IMAGE_PREFIX/cinema-service:$IMAGE_TAG
@@ -121,10 +141,11 @@ jobs:
             export TICKET_SIGNING_SECRET='${{ secrets.TICKET_SIGNING_SECRET }}'
             export AUTH_CLIENT_SECRET='${{ secrets.AUTH_CLIENT_SECRET }}'
 
+            export AUTH_SERVICE_REPLICAS='${{ inputs.auth_service_replicas }}'
+            export CINEMA_SERVICE_REPLICAS='${{ inputs.cinema_service_replicas }}'
+            export MAIL_SERVICE_REPLICAS='${{ inputs.mail_service_replicas }}'
+            export PAYMENT_MOCK_REPLICAS='${{ inputs.payment_mock_replicas }}'
+
             docker stack deploy -c docker-stack.yml cinema --with-registry-auth
 
-            docker service update --image $IMAGE_PREFIX/auth-service:$IMAGE_TAG cinema_auth-service
-            docker service update --image $IMAGE_PREFIX/cinema-service:$IMAGE_TAG cinema_cinema-service
-            docker service update --image $IMAGE_PREFIX/mail-service:$IMAGE_TAG cinema_mail-service
-            docker service update --image $IMAGE_PREFIX/payment-provider-mock:$IMAGE_TAG cinema_payment-mock
             docker service update --force cinema_prometheus
