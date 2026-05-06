@@ -23,7 +23,7 @@ import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.repositories.RefreshTokenRepository;
 import pl.dgrecki.repositories.UserRepository;
 import pl.dgrecki.services.RefreshTokenService;
-import pl.dgrecki.services.user.UserService;
+import pl.dgrecki.services.user.UserRegistrationService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,7 +35,7 @@ class TokenControllerIntegrationTests extends BaseIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserService userService;
+    private UserRegistrationService userRegistrationService;
 
     @Autowired
     private UserRepository userRepository;
@@ -134,7 +134,7 @@ class TokenControllerIntegrationTests extends BaseIntegrationTest {
     private User registerAndActivateUser() {
         UserRegisterRequest request =
                 new UserRegisterRequest("test@example.com", "Password123!", "Password123!", "John", "Doe");
-        userService.registerCustomer(request);
+        userRegistrationService.registerCustomer(request);
         User user = userRepository.findByEmail("test@example.com").orElseThrow();
         user.setStatus(UserStatus.ACTIVE);
         return userRepository.save(user);

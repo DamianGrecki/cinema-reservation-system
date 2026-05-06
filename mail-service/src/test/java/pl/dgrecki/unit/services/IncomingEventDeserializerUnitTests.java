@@ -52,6 +52,17 @@ class IncomingEventDeserializerUnitTests {
     }
 
     @Test
+    void shouldThrowExceptionWhenJsonIsNullLiteralTest() {
+        String nullJson = "null";
+
+        DeserializationException ex =
+                assertThrows(DeserializationException.class, () -> deserializer.deserialize(nullJson));
+
+        assertEquals(INVALID_INCOMING_EVENT_MSG, ex.getMessage());
+        assertEquals(NULL_INCOMING_EVENT_MSG, ex.getCause().getMessage());
+    }
+
+    @Test
     void shouldThrowExceptionWhenEventIdIsMissingTest() {
         String jsonWithoutEventId = """
                 {

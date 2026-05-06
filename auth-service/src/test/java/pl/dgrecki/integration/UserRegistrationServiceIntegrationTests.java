@@ -11,14 +11,14 @@ import pl.dgrecki.models.entities.User;
 import pl.dgrecki.models.requests.UserRegisterRequest;
 import pl.dgrecki.models.responses.UserRegisterResponse;
 import pl.dgrecki.repositories.UserRepository;
-import pl.dgrecki.services.user.UserService;
+import pl.dgrecki.services.user.UserRegistrationService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserServiceIntegrationTests extends BaseIntegrationTest {
+class UserRegistrationServiceIntegrationTests extends BaseIntegrationTest {
 
     @Autowired
-    UserService userService;
+    UserRegistrationService userRegistrationService;
 
     @Autowired
     UserRepository userRepository;
@@ -32,7 +32,7 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
 
-        UserRegisterResponse response = userService.registerCustomer(request);
+        UserRegisterResponse response = userRegistrationService.registerCustomer(request);
         assertTrue(response.isSuccess());
         assertEquals(email, response.getEmail());
 
@@ -51,10 +51,10 @@ class UserServiceIntegrationTests extends BaseIntegrationTest {
 
         UserRegisterRequest request = new UserRegisterRequest(email, password, password, firstName, lastName);
 
-        userService.registerCustomer(request);
+        userRegistrationService.registerCustomer(request);
         assertEquals(1, userRepository.count());
 
-        assertThrows(ResourceAlreadyExistsException.class, () -> userService.registerCustomer(request));
+        assertThrows(ResourceAlreadyExistsException.class, () -> userRegistrationService.registerCustomer(request));
         assertEquals(1, userRepository.count());
     }
 }
